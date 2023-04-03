@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ *
+ * @var \TrueLayer\Connect\Block\Adminhtml\Design\Header $block
+ */
+$logo = $block->getViewFileUrl('TrueLayer_Connect::images/logo.svg');
+?>
+<div class="mm-truelayer-header">
+    <div class="mm-truelayer-header-icon" style="background-image: url(<?= $block->escapeUrl($logo) ?>)">
+        <p>TrueLayer</p>
+    </div>
+    <div class="mm-truelayer-header-text">
+        Easily integrate next-generation payments and financial data
+        into any app. Build powerful products your customers love.
+    </div>
+    <div class="mm-truelayer-header-actions">
+        <a id="mm-truelayer-button_help" class="helpbutton" href="https://www.magmodules.eu/support-form.html"
+           target="_blank" rel="noopener">
+            <span><?= $block->escapeUrl(__('Get in Touch')); ?></span>
+        </a>
+    </div>
+</div>

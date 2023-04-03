@@ -1,0 +1,16 @@
+<?php
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck;
+
+/**
+ * @see \TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck
+ * @var VersionCheck $block
+ */
+?>
+<div class="mm-ui-result_version-wrapper">
+    <span><?= $block->escapeHtml($block->getVersion()); ?></span>
+</div>

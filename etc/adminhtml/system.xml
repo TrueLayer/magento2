@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="truelayer" translate="label" type="text" sortOrder="350" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>TrueLayer</label>
+            <tab>sales</tab>
+            <resource>TrueLayer_Connect::config</resource>
+            <class>truelayer-section</class>
+            <include path="TrueLayer_Connect::system/header.xml"/>
+            <include path="TrueLayer_Connect::system/general.xml"/>
+            <include path="TrueLayer_Connect::system/debug.xml"/>
+            <include path="TrueLayer_Connect::system/settings.xml"/>
+        </section>
+    </system>
+</config>

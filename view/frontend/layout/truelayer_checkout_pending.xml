@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="TrueLayer_Connect::css/pending.css"/>
+    </head>
+    <referenceContainer name="content">
+        <block class="Magento\Framework\View\Element\Template" name="truelayer_checkout_pending" template="TrueLayer_Connect::checkout/pending.phtml">
+            <arguments>
+                <argument name="view_model" xsi:type="object">TrueLayer\Connect\ViewModel\Checkout\Pending</argument>
+            </arguments>
+        </block>
+    </referenceContainer>
+</page>

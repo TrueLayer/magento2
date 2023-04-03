@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="general" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>General</label>
+        <field id="version_button" translate="label" type="button" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Version</label>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck</frontend_model>
+        </field>
+        <field id="active" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Enabled</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/truelayer/active</config_path>
+        </field>
+        <field id="heading_credentials" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Credentials</label>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
+            <comment><![CDATA[Please enter your TrueLayer Console credentials into the relevant fields below in order for the plugin to work.]]></comment>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+        <field id="merchant_account_name" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Merchant Account Name</label>
+            <config_path>payment/truelayer/merchant_account_name</config_path>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+        <field id="mode" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Mode</label>
+            <source_model>TrueLayer\Connect\Model\Config\Source\Mode</source_model>
+            <config_path>payment/truelayer/mode</config_path>
+            <tooltip><![CDATA[Client ID and Client Secret can be found by following the below paths:<br>Client ID: Console > Settings<br>Console > Settings > Saved on your local desktop as a txt file]]></tooltip>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+        <field id="sandbox_client_id" translate="label" type="text" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Client Id (sandbox)</label>
+            <config_path>payment/truelayer/sandbox_client_id</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">sandbox</field>
+            </depends>
+        </field>
+        <field id="production_client_id" translate="label" type="text" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Client Id (production)</label>
+            <config_path>payment/truelayer/production_client_id</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">production</field>
+            </depends>
+        </field>
+        <field id="sandbox_client_secret" translate="label" type="obscure" sortOrder="32" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Client Secret (sandbox)</label>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+            <config_path>payment/truelayer/sandbox_client_secret</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">sandbox</field>
+            </depends>
+        </field>
+        <field id="production_client_secret" translate="label" type="obscure" sortOrder="32" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Client Secret (production)</label>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+            <config_path>payment/truelayer/production_client_secret</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">production</field>
+            </depends>
+        </field>
+        <field id="production_private_key" translate="label" type="file" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Private Key (production)</label>
+            <config_path>payment/truelayer/production_private_key</config_path>
+            <backend_model>TrueLayer\Connect\Model\System\Config\Backend\PrivateKey</backend_model>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">production</field>
+            </depends>
+        </field>
+        <field id="sandbox_private_key" translate="label" type="file" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Private Key (sandbox)</label>
+            <config_path>payment/truelayer/sandbox_private_key</config_path>
+            <backend_model>TrueLayer\Connect\Model\System\Config\Backend\PrivateKey</backend_model>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">sandbox</field>
+            </depends>
+        </field>
+        <field id="production_key_id" translate="label" type="text" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>KID (production)</label>
+            <tooltip><![CDATA[The KID is generated after you upload your public key into Console, within the Payments section. You can find it using the following path:<br>Console > Payments > Settings > Signing keys > Copy the KID column]]></tooltip>
+            <config_path>payment/truelayer/production_key_id</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">production</field>
+            </depends>
+        </field>
+        <field id="sandbox_key_id" translate="label" type="text" sortOrder="34" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>KID (sandbox)</label>
+            <tooltip><![CDATA[The KID is generated after you upload your public key into Console, within the Payments section. You can find it using the following path:<br>Console > Payments > Settings > Signing keys > Copy the KID column]]></tooltip>
+            <config_path>payment/truelayer/sandbox_key_id</config_path>
+            <depends>
+                <field id="active">1</field>
+                <field id="mode">sandbox</field>
+            </depends>
+        </field>
+        <field id="check_credentials" translate="label" type="button" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="1">
+            <label/>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Button\Credentials</frontend_model>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+        </field>
+    </group>
+</include>

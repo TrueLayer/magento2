@@ -1,0 +1,44 @@
+//
+//  Imports
+//  ---------------------------------------------
+
+@import './variables/_colors.less';
+
+@import './module/helper/_mixin.less';
+@import './module/ui/_modal.less';
+
+@import './module/_header.less';
+@import './module/_debug.less';
+
+// For new Styles
+@import './_extends.less';
+
+//
+//  Tab styles
+//  ---------------------------------------------
+
+
+.truelayer-section span {
+  background-image: url('@{baseDir}TrueLayer_Connect/images/logo.svg');
+  padding-left: 25px;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+}
+
+.admin__menu .item-menu.parent.level-0 > a:before {
+  font-size: 2rem;
+  padding-top: .2rem;
+}
+
+//
+//  Common styles
+//  ---------------------------------------------
+form[action*="TrueLayer_Connect"] {
+  .mm-ui-recommend {
+    display: block;
+    padding: 3px 0;
+    color: @mm-ui-color1;
+    font-weight: 600;
+  }
+}

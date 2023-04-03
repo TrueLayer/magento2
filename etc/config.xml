@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <truelayer>
+                <version>1.0.3</version>
+                <model>TrueLayerFacade</model>
+                <title>TrueLayer</title>
+                <description>Pay using TrueLayer</description>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <currency>EUR,USD,GBP</currency>
+                <sort_order/>
+                <generate_invoice>1</generate_invoice>
+                <send_email>1</send_email>
+                <specificcountry>FR,DE,IE,LT,NL,ES,GB</specificcountry>
+                <banking_providers>retail</banking_providers>
+                <payment_page_primary_color>#000000</payment_page_primary_color>
+                <payment_page_secondary_color>#e53935</payment_page_secondary_color>
+                <payment_page_tertiary_color>#32329f</payment_page_tertiary_color>
+            </truelayer>
+        </payment>
+    </default>
+</config>
