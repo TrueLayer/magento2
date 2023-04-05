@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  web:
+    image: michielgerritsen/magento-project-community-edition:php81-fpm-magento2.4.4
+    ports:
+      - 1234:80
+      - 3307:3306
+    environment:
+      - URL=http://localhost:1234/
+      - FLAT_TABLES=false
+      - DOCKER_BUILDKIT=1
+      - COMPOSE_DOCKER_CLI_BUILD=1
+      - DOCKER_DEFAULT_PLATFORM=linux/amd64
+      - CUSTOM_ENTRYPOINT_COMMAND=php bin/magento module:disable Magento_TwoFactorAuth && composer require truelayer/magento2 --no-plugins --with-all-dependencies && php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile
+    volumes:
+      - ./:/data/extensions/tl-magento2

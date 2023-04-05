@@ -53,3 +53,15 @@ We are a Dutch agency dedicated to the development of extensions for Magento and
 
 The TrueLayer plugin solves this, enabling businesses with a Magento 2 webshop a seamless way to integrate instant bank payments into their website with minimal technical and developer resources required.
 [Visit Truelayer.com](https://truelayer.com/)
+
+# Local development
+A basic docker-compose configuration is provided to make local development easier. To start it, run the following:
+
+```bash
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose up
+```
+You can login as an admin user at http://localhost:1234/admin using the following credentials:
+
+| Username | Password |
+| -------- | -------- |
+| exampleuser | examplepassword123 |
