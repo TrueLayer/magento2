@@ -26,10 +26,10 @@ class ColorPicker extends Field
             '<script type="text/javascript">
             require(["jquery","jquery/colorpicker/js/colorpicker"], function ($) {
                 $(document).ready(function () {
-                    var thisElement = $("#' . $element->getHtmlId() . '");
-                    thisElement.css("backgroundColor", "' . $element->getData('value') . '");
+                    var thisElement = $("#' . $this->_escaper->escapeJs($element->getHtmlId()) . '");
+                    thisElement.css("backgroundColor", "' . $this->_escaper->escapeJs($element->getData('value')) . '");
                     thisElement.ColorPicker({
-                        color: "' . $element->getData('value') . '",
+                        color: "' . $this->_escaper->escapeJs($element->getData('value')) . '",
                         onChange: function (hsb, hex, rgb) {
                             thisElement.css("backgroundColor", "#" + hex).val("#" + hex);
                         }
