@@ -15,7 +15,6 @@ use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
-use TrueLayer\Connect\Service\Api\GetGuzzleClient;
 use TrueLayer\Connect\Service\Order\ProcessWebhook;
 use TrueLayer\Exceptions\Exception;
 use TrueLayer\Interfaces\Webhook as TrueLayerWebhookInterface;
@@ -35,10 +34,6 @@ class Webhook implements WebhookInterface
      * @var ProcessWebhook
      */
     private $processWebhook;
-    /**
-     * @var GetGuzzleClient
-     */
-    private $getGuzzleClient;
     /**
      * @var ConfigRepository
      */
@@ -65,7 +60,6 @@ class Webhook implements WebhookInterface
      *
      * @param LogRepository $logRepository
      * @param ProcessWebhook $processWebhook
-     * @param GetGuzzleClient $getGuzzleClient
      * @param ConfigRepository $configProvider
      * @param JsonSerializer $jsonSerializer
      * @param File $file
@@ -75,7 +69,6 @@ class Webhook implements WebhookInterface
     public function __construct(
         LogRepository $logRepository,
         ProcessWebhook $processWebhook,
-        GetGuzzleClient $getGuzzleClient,
         ConfigRepository $configProvider,
         JsonSerializer $jsonSerializer,
         File $file,
@@ -84,7 +77,6 @@ class Webhook implements WebhookInterface
     ) {
         $this->logRepository = $logRepository;
         $this->processWebhook = $processWebhook;
-        $this->getGuzzleClient = $getGuzzleClient;
         $this->configProvider = $configProvider;
         $this->jsonSerializer = $jsonSerializer;
         $this->file = $file;
@@ -97,8 +89,8 @@ class Webhook implements WebhookInterface
      */
     public function processTransfer()
     {
+        \TrueLayer\Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
         $webhook = TrueLayerWebhook::configure()
-            ->httpClient($this->getGuzzleClient->execute())
             ->useProduction(!$this->configProvider->isSandbox($this->getStoreId()))
             ->create();
 

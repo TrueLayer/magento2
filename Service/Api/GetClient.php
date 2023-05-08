@@ -34,26 +34,19 @@ class GetClient
      * @var array
      */
     private $credentials;
-    /**
-     * @var GetGuzzleClient
-     */
-    private $getGuzzleClient;
 
     /**
      * Adapter constructor.
      *
      * @param ConfigRepository $configProvider
      * @param LogRepository $logRepository
-     * @param GetGuzzleClient $getGuzzleClient
      */
     public function __construct(
         ConfigRepository $configProvider,
-        LogRepository $logRepository,
-        GetGuzzleClient $getGuzzleClient
+        LogRepository $logRepository
     ) {
         $this->configProvider = $configProvider;
         $this->logRepository = $logRepository;
-        $this->getGuzzleClient = $getGuzzleClient;
     }
 
     /**
@@ -79,12 +72,12 @@ class GetClient
     private function getClient(): ?ClientInterface
     {
         try {
+            \TrueLayer\Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
             $client = Client::configure()
                 ->clientId($this->credentials['client_id'])
                 ->clientSecret($this->credentials['client_secret'])
                 ->keyId($this->credentials['key_id'])
                 ->pemFile($this->credentials['private_key'])
-                ->httpClient($this->getGuzzleClient->execute())
                 ->useProduction(!$this->configProvider->isSandbox());
 
             return $client->create();
