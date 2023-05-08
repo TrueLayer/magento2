@@ -29,4 +29,12 @@ interface RepositoryInterface
      * @return mixed
      */
     public function get($email);
+
+    /**
+     * Get user by id
+     *
+     * @param $userId
+     * @return mixed
+     */
+    public function getByTruelayerId($userId);
 }

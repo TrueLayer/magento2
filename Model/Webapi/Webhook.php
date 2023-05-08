@@ -98,7 +98,7 @@ class Webhook implements WebhookInterface
             $this->logRepository->addDebugLog('Webhook', $event->getBody());
         })->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
             try {
-                $this->processWebhook->execute($event->getBody()['payment_id']);
+                $this->processWebhook->execute($event->getBody()['payment_id'], $event->getBody()['user_id']);
             } catch (\Exception $exception) {
                 $this->logRepository->addErrorLog('Webhook processTransfer', $exception->getMessage());
                 throw new LocalizedException(__($exception->getMessage()));
