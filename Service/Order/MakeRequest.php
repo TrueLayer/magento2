@@ -210,7 +210,7 @@ class MakeRequest
         $customerEmail = $quote->getBillingAddress()->getEmail() ?: $quote->getCustomerEmail();
 
         $data = [
-            "amount_in_minor" => (int)($quote->getBaseGrandTotal() * 100),
+            "amount_in_minor" => (int)bcmul((string)$quote->getBaseGrandTotal(), '100'),
             "currency" => $quote->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
