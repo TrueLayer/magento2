@@ -1,13 +1,18 @@
 name: Run setup:upgrade and setup:di:compile
-on: [pull_request]
+on: [ pull_request ]
 
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
+          - PHP_VERSION: php74-fpm
+            MAGENTO_VERSION: 2.4.3-p1
           - PHP_VERSION: php81-fpm
             MAGENTO_VERSION: 2.4.4
+          - PHP_VERSION: php81-fpm
+            MAGENTO_VERSION: 2.4.5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
