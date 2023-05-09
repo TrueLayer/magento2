@@ -53,4 +53,18 @@ class ResourceModel extends AbstractDb
             ['magento_email' => $email, 'truelayer_id' => $userId]
         );
     }
+
+    /**
+     * @param string $uuid
+     * @return mixed
+     */
+    public function getByTruelayerId(string $userId)
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getTable('truelayer_user'))
+            ->where('truelayer_id = :userId');
+        $bind = [':userId' => $userId];
+        return $connection->fetchRow($select, $bind);
+    }
 }

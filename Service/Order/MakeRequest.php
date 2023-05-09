@@ -23,6 +23,7 @@ use Magento\Quote\Model\QuoteRepository;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
+use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Service\Api\GetClient;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
@@ -71,6 +72,10 @@ class MakeRequest
      * @var UserRepository
      */
     private $userRepository;
+    /**
+     * @var LogRepository
+     */
+    private $logRepository;
 
     private $truelayerUser = null;
 
@@ -87,6 +92,7 @@ class MakeRequest
      * @param DataObjectProcessor $dataObjectProcessor
      * @param DataObjectHelper $dataObjectHelper
      * @param UserRepository $userRepository
+     * @param LogRepository $logRepository
      */
     public function __construct(
         ConfigRepository $configProvider,
@@ -98,7 +104,8 @@ class MakeRequest
         AddressFactory $quoteAddressFactory,
         DataObjectProcessor $dataObjectProcessor,
         DataObjectHelper $dataObjectHelper,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        LogRepository $logRepository
     ) {
         $this->configProvider = $configProvider;
         $this->checkoutSession = $checkoutSession;
@@ -110,6 +117,7 @@ class MakeRequest
         $this->dataObjectProcessor = $dataObjectProcessor;
         $this->dataObjectHelper = $dataObjectHelper;
         $this->userRepository = $userRepository;
+        $this->logRepository = $logRepository;
     }
 
     /**
@@ -202,7 +210,7 @@ class MakeRequest
         $customerEmail = $quote->getBillingAddress()->getEmail() ?: $quote->getCustomerEmail();
 
         $data = [
-            "amount_in_minor" => (int)($quote->getBaseGrandTotal() * 100),
+            "amount_in_minor" => (int)bcmul((string)$quote->getBaseGrandTotal(), '100'),
             "currency" => $quote->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
@@ -240,6 +248,8 @@ class MakeRequest
         if ($this->truelayerUser) {
             $data['user']['id'] = $this->truelayerUser['truelayer_id'];
         }
+
+        $this->logRepository->addDebugLog('order request', $data);
 
         return $data;
     }

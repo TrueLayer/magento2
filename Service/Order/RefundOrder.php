@@ -62,7 +62,7 @@ class RefundOrder
             $client = $this->getClient->execute((int)$order->getStoreId());
             $refundId = $client->refund()
                 ->payment($transaction->getUuid())
-                ->amountInMinor((int)($amount * 100))
+                ->amountInMinor((int)bcmul((string)$amount, '100'))
                 ->reference($transaction->getInvoiceUuid())
                 ->create()
                 ->getId();

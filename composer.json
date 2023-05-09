@@ -2,7 +2,7 @@
     "name": "truelayer/magento2",
     "description": "TrueLayer extension for Magento 2",
     "type": "magento2-module",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -12,7 +12,7 @@
         "magento/module-payment": ">=100.1.0",
         "magento/module-checkout": ">=100.1.0",
         "magento/module-sales": ">=100.1.0",
-        "truelayer/client": ">=v0.0.4",
+        "truelayer/client": ">=1.2.0",
         "php": ">=7.4.0"
     },
     "require-dev": {

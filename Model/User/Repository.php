@@ -45,4 +45,12 @@ class Repository implements RepositoryInterface
     {
         return $this->resource->get($email);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getByTruelayerId($userId)
+    {
+        return $this->resource->getByTruelayerId($userId);
+    }
 }
