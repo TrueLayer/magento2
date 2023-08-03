@@ -3,38 +3,34 @@
  * See COPYING.txt for license details.
  */
 
-define([
-    'jquery'
-], function ($) {
+define([], function () {
     'use strict';
 
     return function (data) {
-        let i = 0;
-        let check = function() {
-            if (i === 3) {
-                $("#truelayer-refresh-button").show();
-                $("#truelayer-loading").hide();
-            } else {
-                setTimeout(function () {
-                    i++;
-                    $.ajax({
-                        method: 'GET',
-                        url: data.checkUrl,
-                        success: function (result) {
-                            if (result == true) {
-                                window.location.replace(data.refreshUrl);
-                            } else {
-                                check();
-                            }
-                        },
-                        error: function () {
-                            $("#truelayer-refresh-button").show();
-                            $("#truelayer-loading").hide();
-                        }
-                    });
-                }, 2000);
-            }
+        let success = document.querySelector('[data-success]'),
+            error = document.querySelector('[data-error]'),
+            loader = document.querySelector('[data-loader]'),
+            count = 0,
+            interval = setInterval(() => { getRequest() }, 2500);
+
+        function getRequest() {
+            fetch(data.checkUrl)
+                .then((res) => {
+                    count++;
+                    if (!res.ok) throw new Error();
+                    displayRequstResult(success);
+                    window.location.replace(data.refreshUrl);
+                })
+                .catch(() => {
+                    if (count === 3) displayRequstResult(error);
+                });
         }
-        check();
+
+        // Element - HTML element
+        function displayRequstResult(element) {
+            clearInterval(interval);
+            loader.setAttribute('style', 'display: none;');
+            element.removeAttribute('style');
+        }
     };
 });

@@ -10,23 +10,31 @@
 $viewModel = $block->getData('view_model');
 ?>
 <div class="checkout-pending">
-    <p>
+    <h2>
+        <?= $block->escapeHtml(__('Your payment has been accepted by your bank.')) ?>
+        <br />
         <?= $block->escapeHtml(__(
-            'Your payment has been accepted by TrueLayer. We are redirecting you to the order confirmation page ' .
-            'but it might take an extra second.'
+            'We are redirecting you to the order confirmation page but it might take an extra second.'
         )) ?>
-    </p>
-    <div class="truelayer-loading" id="truelayer-loading">
-        <div class="redirect-block">
-            <h1><?= $block->escapeHtml(__('Refreshing...')); ?></h1>
-            <div class="loader"></div>
+    </h2>
+    <div class="truelayer-loading" data-loader>
+        <div class="loading-container">
+            <div class="loading"></div>
+            <div class="progress"></div>
         </div>
     </div>
-    <div class="actions-toolbar" id="truelayer-refresh-button" style="display:none">
-        <div class="primary">
-            <a class="action primary refresh" href="<?= $block->escapeUrl($viewModel->getRefreshUrl()) ?>">
-                <span><?= $block->escapeHtml(__('Refresh')) ?></span>
-            </a>
+
+    <div class="truelayer-result">
+        <div class="message success" data-success style="display: none;">
+            <div>
+                <?= $block->escapeHtml(__('Success! You will now be redirected to another page.')) ?>
+            </div>
+        </div>
+        <div class="message info" data-error style="display: none;">
+            <div>
+                <?= $block->escapeHtml(__('Your payment is being processed by your bank.')) ?>
+                <?= $block->escapeHtml(__('Please wait for an order confirmation email.')) ?>
+            </div>
         </div>
     </div>
 </div>
