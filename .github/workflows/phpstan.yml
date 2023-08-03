@@ -22,6 +22,9 @@ jobs:
       - name: Upload our code into the docker container
         run: docker cp $(pwd) magento-project-community-edition:/data/extensions/
 
+      - name: Set minimum-stability for composer (temp)
+        run: docker exec magento-project-community-edition composer config minimum-stability dev
+
       - name: Install the extensions in Magento
         run: docker exec magento-project-community-edition composer require truelayer/magento2:@dev --no-plugins --with-all-dependencies
 
