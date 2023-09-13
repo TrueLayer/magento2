@@ -12,7 +12,7 @@
         "magento/module-payment": ">=100.1.0",
         "magento/module-checkout": ">=100.1.0",
         "magento/module-sales": ">=100.1.0",
-        "truelayer/client": "*",
+        "truelayer/client": ">=1.2.0",
         "php": ">=7.4.0"
     },
     "require-dev": {
