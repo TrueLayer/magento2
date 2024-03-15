@@ -202,7 +202,7 @@ class MakeRequest
 
     /**
      * @param Quote $quote
-     *
+     * @param string $merchantAccountId
      * @return array
      */
     private function prepareData(Quote $quote, string $merchantAccountId): array
@@ -210,7 +210,7 @@ class MakeRequest
         $customerEmail = $quote->getBillingAddress()->getEmail() ?: $quote->getCustomerEmail();
 
         $data = [
-            "amount_in_minor" => (int)bcmul((string)$quote->getBaseGrandTotal(), '100'),
+            "amount_in_minor" => (int) round($quote->getBaseGrandTotal() * 100, 0, PHP_ROUND_HALF_UP),
             "currency" => $quote->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
