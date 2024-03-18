@@ -47,7 +47,7 @@ define(
             },
 
             _placeOrder: function () {
-                return this.setPaymentInformation().success(function () {
+                return this.setPaymentInformation().done(function () {
                     this.orderRequest(customer.isLoggedIn(), quote.getQuoteId());
                 }.bind(this));
             },
