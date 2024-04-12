@@ -239,8 +239,7 @@ class MakeRequest
                 "name" => trim($quote->getBillingAddress()->getFirstname()) .
                     ' ' .
                     trim($quote->getBillingAddress()->getLastname()),
-                "email" => $customerEmail,
-                "phone" => $quote->getBillingAddress()->getTelephone()
+                "email" => $customerEmail
             ]
         ];
 
