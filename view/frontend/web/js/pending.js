@@ -3,34 +3,54 @@
  * See COPYING.txt for license details.
  */
 
-define([], function () {
+define(['ko', 'uiComponent'], function (ko, Component) {
     'use strict';
 
-    return function (data) {
-        let success = document.querySelector('[data-success]'),
-            error = document.querySelector('[data-error]'),
-            loader = document.querySelector('[data-loader]'),
-            count = 0,
-            interval = setInterval(() => { getRequest() }, 2500);
+    return Component.extend({
+        defaults: {
+            isShowLoader: ko.observable(true),
+            isSuccess: ko.observable(false),
+            isError: ko.observable(false),
+            requestCount: ko.observable(0),
+            maxRequestCount: 3,
+            delay: 2500,
+        },
 
-        function getRequest() {
-            fetch(data.checkUrl)
-                .then((res) => {
-                    count++;
-                    if (!res.ok) throw new Error();
-                    displayRequstResult(success);
-                    window.location.replace(data.refreshUrl);
-                })
-                .catch(() => {
-                    if (count === 3) displayRequstResult(error);
-                });
-        }
+        initialize() {
+            this._super();
+            this.getRequest();
+        },
 
-        // Element - HTML element
-        function displayRequstResult(element) {
-            clearInterval(interval);
-            loader.setAttribute('style', 'display: none;');
-            element.removeAttribute('style');
+        getRequest() {
+            if (this.requestCount() < this.maxRequestCount) {
+                fetch(this.checkUrl)
+                    .then((res) => {
+                        if (!res.ok) throw new Error();
+                        this.requestCount(this.requestCount() + 1);
+                        return res.json();
+                    })
+                    .then((json) => {
+                        const timer = setTimeout(() => {
+                            json === false ? this.getRequest() : this.successOrder();
+                            clearTimeout(timer);
+                        }, this.delay);
+                    })
+                    .catch(() => this.errorOrder());
+            } else {
+                this.errorOrder();
+            }
+        },
+
+        successOrder() {
+            this.requestCount(this.maxRequestCount);
+            this.isShowLoader(false);
+            this.isSuccess(true);
+            window.location.replace(this.refreshUrl);
+        },
+
+        errorOrder() {
+            this.isShowLoader(false);
+            this.isError(true);
         }
-    };
+    });
 });
