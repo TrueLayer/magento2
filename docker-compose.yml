@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   web:
-    image: michielgerritsen/magento-project-community-edition:php81-fpm-magento2.4.4
+    image: michielgerritsen/magento-project-community-edition:php81-fpm-magento2.4.6
     ports:
       - 1234:80
       - 3307:3306
@@ -12,6 +12,6 @@ services:
       - DOCKER_BUILDKIT=1
       - COMPOSE_DOCKER_CLI_BUILD=1
       - DOCKER_DEFAULT_PLATFORM=linux/amd64
-      - CUSTOM_ENTRYPOINT_COMMAND=php bin/magento module:disable Magento_TwoFactorAuth && composer require truelayer/magento2 --no-plugins --with-all-dependencies && php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile
+      - CUSTOM_ENTRYPOINT_COMMAND=php bin/magento module:disable {Magento_AdminAdobeImsTwoFactorAuth,Magento_TwoFactorAuth} && composer require truelayer/magento2 --no-plugins --with-all-dependencies && php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile && php bin/magento config:set admin/security/password_lifetime 0 && php bin/magento config:set admin/security/password_is_forced 0 && php bin/magento cache:clean
     volumes:
       - ./:/data/extensions/tl-magento2
