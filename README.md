@@ -65,3 +65,12 @@ You can login as an admin user at http://localhost:1234/admin using the followin
 | Username | Password |
 | -------- | -------- |
 | exampleuser | examplepassword123 |
+
+# Testing webhooks
+Webhook signature includes the path so make sure the webhook URL is configured in your Console and the path is set to rest/V1/webhook/transfer. 
+The domain does not matter, as we will be using `truelayer-cli` to forward webhooks.
+
+Run the following to forward webhooks to your local instance:
+```
+docker run --network="host" truelayer/truelayer-cli route-webhooks --to-addr http://localhost:1234/rest/V1/webhook/transfer --client-secret <client_secret> --client-id <client_id>
+```
