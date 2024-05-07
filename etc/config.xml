@@ -10,7 +10,7 @@
     <default>
         <payment>
             <truelayer>
-                <version>1.0.10</version>
+                <version>1.0.11</version>
                 <model>TrueLayerFacade</model>
                 <title>TrueLayer</title>
                 <description>Pay using TrueLayer</description>

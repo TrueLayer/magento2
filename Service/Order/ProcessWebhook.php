@@ -9,6 +9,7 @@ namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
@@ -150,6 +151,7 @@ class ProcessWebhook
             }
         } catch (Exception $e) {
             $this->logRepository->addDebugLog('webhook exception', $e->getMessage());
+            throw new LocalizedException(__($e->getMessage()));
         }
     }
 
@@ -176,7 +178,7 @@ class ProcessWebhook
             $this->sendInvoiceEmail($order);
         } catch (Exception $e) {
             $this->logRepository->addDebugLog('place order', $e->getMessage());
-            return false;
+            throw new LocalizedException(__($e->getMessage()));
         }
 
         return $order->getEntityId();
