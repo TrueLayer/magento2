@@ -200,6 +200,8 @@ class ProcessWebhook
 
         $quote->setCustomerIsGuest($quote->getCustomerId() == null);
         $quote->setIsActive(true);
+        // stop collecting shipping rated to avoid losing the shipping method with saving the quote. This happens while using custom shipping methods
+        $quote->getShippingAddress()->setCollectShippingRates(false);
         $this->quoteRepository->save($quote);
         return $quote;
     }
