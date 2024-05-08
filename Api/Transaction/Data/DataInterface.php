@@ -81,19 +81,19 @@ interface DataInterface extends ExtensibleDataInterface
     public function setToken(string $value): self;
 
     /**
-     * Return uuid.
+     * Return the payment uuid.
      *
      * @return string|null
      */
-    public function getUuid(): ?string;
+    public function getPaymentUuid(): ?string;
 
     /**
-     * Set uuid.
+     * Set the payment uuid.
      *
      * @param string $value
      * @return $this
      */
-    public function setUuid(string $value): self;
+    public function setPaymentUuid(string $value): self;
 
     /**
      * Return status.

@@ -13,11 +13,10 @@ use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
 /**
- * TrueLayer API adapter wrapper
+ * TrueLayer Client Factory
  */
-class GetClient
+class ClientFactory
 {
-
     /**
      * @var int
      */
@@ -36,8 +35,6 @@ class GetClient
     private $credentials;
 
     /**
-     * Adapter constructor.
-     *
      * @param ConfigRepository $configProvider
      * @param LogRepository $logRepository
      */
@@ -54,7 +51,7 @@ class GetClient
      * @param array|null $data
      * @return ClientInterface|null
      */
-    public function execute(int $storeId = 0, ?array $data = []): ?ClientInterface
+    public function create(int $storeId = 0, ?array $data = []): ?ClientInterface
     {
         $this->storeId = $storeId;
         if (isset($data['credentials'])) {

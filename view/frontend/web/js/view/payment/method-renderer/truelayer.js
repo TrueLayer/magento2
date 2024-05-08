@@ -8,22 +8,19 @@ define(
     [
         'jquery',
         'Magento_Checkout/js/view/payment/default',
+        'mage/url',
+        'Magento_Customer/js/customer-data',
         'Magento_Checkout/js/model/error-processor',
-        'Magento_Checkout/js/model/quote',
-        'Magento_Customer/js/model/customer',
-        'Magento_Checkout/js/model/url-builder',
         'Magento_Checkout/js/model/full-screen-loader',
-        'mage/storage',
-        'Magento_Ui/js/model/messageList',
-        'Magento_Checkout/js/model/payment/additional-validators',
-        'uiRegistry'
     ],
-    function ($, Component, errorProcessor, quote, customer, urlBuilder, fullScreenLoader, storage, messageList, additionalValidators, uiRegistry) {
+    function ($, Component, url, customerData, errorProcessor, fullScreenLoader) {
         'use strict';
 
         var payload = '';
 
         return Component.extend({
+            redirectAfterPlaceOrder: false,
+
             defaults: {
                 template: 'TrueLayer_Connect/payment/truelayer'
             },
@@ -32,82 +29,34 @@ define(
                 return 'truelayer';
             },
 
-            placeOrder: function (data, event) {
-                if (event) {
-                    event.preventDefault();
-                }
+            afterPlaceOrder: function () {
+                fullScreenLoader.startLoader();
 
-                this.isPlaceOrderActionAllowed(false);
-                var _this = this;
-
-                if (additionalValidators.validate()) {
-                    fullScreenLoader.startLoader();
-                    _this._placeOrder();
-                }
-            },
-
-            _placeOrder: function () {
-                return this.setPaymentInformation().done(function () {
-                    this.orderRequest(customer.isLoggedIn(), quote.getQuoteId());
-                }.bind(this));
-            },
-
-            setPaymentInformation: function() {
-                var serviceUrl, payload;
-
-                payload = {
-                    cartId: quote.getQuoteId(),
-                    billingAddress: quote.billingAddress(),
-                    paymentMethod: this.getData()
-                };
-
-                if (customer.isLoggedIn()) {
-                    serviceUrl = urlBuilder.createUrl('/carts/mine/set-payment-information', {});
-                } else {
-                    payload.email = quote.guestEmail;
-                    serviceUrl = urlBuilder.createUrl('/guest-carts/:quoteId/set-payment-information', {
-                        quoteId: quote.getQuoteId()
+                $.ajax({
+                    url: '/rest/V1/truelayer/order-request',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        isLoggedIn: true,
+                        cartId: '', // @todo Find out where validation happens and drop params
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                })
+                    .done(function (response) {
+                        //customerData.invalidate(['cart']);
+                        if (response[0].success) {
+                            window.location.replace(response[0].payment_page_url);
+                        } else {
+                            this.addError(response[0].message);
+                        }
+                    })
+                    .fail(function (response) {
+                        errorProcessor.process(response, this.messageContainer);
+                    })
+                    .always(function () {
+                        fullScreenLoader.stopLoader();
                     });
-                }
-
-                return storage.post(
-                    serviceUrl, JSON.stringify(payload)
-                );
-            },
-
-            orderRequest: function(isLoggedIn, cartId) {
-                var url = 'rest/V1/truelayer/order-request';
-
-                payload = {
-                    isLoggedIn: isLoggedIn,
-                    cartId: cartId,
-                    paymentMethod: this.getData()
-                };
-
-                storage.post(
-                    url,
-                    JSON.stringify(payload)
-                ).done(function (response) {
-                    if (response[0].success) {
-                        fullScreenLoader.stopLoader();
-                        window.location.replace(response[0].payment_page_url);
-                    } else {
-                        fullScreenLoader.stopLoader();
-                        this.addError(response[0].message);
-                    }
-                }.bind(this));
-            },
-
-            /**
-             * Adds error message
-             *
-             * @param {String} message
-             */
-            addError: function (message) {
-                messageList.addErrorMessage({
-                    message: message
-                });
-            },
+            }
         });
     }
 );

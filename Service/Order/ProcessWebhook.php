@@ -117,6 +117,7 @@ class ProcessWebhook
     public function execute(string $uuid, string $userId)
     {
         $this->logRepository->addDebugLog('webhook payload uuid', $uuid);
+        error_log('********* '.$uuid);
 
         try {
             $transaction = $this->transactionRepository->getByUuid($uuid);

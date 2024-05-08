@@ -90,7 +90,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function getUuid(): ?string
+    public function getPaymentUuid(): ?string
     {
         return $this->getData(self::UUID)
             ? (string)$this->getData(self::UUID)
@@ -100,7 +100,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setUuid(string $value): DataInterface
+    public function setPaymentUuid(string $value): DataInterface
     {
         return $this->setData(self::UUID, $value);
     }
