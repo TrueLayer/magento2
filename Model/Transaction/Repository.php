@@ -199,7 +199,7 @@ class Repository implements RepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getByUuid(string $uuid): DataInterface
+    public function getByPaymentUuid(string $uuid): DataInterface
     {
         if (!$uuid) {
             $errorMsg = static::INPUT_EXCEPTION;

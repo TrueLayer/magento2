@@ -12,7 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Service\Api\GetClient;
+use TrueLayer\Connect\Service\Api\ClientFactory;
 
 class RefundOrder
 {
@@ -20,9 +20,9 @@ class RefundOrder
     public const EXCEPTION_MSG = 'Unable to refund order #%1 on TrueLayer';
 
     /**
-     * @var GetClient
+     * @var ClientFactory
      */
-    private $getClient;
+    private $clientFactory;
     /**
      * @var TransactionRepository
      */
@@ -31,14 +31,14 @@ class RefundOrder
     /**
      * RefundOrder constructor.
      *
-     * @param GetClient $getClient
+     * @param ClientFactory $clientFactory
      * @param TransactionRepository $transactionRepository
      */
     public function __construct(
-        GetClient $getClient,
+        ClientFactory $clientFactory,
         TransactionRepository $transactionRepository
     ) {
-        $this->getClient = $getClient;
+        $this->clientFactory = $clientFactory;
         $this->transactionRepository = $transactionRepository;
     }
 
@@ -59,7 +59,7 @@ class RefundOrder
         $transaction = $this->transactionRepository->getByOrderId((int)$order->getId());
 
         if ($amount != 0) {
-            $client = $this->getClient->execute((int)$order->getStoreId());
+            $client = $this->clientFactory->create((int)$order->getStoreId());
             $refundId = $client->refund()
                 ->payment($transaction->getPaymentUuid())
                 ->amountInMinor((int)bcmul((string)$amount, '100'))

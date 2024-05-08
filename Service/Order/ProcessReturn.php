@@ -7,17 +7,12 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Order;
 
-use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Service\Api\GetClient;
+use TrueLayer\Connect\Service\Api\ClientFactory;
 
 /**
  * Class ProcessReturn
@@ -31,17 +26,9 @@ class ProcessReturn
     public const UNKNOWN_MSG = 'Unknown error, please try again.';
 
     /**
-     * @var GetClient
+     * @var ClientFactory
      */
-    private $getClient;
-    /**
-     * @var Session
-     */
-    private $checkoutSession;
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $quoteRepository;
+    private $clientFactory;
     /**
      * @var OrderInterface
      */
@@ -51,10 +38,6 @@ class ProcessReturn
      */
     private $transactionRepository;
     /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-    /**
      * @var LogRepository
      */
     private $logger;
@@ -62,28 +45,19 @@ class ProcessReturn
     /**
      * ProcessReturn constructor.
      *
-     * @param Session $checkoutSession
-     * @param GetClient $getClient
-     * @param CartRepositoryInterface $quoteRepository
+     * @param ClientFactory $clientFactory
      * @param OrderInterface $orderInterface
-     * @param OrderRepositoryInterface $orderRepository
      * @param TransactionRepository $transactionRepository
      * @param LogRepository $logger
      */
     public function __construct(
-        Session $checkoutSession,
-        GetClient $getClient,
-        CartRepositoryInterface $quoteRepository,
+        ClientFactory $clientFactory,
         OrderInterface $orderInterface,
-        OrderRepositoryInterface $orderRepository,
         TransactionRepository $transactionRepository,
         LogRepository $logger
     ) {
-        $this->checkoutSession = $checkoutSession;
-        $this->getClient = $getClient;
-        $this->quoteRepository = $quoteRepository;
+        $this->clientFactory = $clientFactory;
         $this->orderInterface = $orderInterface;
-        $this->orderRepository = $orderRepository;
         $this->transactionRepository = $transactionRepository;
         $this->logger = $logger;
     }
@@ -96,68 +70,33 @@ class ProcessReturn
      * @throws \TrueLayer\Exceptions\ApiRequestJsonSerializationException
      * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
      * @throws \TrueLayer\Exceptions\SignerException
-     * @throws \TrueLayer\Exceptions\ValidationException
      */
     public function execute(string $transactionId): array
     {
-        $transaction = $this->transactionRepository->getByUuid($transactionId);
-        $quote = $this->quoteRepository->get($transaction->getQuoteId());
-        $this->checkoutSession->setLoadInactive(true)->replaceQuote($quote);
+        $transaction = $this->transactionRepository->getByPaymentUuid($transactionId);
+        $order = $this->orderInterface->loadByAttribute('quote_id', $transaction->getQuoteId());
 
-        $order = $this->orderInterface->loadByAttribute('quote_id', $quote->getId());
-
-        $client = $this->getClient->execute($quote->getStoreId());
-        $payment = $client->getPayment($transactionId);
-        $transactionStatus = $payment->getStatus();
+        $client = $this->clientFactory->create((int) $order->getStoreId());
+        $paymentStatus = $client->getPayment($transactionId)->getStatus();
 
         if (!$order->getEntityId()) {
-            if ($transactionStatus == 'settled' || $transactionStatus == 'executed') {
-                return ['success' => false, 'status' => $transactionStatus];
+            if ($paymentStatus == 'settled' || $paymentStatus == 'executed') {
+                return ['success' => false, 'status' => $paymentStatus];
             } 
         }
 
-        switch ($transactionStatus) {
+        switch ($paymentStatus) {
             case 'executed':
             case 'settled':
-                $this->updateCheckoutSession($quote, $order);
-                return ['success' => true, 'status' => $transactionStatus];
+                return ['success' => true, 'status' => $paymentStatus];
             case 'cancelled':
-                $message = (string)self::CANCELLED_MSG;
-                return ['success' => false, 'status' => $transactionStatus, 'msg' => __($message)];
+                return ['success' => false, 'status' => $paymentStatus, 'msg' => __(self::CANCELLED_MSG)];
             case 'failed':
-                $message = (string)self::FAILED_MSG;
-                return ['success' => false, 'status' => $transactionStatus, 'msg' => __($message)];
+                return ['success' => false, 'status' => $paymentStatus, 'msg' => __(self::FAILED_MSG)];
             case 'rejected':
-                $message = (string)self::REJECTED_MSG;
-                return ['success' => false, 'status' => $transactionStatus, 'msg' => __($message)];
+                return ['success' => false, 'status' => $paymentStatus, 'msg' => __(self::REJECTED_MSG)];
             default:
-                $message = (string)self::UNKNOWN_MSG;
-                return ['success' => false, 'status' => $transactionStatus, 'msg' => __($message)];
+                return ['success' => false, 'status' => $paymentStatus, 'msg' => __(self::UNKNOWN_MSG)];
         }
-    }
-
-    /**
-     * @param CartInterface $quote
-     * @param Order $order
-     * @return void
-     */
-    private function updateCheckoutSession(CartInterface $quote, Order $order): void
-    {
-        $this->orderRepository->save($order);
-
-        // Remove additional quote for customer
-        if ($customerId = $quote->getCustomer()->getId()) {
-            try {
-                $activeQuote = $this->quoteRepository->getActiveForCustomer($customerId);
-                $this->quoteRepository->delete($activeQuote);
-            } catch (NoSuchEntityException $e) {
-                $this->logger->addErrorLog('Remove customer quote', $e->getMessage());
-            }
-        }
-
-        $this->checkoutSession->setLastQuoteId($quote->getEntityId())
-            ->setLastSuccessQuoteId($quote->getEntityId())
-            ->setLastRealOrderId($order->getIncrementId())
-            ->setLastOrderId($order->getId());
     }
 }

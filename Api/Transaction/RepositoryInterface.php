@@ -124,7 +124,7 @@ interface RepositoryInterface
      * @throws InputException
      * @throws NoSuchEntityException
      */
-    public function getByUuid(string $uuid): DataInterface;
+    public function getByPaymentUuid(string $uuid): DataInterface;
 
     /**
      * @param string $token

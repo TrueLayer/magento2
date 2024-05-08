@@ -8,10 +8,6 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
-use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Quote\Api\CartManagementInterface;
-use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
@@ -29,83 +25,53 @@ class ProcessWebhook
 {
 
     public const SUCCESS_MSG = 'Order #%1 successfully captured on TrueLayer';
-    /**
-     * @var CheckoutSession
-     */
-    public $checkoutSession;
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $quoteRepository;
-    /**
-     * @var TransactionRepository
-     */
-    private $transactionRepository;
-    /**
-     * @var CartManagementInterface
-     */
-    private $cartManagement;
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-    /**
-     * @var InvoiceSender
-     */
-    private $invoiceSender;
-    /**
-     * @var OrderSender
-     */
-    private $orderSender;
-    /**
-     * @var ConfigRepository
-     */
-    private $configRepository;
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
+
+    private TransactionRepository $transactionRepository;
+
+    private OrderRepositoryInterface $orderRepository;
+
+    private InvoiceSender $invoiceSender;
+
+    private OrderSender $orderSender;
+
+    private ConfigRepository $configRepository;
+
+    private LogRepository $logRepository;
+
+    private UserRepository $userRepository;
+
+    private OrderInterface $orderInterface;
 
     /**
      * ProcessWebhook constructor.
      *
-     * @param CartRepositoryInterface $quoteRepository
      * @param TransactionRepository $transactionRepository
-     * @param CartManagementInterface $cartManagement
      * @param OrderRepositoryInterface $orderRepository
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param ConfigRepository $configRepository
      * @param LogRepository $logRepository
-     * @param CheckoutSession $checkoutSession
      * @param UserRepository $userRepository
+     * @param OrderInterface $orderInterface
      */
     public function __construct(
-        CartRepositoryInterface $quoteRepository,
         TransactionRepository $transactionRepository,
-        CartManagementInterface $cartManagement,
         OrderRepositoryInterface $orderRepository,
         OrderSender $orderSender,
         InvoiceSender $invoiceSender,
         ConfigRepository $configRepository,
         LogRepository $logRepository,
-        CheckoutSession $checkoutSession,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        OrderInterface $orderInterface
     ) {
-        $this->quoteRepository = $quoteRepository;
         $this->transactionRepository = $transactionRepository;
-        $this->cartManagement = $cartManagement;
         $this->orderRepository = $orderRepository;
         $this->orderSender = $orderSender;
         $this->invoiceSender = $invoiceSender;
         $this->configRepository = $configRepository;
         $this->logRepository = $logRepository;
-        $this->checkoutSession = $checkoutSession;
         $this->userRepository = $userRepository;
+        $this->orderInterface = $orderInterface;
     }
 
     /**
@@ -116,94 +82,52 @@ class ProcessWebhook
      */
     public function execute(string $uuid, string $userId)
     {
-        $this->logRepository->addDebugLog('webhook payload uuid', $uuid);
-        error_log('********* '.$uuid);
+        $this->logRepository->addDebugLog('webhook - start processing ', $uuid);
 
         try {
-            $transaction = $this->transactionRepository->getByUuid($uuid);
+            $transaction = $this->transactionRepository->getByPaymentUuid($uuid);
 
-            $this->logRepository->addDebugLog(
-                'webhook transaction id',
-                $transaction->getEntityId() . ' quote_id = ' . $transaction->getQuoteId()
-            );
+            $this->logRepository->addDebugLog('webhook', [
+                'transaction id' => $transaction->getEntityId(),
+                'quote id' => $transaction->getQuoteId(),
+            ]);
 
-            if (!$quoteId = $transaction->getQuoteId()) {
-                $this->logRepository->addDebugLog('webhook', 'no quote id found in transaction');
+            if (!$transaction->getQuoteId()) {
+                $this->logRepository->addDebugLog('webhook', 'aborting, no quote found');
                 return;
             }
 
-            $quote = $this->quoteRepository->get($quoteId);
-            $this->checkoutSession->setQuoteId($quoteId);
-
-            if (!$this->transactionRepository->isLocked($transaction)) {
-                $this->logRepository->addDebugLog('webhook', 'start processing accepted transaction');
-                $this->transactionRepository->lock($transaction);
-
-                if (!$this->transactionRepository->checkOrderIsPlaced($transaction)) {
-                    $orderId = $this->placeOrder($quote, $uuid, $userId);
-                    $transaction->setOrderId((int)$orderId)->setStatus('payment_settled');
-                    $this->transactionRepository->save($transaction);
-                    $this->logRepository->addDebugLog('webhook', 'Order placed. Order id = ' . $orderId);
-                }
-
-                $this->transactionRepository->unlock($transaction);
-                $this->logRepository->addDebugLog('webhook', 'end processing accepted transaction');
+            if ($transaction->getIsLocked()) {
+                $this->logRepository->addDebugLog('webhook', 'aborting, transaction is locked');
+                return;
             }
-        } catch (Exception $e) {
-            $this->logRepository->addDebugLog('webhook exception', $e->getMessage());
-        }
-    }
 
-    /**
-     * @param CartInterface $quote
-     * @param $uuid
-     * @param $userId
-     * @return false|int|null
-     */
-    private function placeOrder(CartInterface $quote, $uuid, $userId)
-    {
-        try {
-            $quote = $this->prepareQuote($quote, $userId);
-            $orderId = $this->cartManagement->placeOrder($quote->getId());
-            $order = $this->orderRepository->get($orderId);
-            $this->sendOrderEmail($order);
+            $this->logRepository->addDebugLog('webhook', 'locking transaction and starting order update');
+            $this->transactionRepository->lock($transaction);
+            $order = $this->orderInterface->loadByAttribute('quote_id', $transaction->getQuoteId());
 
+            // Update payment and order status
             $payment = $order->getPayment();
             $payment->setTransactionId($uuid);
             $payment->setIsTransactionClosed(true);
             $payment->registerCaptureNotification($order->getGrandTotal(), true);
             $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
             $this->orderRepository->save($order);
+            $this->logRepository->addDebugLog('webhook', 'payment and order statuses updated');
+
+            // Send emails
+            $this->sendOrderEmail($order);
             $this->sendInvoiceEmail($order);
+            $this->logRepository->addDebugLog('webhook', 'emails sent');
+
+            // Update transaction statis
+            $transaction->setStatus('payment_settled');
+            $this->transactionRepository->save($transaction);
+            $this->transactionRepository->unlock($transaction);
+            $this->logRepository->addDebugLog('webhook', 'transaction status set to settled');
         } catch (Exception $e) {
-            $this->logRepository->addDebugLog('place order', $e->getMessage());
-            return false;
+            $this->logRepository->addDebugLog('webhook - exception', $e->getMessage());
         }
-
-        return $order->getEntityId();
-    }
-
-    /**
-     * Make sure the quote is valid for order placement.
-     *
-     * Force setCustomerIsGuest; see issue: https://github.com/magento/magento2/issues/23908
-     *
-     * @param CartInterface $quote
-     *
-     * @return CartInterface
-     */
-    private function prepareQuote(CartInterface $quote, string $userId): CartInterface
-    {
-        if ($quote->getCustomerEmail() == null) {
-            $user = $this->userRepository->getByTruelayerId($userId);
-            $quote->setCustomerEmail($user['magento_email']);
-        }
-
-        $quote->setCustomerIsGuest($quote->getCustomerId() == null);
-        $quote->setIsActive(true);
-        $quote->getShippingAddress()->setCollectShippingRates(false);
-        $this->quoteRepository->save($quote);
-        return $quote;
     }
 
     /**

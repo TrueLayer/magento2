@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Model\Webapi;
 
 use Magento\Framework\Math\Random;
-use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
 use Magento\Checkout\Model\Session;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
@@ -88,6 +87,7 @@ class Checkout implements CheckoutInterface
      * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
      * @throws \TrueLayer\Exceptions\InvalidArgumentException
      * @throws \TrueLayer\Exceptions\SignerException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function getHppUrl(): string
     {
@@ -195,6 +195,7 @@ class Checkout implements CheckoutInterface
 
     /**
      * @return DataInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function getTransaction(): DataInterface
     {

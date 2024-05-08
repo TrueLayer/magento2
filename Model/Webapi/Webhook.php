@@ -123,7 +123,7 @@ class Webhook implements WebhookInterface
                 return 0;
             }
 
-            $transaction = $this->transactionRepository->getByUuid($postArray['payment_id']);
+            $transaction = $this->transactionRepository->getByPaymentUuid($postArray['payment_id']);
             if (!$quoteId = $transaction->getQuoteId()) {
                 return 0;
             }

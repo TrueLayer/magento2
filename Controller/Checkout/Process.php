@@ -52,6 +52,7 @@ class Process extends Action implements HttpGetActionInterface
     public function execute(): Redirect
     {
         $resultRedirect = $this->resultRedirectFactory->create();
+
         if (!$transactionId = $this->getRequest()->getParam('payment_id')) {
             $this->messageManager->addErrorMessage(__('Error in return data from TrueLayer'));
             $resultRedirect->setPath('checkout/cart/index');

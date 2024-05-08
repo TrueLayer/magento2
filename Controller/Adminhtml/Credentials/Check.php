@@ -16,7 +16,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Io\File;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Service\Api\GetClient;
+use TrueLayer\Connect\Service\Api\ClientFactory;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
 /**
@@ -31,9 +31,9 @@ class Check extends Action implements HttpPostActionInterface
      */
     private $directoryList;
     /**
-     * @var GetClient
+     * @var ClientFactory
      */
-    private $getClient;
+    private $clientFactory;
     /**
      * @var Json
      */
@@ -52,7 +52,7 @@ class Check extends Action implements HttpPostActionInterface
      *
      * @param Action\Context $context
      * @param JsonFactory $resultJsonFactory
-     * @param GetClient $getClient
+     * @param ClientFactory $clientFactory
      * @param ConfigRepository $configProvider
      * @param File $file
      * @param DirectoryList $directoryList
@@ -60,12 +60,12 @@ class Check extends Action implements HttpPostActionInterface
     public function __construct(
         Action\Context $context,
         JsonFactory $resultJsonFactory,
-        GetClient $getClient,
+        ClientFactory $clientFactory,
         ConfigRepository $configProvider,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->getClient = $getClient;
+        $this->clientFactory = $clientFactory;
         $this->resultJson = $resultJsonFactory->create();
         $this->configProvider = $configProvider;
         $this->file = $file;
@@ -106,7 +106,7 @@ class Check extends Action implements HttpPostActionInterface
             throw new LocalizedException(__('No Client Secret set!'));
         }
 
-        $result = $this->getClient->execute(
+        $result = $this->clientFactory->create(
             (int)$config['store_id'],
             ['credentials' => $config['credentials']]
         );

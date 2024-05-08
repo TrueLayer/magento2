@@ -36,7 +36,7 @@ class Pending implements PendingInterface
     public function checkOrderPlaced(string $token): bool
     {
         try {
-            $transaction = $this->transactionRepository->getByUuid($token);
+            $transaction = $this->transactionRepository->getByPaymentUuid($token);
             return (bool)$transaction->getOrderId();
         } catch (InputException|NoSuchEntityException $e) {
             return false;
