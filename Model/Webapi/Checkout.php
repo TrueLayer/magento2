@@ -10,6 +10,7 @@ namespace TrueLayer\Connect\Model\Webapi;
 use Magento\Framework\Math\Random;
 use Magento\Sales\Model\Order;
 use Magento\Checkout\Model\Session;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
@@ -23,6 +24,7 @@ use TrueLayer\Interfaces\Payment\PaymentCreatedInterface;
 class Checkout implements CheckoutInterface
 {
     private Order $order;
+    private OrderRepositoryInterface $orderRepository;
     private Random $mathRandom;
     private LogRepository $logRepository;
     private ConfigRepository $configRepository;
@@ -33,6 +35,7 @@ class Checkout implements CheckoutInterface
     /**
      * @param Random $mathRandom
      * @param Session $session
+     * @param OrderRepositoryInterface $orderRepository
      * @param LogRepository $logRepository
      * @param ConfigRepository $configRepository
      * @param TransactionRepository $transactionRepository
@@ -42,6 +45,7 @@ class Checkout implements CheckoutInterface
     public function __construct(
         Random $mathRandom,
         Session $session,
+        OrderRepositoryInterface $orderRepository,
         LogRepository $logRepository,
         ConfigRepository $configRepository,
         TransactionRepository $transactionRepository,
@@ -49,6 +53,7 @@ class Checkout implements CheckoutInterface
         ClientFactory $clientFactory
     ) {
         $this->order = $session->getLastRealOrder();
+        $this->orderRepository = $orderRepository;
         $this->mathRandom = $mathRandom;
         $this->logRepository = $logRepository;
         $this->configRepository = $configRepository;
@@ -63,10 +68,15 @@ class Checkout implements CheckoutInterface
     public function orderRequest()
     {
         try {
+            $hppUrl = $this->getHppUrl();
+            $this->order->setState(Order::STATE_PENDING_PAYMENT);
+            $this->order->setStatus(Order::STATE_PENDING_PAYMENT);
+            $this->orderRepository->save($this->order);
+
             return [
                 'response' => [
                     'success' => true,
-                    'payment_page_url' => $this->getHppUrl()
+                    'payment_page_url' => $hppUrl
                 ]
             ];
         } catch (\Exception $exception) {

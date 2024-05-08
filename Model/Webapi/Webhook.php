@@ -15,7 +15,8 @@ use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
-use TrueLayer\Connect\Service\Order\ProcessWebhook;
+use TrueLayer\Connect\Service\Order\ProcessFailedWebhook;
+use TrueLayer\Connect\Service\Order\ProcessSettledWebhook;
 use TrueLayer\Exceptions\Exception;
 use TrueLayer\Interfaces\Webhook as TrueLayerWebhookInterface;
 use TrueLayer\Webhook as TrueLayerWebhook;
@@ -25,41 +26,28 @@ use TrueLayer\Webhook as TrueLayerWebhook;
  */
 class Webhook implements WebhookInterface
 {
+    private LogRepository $logRepository;
 
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
-    /**
-     * @var ProcessWebhook
-     */
-    private $processWebhook;
-    /**
-     * @var ConfigRepository
-     */
-    private $configProvider;
-    /**
-     * @var JsonSerializer
-     */
-    private $jsonSerializer;
-    /**
-     * @var File
-     */
-    private $file;
-    /**
-     * @var TransactionRepository
-     */
-    private $transactionRepository;
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $quoteRepository;
+    private ProcessSettledWebhook $processSettledWebhook;
+
+    private ProcessFailedWebhook $processFailedWebhook;
+
+    private ConfigRepository $configProvider;
+
+    private JsonSerializer $jsonSerializer;
+
+    private File $file;
+
+    private TransactionRepository $transactionRepository;
+
+    private CartRepositoryInterface $quoteRepository;
 
     /**
      * Webhook constructor.
      *
      * @param LogRepository $logRepository
-     * @param ProcessWebhook $processWebhook
+     * @param ProcessSettledWebhook $processSettledWebhook
+     * @param ProcessFailedWebhook $processFailedWebhook
      * @param ConfigRepository $configProvider
      * @param JsonSerializer $jsonSerializer
      * @param File $file
@@ -67,16 +55,18 @@ class Webhook implements WebhookInterface
      * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
-        LogRepository $logRepository,
-        ProcessWebhook $processWebhook,
-        ConfigRepository $configProvider,
-        JsonSerializer $jsonSerializer,
-        File $file,
-        TransactionRepository $transactionRepository,
+        LogRepository           $logRepository,
+        ProcessSettledWebhook   $processSettledWebhook,
+        ProcessFailedWebhook    $processFailedWebhook,
+        ConfigRepository         $configProvider,
+        JsonSerializer          $jsonSerializer,
+        File                    $file,
+        TransactionRepository   $transactionRepository,
         CartRepositoryInterface $quoteRepository
     ) {
         $this->logRepository = $logRepository;
-        $this->processWebhook = $processWebhook;
+        $this->processSettledWebhook = $processSettledWebhook;
+        $this->processFailedWebhook = $processFailedWebhook;
         $this->configProvider = $configProvider;
         $this->jsonSerializer = $jsonSerializer;
         $this->file = $file;
@@ -85,29 +75,35 @@ class Webhook implements WebhookInterface
     }
 
     /**
-     * @inheritDoc
+     * @throws Exception
+     * @throws \ReflectionException
+     * @throws \TrueLayer\Exceptions\InvalidArgumentException
+     * @throws \TrueLayer\Exceptions\SignerException
+     * @throws \TrueLayer\Exceptions\WebhookHandlerException
+     * @throws \TrueLayer\Exceptions\WebhookHandlerInvalidArgumentException
      */
     public function processTransfer()
     {
         \TrueLayer\Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
+
         $webhook = TrueLayerWebhook::configure()
             ->useProduction(!$this->configProvider->isSandbox($this->getStoreId()))
-            ->create();
+            ->create()
+            ->handler(function (TrueLayerWebhookInterface\EventInterface $event) {
+                $this->logRepository->addDebugLog('Webhook', $event->getBody());
+            })
+            ->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
+                $this->processSettledWebhook->execute($event->getPaymentId());
+            })
+            ->handler(function (TrueLayerWebhookInterface\PaymentFailedEventInterface $event) {
+                $this->processFailedWebhook->execute($event->getPaymentId());
+            });
 
-        $webhook->handler(function (TrueLayerWebhookInterface\EventInterface $event) {
-            $this->logRepository->addDebugLog('Webhook', $event->getBody());
-        })->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
-            try {
-                $this->processWebhook->execute($event->getBody()['payment_id'], $event->getBody()['user_id']);
-            } catch (\Exception $exception) {
-                $this->logRepository->addErrorLog('Webhook processTransfer', $exception->getMessage());
-                throw new LocalizedException(__($exception->getMessage()));
-            }
-        });
         try {
             $webhook->execute();
         } catch (Exception $e) {
             $this->logRepository->addErrorLog('Webhook', $e->getMessage());
+            throw $e;
         }
     }
 

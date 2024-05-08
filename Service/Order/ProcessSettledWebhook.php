@@ -19,9 +19,9 @@ use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionReposito
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
 
 /**
- * Class ProcessWebhook
+ * Class ProcessSettledWebhook
  */
-class ProcessWebhook
+class ProcessSettledWebhook
 {
 
     public const SUCCESS_MSG = 'Order #%1 successfully captured on TrueLayer';
@@ -43,7 +43,7 @@ class ProcessWebhook
     private OrderInterface $orderInterface;
 
     /**
-     * ProcessWebhook constructor.
+     * ProcessSettledWebhook constructor.
      *
      * @param TransactionRepository $transactionRepository
      * @param OrderRepositoryInterface $orderRepository
@@ -75,14 +75,14 @@ class ProcessWebhook
     }
 
     /**
-     * Place order via webhook
-     *
      * @param string $uuid
-     * @param string $userId
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute(string $uuid, string $userId)
+    public function execute(string $uuid)
     {
-        $this->logRepository->addDebugLog('webhook - start processing ', $uuid);
+        $this->logRepository->addDebugLog('webhook - settled payment - start processing ', $uuid);
 
         try {
             $transaction = $this->transactionRepository->getByPaymentUuid($uuid);
@@ -122,11 +122,13 @@ class ProcessWebhook
 
             // Update transaction statis
             $transaction->setStatus('payment_settled');
+
             $this->transactionRepository->save($transaction);
             $this->transactionRepository->unlock($transaction);
             $this->logRepository->addDebugLog('webhook', 'transaction status set to settled');
         } catch (Exception $e) {
             $this->logRepository->addDebugLog('webhook - exception', $e->getMessage());
+            throw $e;
         }
     }
 

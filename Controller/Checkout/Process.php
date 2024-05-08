@@ -66,8 +66,8 @@ class Process extends Action implements HttpGetActionInterface
             } elseif (in_array($result['status'], ['settled', 'executed', 'authorized'])) {
                 $resultRedirect->setPath('truelayer/checkout/pending', ['payment_id' => $transactionId]);
             } else {
-                $this->messageManager->addErrorMessage('Something went wrong');
-                $resultRedirect->setPath('checkout/cart/index');
+                $this->messageManager->addErrorMessage($result['msg']);
+                $resultRedirect->setPath('checkout/onepage/failure');
             }
         } catch (\Exception $exception) {
             $this->logRepository->addErrorLog('Checkout Process', $exception->getMessage());
