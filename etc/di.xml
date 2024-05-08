@@ -131,9 +131,6 @@
         </arguments>
     </virtualType>
 
-    <type name="Magento\Quote\Model\ChangeQuoteControl">
-        <plugin name="truelayer-quote-control" type="TrueLayer\Connect\Plugin\Quote\ChangeQuoteControl" sortOrder="1" disabled="false" />
-    </type>
     <type name="Magento\Payment\Model\MethodList">
         <plugin name="restrict_payment_on_grandtotal" type="TrueLayer\Connect\Plugin\Payment\MethodList" sortOrder="1" disabled="false"/>
     </type>

@@ -40,8 +40,6 @@ class ProcessSettledWebhook
 
     private UserRepository $userRepository;
 
-    private OrderInterface $orderInterface;
-
     /**
      * ProcessSettledWebhook constructor.
      *
@@ -52,7 +50,6 @@ class ProcessSettledWebhook
      * @param ConfigRepository $configRepository
      * @param LogRepository $logRepository
      * @param UserRepository $userRepository
-     * @param OrderInterface $orderInterface
      */
     public function __construct(
         TransactionRepository $transactionRepository,
@@ -61,8 +58,7 @@ class ProcessSettledWebhook
         InvoiceSender $invoiceSender,
         ConfigRepository $configRepository,
         LogRepository $logRepository,
-        UserRepository $userRepository,
-        OrderInterface $orderInterface
+        UserRepository $userRepository
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->orderRepository = $orderRepository;
@@ -71,7 +67,6 @@ class ProcessSettledWebhook
         $this->configRepository = $configRepository;
         $this->logRepository = $logRepository;
         $this->userRepository = $userRepository;
-        $this->orderInterface = $orderInterface;
     }
 
     /**
@@ -89,11 +84,11 @@ class ProcessSettledWebhook
 
             $this->logRepository->addDebugLog('webhook', [
                 'transaction id' => $transaction->getEntityId(),
-                'quote id' => $transaction->getQuoteId(),
+                'order id' => $transaction->getOrderId(),
             ]);
 
-            if (!$transaction->getQuoteId()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, no quote found');
+            if (!$transaction->getOrderId()) {
+                $this->logRepository->addDebugLog('webhook', 'aborting, no order found');
                 return;
             }
 
@@ -104,7 +99,7 @@ class ProcessSettledWebhook
 
             $this->logRepository->addDebugLog('webhook', 'locking transaction and starting order update');
             $this->transactionRepository->lock($transaction);
-            $order = $this->orderInterface->loadByAttribute('quote_id', $transaction->getQuoteId());
+            $order = $this->orderRepository->get($transaction->getOrderId());
 
             // Update payment and order status
             $payment = $order->getPayment();

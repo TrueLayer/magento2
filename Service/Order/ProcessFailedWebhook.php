@@ -20,12 +20,8 @@ use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionReposito
 class ProcessFailedWebhook
 {
     private TransactionRepository $transactionRepository;
-
     private OrderRepositoryInterface $orderRepository;
-
     private LogRepository $logRepository;
-
-    private OrderInterface $orderInterface;
 
     /**
      * ProcessFailedWebhook constructor.
@@ -33,18 +29,15 @@ class ProcessFailedWebhook
      * @param TransactionRepository $transactionRepository
      * @param OrderRepositoryInterface $orderRepository
      * @param LogRepository $logRepository
-     * @param OrderInterface $orderInterface
      */
     public function __construct(
         TransactionRepository $transactionRepository,
         OrderRepositoryInterface $orderRepository,
         LogRepository $logRepository,
-        OrderInterface $orderInterface
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->orderRepository = $orderRepository;
         $this->logRepository = $logRepository;
-        $this->orderInterface = $orderInterface;
     }
 
     /**
@@ -62,11 +55,11 @@ class ProcessFailedWebhook
 
             $this->logRepository->addDebugLog('webhook', [
                 'transaction id' => $transaction->getEntityId(),
-                'quote id' => $transaction->getQuoteId(),
+                'order id' => $transaction->getOrderId(),
             ]);
 
-            if (!$transaction->getQuoteId()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, no quote found');
+            if (!$transaction->getOrderId()) {
+                $this->logRepository->addDebugLog('webhook', 'aborting, no order found');
                 return;
             }
 
@@ -77,7 +70,7 @@ class ProcessFailedWebhook
 
             $this->logRepository->addDebugLog('webhook', 'locking transaction and starting order deletion');
             $this->transactionRepository->lock($transaction);
-            $order = $this->orderInterface->loadByAttribute('quote_id', $transaction->getQuoteId());
+            $order = $this->orderRepository->get($transaction->getOrderId());
             $order->setState(Order::STATE_CANCELED)->setStatus(Order::STATE_CANCELED);
             $this->orderRepository->save($order);
 

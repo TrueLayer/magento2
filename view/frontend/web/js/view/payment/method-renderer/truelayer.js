@@ -8,15 +8,11 @@ define(
     [
         'jquery',
         'Magento_Checkout/js/view/payment/default',
-        'mage/url',
-        'Magento_Customer/js/customer-data',
         'Magento_Checkout/js/model/error-processor',
         'Magento_Checkout/js/model/full-screen-loader',
     ],
-    function ($, Component, url, customerData, errorProcessor, fullScreenLoader) {
+    function ($, Component, errorProcessor, fullScreenLoader) {
         'use strict';
-
-        var payload = '';
 
         return Component.extend({
             redirectAfterPlaceOrder: false,
@@ -35,15 +31,10 @@ define(
                 $.ajax({
                     url: '/rest/V1/truelayer/order-request',
                     type: 'POST',
-                    data: JSON.stringify({
-                        isLoggedIn: true,
-                        cartId: '', // @todo Find out where validation happens and drop params
-                    }),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json"
                 })
                     .done(function (response) {
-                        //customerData.invalidate(['cart']);
                         if (response[0].success) {
                             window.location.replace(response[0].payment_page_url);
                         } else {
