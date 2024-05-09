@@ -120,7 +120,7 @@ class ProcessReturn
         if (!$order->getEntityId()) {
             if ($transactionStatus == 'settled' || $transactionStatus == 'executed') {
                 return ['success' => false, 'status' => $transactionStatus];
-            } 
+            }
         }
 
         switch ($transactionStatus) {
