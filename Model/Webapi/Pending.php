@@ -37,7 +37,7 @@ class Pending implements PendingInterface
     {
         try {
             $transaction = $this->transactionRepository->getByPaymentUuid($token);
-            return (bool)$transaction->getOrderId();
+            return $transaction->getStatus() === 'payment_settled';
         } catch (InputException|NoSuchEntityException $e) {
             return false;
         }

@@ -25,7 +25,7 @@ class OrderPlacedHandler implements ObserverInterface
      */
     public function __construct(
         OrderRepositoryInterface $orderRepository,
-        LogRepository $logRepository,
+        LogRepository $logRepository
     ) {
         $this->orderRepository = $orderRepository;
         $this->logRepository = $logRepository;
