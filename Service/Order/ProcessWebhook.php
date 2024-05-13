@@ -200,7 +200,6 @@ class ProcessWebhook
 
         $quote->setCustomerIsGuest($quote->getCustomerId() == null);
         $quote->setIsActive(true);
-        $quote->getShippingAddress()->setCollectShippingRates(false);
         $this->quoteRepository->save($quote);
         return $quote;
     }

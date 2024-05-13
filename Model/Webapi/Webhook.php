@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Model\Webapi;
 
+use Magento\Framework\App\Area;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Model\App\Emulation;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
@@ -54,6 +56,14 @@ class Webhook implements WebhookInterface
      * @var CartRepositoryInterface
      */
     private $quoteRepository;
+    /**
+     * @var Emulation
+     */
+    private $appEmulation;
+    /**
+     * @var int|null
+     */
+    private $storeId = null;
 
     /**
      * Webhook constructor.
@@ -65,6 +75,7 @@ class Webhook implements WebhookInterface
      * @param File $file
      * @param TransactionRepository $transactionRepository
      * @param CartRepositoryInterface $quoteRepository
+     * @param Emulation $appEmulation
      */
     public function __construct(
         LogRepository $logRepository,
@@ -73,7 +84,8 @@ class Webhook implements WebhookInterface
         JsonSerializer $jsonSerializer,
         File $file,
         TransactionRepository $transactionRepository,
-        CartRepositoryInterface $quoteRepository
+        CartRepositoryInterface $quoteRepository,
+        Emulation $appEmulation
     ) {
         $this->logRepository = $logRepository;
         $this->processWebhook = $processWebhook;
@@ -82,6 +94,7 @@ class Webhook implements WebhookInterface
         $this->file = $file;
         $this->transactionRepository = $transactionRepository;
         $this->quoteRepository = $quoteRepository;
+        $this->appEmulation = $appEmulation;
     }
 
     /**
@@ -98,10 +111,13 @@ class Webhook implements WebhookInterface
             $this->logRepository->addDebugLog('Webhook', $event->getBody());
         })->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
             try {
+                $this->appEmulation->startEnvironmentEmulation($this->getStoreId(), Area::AREA_FRONTEND, true);
                 $this->processWebhook->execute($event->getBody()['payment_id'], $event->getBody()['user_id']);
             } catch (\Exception $exception) {
                 $this->logRepository->addErrorLog('Webhook processTransfer', $exception->getMessage());
                 throw new LocalizedException(__($exception->getMessage()));
+            } finally {
+                $this->appEmulation->stopEnvironmentEmulation();
             }
         });
         try {
@@ -116,24 +132,30 @@ class Webhook implements WebhookInterface
      */
     private function getStoreId(): int
     {
-        try {
-            $post = $this->file->fileGetContents('php://input');
-            $postArray = $this->jsonSerializer->unserialize($post);
-            if (!isset($postArray['payment_id']) || !$this->isValidUuid((string)$postArray['payment_id'])) {
-                return 0;
-            }
+        if ($this->storeId === null) {
+            try {
+                $post = $this->file->fileGetContents('php://input');
+                $postArray = $this->jsonSerializer->unserialize($post);
+                if (!isset($postArray['payment_id']) || !$this->isValidUuid((string)$postArray['payment_id'])) {
+                    $this->storeId = 0;
+                    return $this->storeId;
+                }
 
-            $transaction = $this->transactionRepository->getByUuid($postArray['payment_id']);
-            if (!$quoteId = $transaction->getQuoteId()) {
-                return 0;
-            }
+                $transaction = $this->transactionRepository->getByUuid($postArray['payment_id']);
+                if (!$quoteId = $transaction->getQuoteId()) {
+                    $this->storeId = 0;
+                    return $this->storeId;
+                }
 
-            $quote = $this->quoteRepository->get($quoteId);
-            return $quote->getStoreId();
-        } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('Webhook processTransfer postData', $exception->getMessage());
-            return 0;
+                $quote = $this->quoteRepository->get($quoteId);
+                $this->storeId = $quote->getStoreId();
+            } catch (\Exception $exception) {
+                $this->logRepository->addErrorLog('Webhook processTransfer postData', $exception->getMessage());
+                $this->storeId = 0;
+                return $this->storeId;
+            }
         }
+        return $this->storeId;
     }
 
     /**
