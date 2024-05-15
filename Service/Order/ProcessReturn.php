@@ -15,6 +15,7 @@ use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Quote\Api\CartManagementInterface;
 use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Service\Api\GetClient;
@@ -58,6 +59,10 @@ class ProcessReturn
      * @var LogRepository
      */
     private $logger;
+    /**
+     * @var CartManagementInterface
+     */
+    private $cartManagement;
 
     /**
      * ProcessReturn constructor.
@@ -76,6 +81,7 @@ class ProcessReturn
         CartRepositoryInterface $quoteRepository,
         OrderInterface $orderInterface,
         OrderRepositoryInterface $orderRepository,
+        CartManagementInterface $cartManagement,
         TransactionRepository $transactionRepository,
         LogRepository $logger
     ) {
@@ -84,6 +90,7 @@ class ProcessReturn
         $this->quoteRepository = $quoteRepository;
         $this->orderInterface = $orderInterface;
         $this->orderRepository = $orderRepository;
+        $this->cartManagement = $cartManagement;
         $this->transactionRepository = $transactionRepository;
         $this->logger = $logger;
     }
@@ -113,9 +120,6 @@ class ProcessReturn
         if (!$order->getEntityId()) {
             if ($transactionStatus == 'settled' || $transactionStatus == 'executed') {
                 return ['success' => false, 'status' => $transactionStatus];
-            } else {
-                $quote->setIsActive(true);
-                $this->quoteRepository->save($quote);
             }
         }
 
@@ -142,7 +146,7 @@ class ProcessReturn
     /**
      * @param CartInterface $quote
      * @param Order $order
-     * @return void
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     private function updateCheckoutSession(CartInterface $quote, Order $order): void
     {
@@ -153,6 +157,7 @@ class ProcessReturn
             try {
                 $activeQuote = $this->quoteRepository->getActiveForCustomer($customerId);
                 $this->quoteRepository->delete($activeQuote);
+                $this->cartManagement->createEmptyCartForCustomer($customerId);
             } catch (NoSuchEntityException $e) {
                 $this->logger->addErrorLog('Remove customer quote', $e->getMessage());
             }
