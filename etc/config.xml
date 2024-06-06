@@ -14,6 +14,7 @@
                 <model>TrueLayerFacade</model>
                 <title>TrueLayer</title>
                 <description>Pay using TrueLayer</description>
+                <show_description>0</show_description>
                 <active>0</active>
                 <payment_action>authorize</payment_action>
                 <can_use_checkout>1</can_use_checkout>

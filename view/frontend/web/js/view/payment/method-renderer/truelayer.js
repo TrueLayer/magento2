@@ -108,6 +108,20 @@ define(
                     message: message
                 });
             },
+
+            /**
+             * Get payment method description.
+             */
+            getDescription: function () {
+                return window.checkoutConfig.payment[this.getCode()].description;
+            },
+            /**
+             * Get show description of payment method during checkout flag
+             */
+            getShowDescription: function () {
+                return window.checkoutConfig.payment[this.getCode()].showDescription;
+                // return this.item.title;
+            },
         });
     }
 );

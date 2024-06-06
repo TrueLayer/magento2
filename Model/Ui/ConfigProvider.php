@@ -8,12 +8,23 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Model\Ui;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
+use TrueLayer\Connect\Model\Config\System\SettingsRepository;
 
 /**
  * Payment Config Provider
  */
 class ConfigProvider implements ConfigProviderInterface
 {
+    /**
+     * @var SettingsRepository
+     */
+    private $settingsRepository;
+
+    public function __construct(
+        SettingsRepository $settingsRepository
+    ) {
+        $this->settingsRepository = $settingsRepository;
+    }
     public const CODE = 'truelayer';
 
     /**
@@ -23,9 +34,17 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig(): array
     {
+        $showDescription = $this->settingsRepository->getShowDescription();
+        $description = $this->settingsRepository->getDescription();
+
+        $config = [
+            'description' => $description,
+            'showDescription' => $showDescription
+        ];
+
         return [
             'payment' => [
-                self::CODE => []
+                self::CODE => $config
             ]
         ];
     }
