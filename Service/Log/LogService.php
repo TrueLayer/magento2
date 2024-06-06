@@ -5,26 +5,31 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Model\Log;
+namespace TrueLayer\Connect\Service\Log;
 
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepositoryInterface;
+use TrueLayer\Connect\Api\Log\LogService as LogRepositoryInterface;
 use TrueLayer\Connect\Logger\DebugLogger;
 use TrueLayer\Connect\Logger\ErrorLogger;
 
 /**
  * Logs repository class
  */
-class Repository implements LogRepositoryInterface
+class LogService implements LogRepositoryInterface
 {
-
     /**
      * @var DebugLogger
      */
-    private $debugLogger;
+    private DebugLogger $debugLogger;
+
     /**
      * @var ErrorLogger
      */
-    private $errorLogger;
+    private ErrorLogger $errorLogger;
+
+    /**
+     * @var string
+     */
+    private string $prefix = '';
 
     /**
      * Repository constructor.
@@ -43,16 +48,30 @@ class Repository implements LogRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function addErrorLog(string $type, $data): void
+    public function error(string $type, $data = ''): self
     {
-        $this->errorLogger->addLog($type, $data);
+        $this->errorLogger->addLog("[$this->prefix $type]", $data);
+
+        return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function addDebugLog(string $type, $data): void
+    public function debug(string $type, $data = ''): self
     {
-        $this->debugLogger->addLog($type, $data);
+        $this->debugLogger->addLog("[$this->prefix $type]", $data);
+
+        return $this;
+    }
+
+    /**
+     * @inheriDoc
+     */
+    public function prefix(string $prefix): self
+    {
+        $this->prefix = $prefix;
+
+        return $this;
     }
 }

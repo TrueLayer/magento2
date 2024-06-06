@@ -9,8 +9,8 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="TrueLayer\Connect\Api\Config\RepositoryInterface"
                 type="TrueLayer\Connect\Model\Config\Repository"/>
-    <preference for="TrueLayer\Connect\Api\Log\RepositoryInterface"
-                type="TrueLayer\Connect\Model\Log\Repository"/>
+    <preference for="TrueLayer\Connect\Api\Log\LogService"
+                type="TrueLayer\Connect\Service\Log\LogService"/>
     <preference for="TrueLayer\Connect\Api\Webapi\CheckoutInterface"
                 type="TrueLayer\Connect\Model\Webapi\Checkout" />
     <preference for="TrueLayer\Connect\Api\Transaction\Data\DataInterface"
@@ -26,19 +26,20 @@
     <preference for="TrueLayer\Connect\Api\User\RepositoryInterface"
                 type="TrueLayer\Connect\Model\User\Repository" />
 
-    <type name="TrueLayer\Connect\Logger\ErrorLogger">
+    <type name="TrueLayer\Connect\Service\Log\ErrorLogger">
         <arguments>
             <argument name="name" xsi:type="string">TrueLayerError</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">TrueLayer\Connect\Logger\Handler\Error</item>
+                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\Handler\Error</item>
             </argument>
         </arguments>
     </type>
-    <type name="TrueLayer\Connect\Logger\DebugLogger">
+
+    <type name="TrueLayer\Connect\Service\Log\DebugLogger">
         <arguments>
             <argument name="name" xsi:type="string">TrueLayerDebug</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">TrueLayer\Connect\Logger\Handler\Debug</item>
+                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\Handler\Debug</item>
             </argument>
         </arguments>
     </type>
@@ -57,39 +58,16 @@
     <virtualType name="TrueLayerCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">TrueLayerInitializeCommand</item>
-                <item name="refund" xsi:type="string">TrueLayerRefundCommand</item>
-                <item name="cancel" xsi:type="string">TrueLayerCancelCommand</item>
-                <item name="void" xsi:type="string">TrueLayerCancelCommand</item>
+                <item name="create_payment" xsi:type="string">TrueLayerCreatePaymentCommand</item>
+                <item name="authorize" xsi:type="string">TrueLayerAuthorizePaymentCommand</item>
+                <item name="refund" xsi:type="string">TrueLayerRefundPaymentCommand</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TrueLayerInitializeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">TrueLayerInitializeRequestBuilder</argument>
-            <argument name="transferFactory" xsi:type="object">TrueLayer\Connect\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">TrueLayer\Connect\Gateway\Http\Client\GenericClient</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TrueLayerRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">TrueLayer\Connect\Gateway\Request\RefundRequest</argument>
-            <argument name="transferFactory" xsi:type="object">TrueLayer\Connect\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">TrueLayer\Connect\Gateway\Http\Client\GenericClient</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TrueLayerCancelCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">TrueLayer\Connect\Gateway\Request\CancelRequest</argument>
-            <argument name="transferFactory" xsi:type="object">TrueLayer\Connect\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">TrueLayer\Connect\Gateway\Http\Client\GenericClient</argument>
-        </arguments>
-    </virtualType>
-
-    <virtualType name="TrueLayerInitializeRequestBuilder" type="Magento\Payment\Gateway\Request\BuilderComposite" />
+    <virtualType name="TrueLayerCreatePaymentCommand" type="TrueLayer\Connect\Gateway\Command\CreatePaymentCommand" />
+    <virtualType name="TrueLayerAuthorizePaymentCommand" type="TrueLayer\Connect\Gateway\Command\AuthorizePaymentCommand" />
+    <virtualType name="TrueLayerRefundPaymentCommand" type="TrueLayer\Connect\Gateway\Command\RefundPaymentCommand" />
 
     <virtualType name="TrueLayerValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>

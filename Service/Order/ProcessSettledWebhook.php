@@ -14,7 +14,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
 
@@ -77,27 +77,27 @@ class ProcessSettledWebhook
      */
     public function execute(string $uuid)
     {
-        $this->logRepository->addDebugLog('webhook - settled payment - start processing ', $uuid);
+        $this->logRepository->debug('webhook - settled payment - start processing ', $uuid);
 
         try {
             $transaction = $this->transactionRepository->getByPaymentUuid($uuid);
 
-            $this->logRepository->addDebugLog('webhook', [
+            $this->logRepository->debug('webhook', [
                 'transaction id' => $transaction->getEntityId(),
                 'order id' => $transaction->getOrderId(),
             ]);
 
             if (!$transaction->getOrderId()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, no order found');
+                $this->logRepository->debug('webhook', 'aborting, no order found');
                 return;
             }
 
             if ($transaction->getIsLocked()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, transaction is locked');
+                $this->logRepository->debug('webhook', 'aborting, transaction is locked');
                 return;
             }
 
-            $this->logRepository->addDebugLog('webhook', 'locking transaction and starting order update');
+            $this->logRepository->debug('webhook', 'locking transaction and starting order update');
             $this->transactionRepository->lock($transaction);
             $order = $this->orderRepository->get($transaction->getOrderId());
 
@@ -108,21 +108,21 @@ class ProcessSettledWebhook
             $payment->registerCaptureNotification($order->getGrandTotal(), true);
             $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
             $this->orderRepository->save($order);
-            $this->logRepository->addDebugLog('webhook', 'payment and order statuses updated');
+            $this->logRepository->debug('webhook', 'payment and order statuses updated');
 
             // Send emails
             $this->sendOrderEmail($order);
             $this->sendInvoiceEmail($order);
-            $this->logRepository->addDebugLog('webhook', 'emails sent');
+            $this->logRepository->debug('webhook', 'emails sent');
 
             // Update transaction statis
             $transaction->setStatus('payment_settled');
 
             $this->transactionRepository->save($transaction);
             $this->transactionRepository->unlock($transaction);
-            $this->logRepository->addDebugLog('webhook', 'transaction status set to settled');
+            $this->logRepository->debug('webhook', 'transaction status set to settled');
         } catch (Exception $e) {
-            $this->logRepository->addDebugLog('webhook - exception', $e->getMessage());
+            $this->logRepository->debug('webhook - exception', $e->getMessage());
             throw $e;
         }
     }

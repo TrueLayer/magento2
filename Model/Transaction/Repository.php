@@ -12,7 +12,7 @@ use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
 use TrueLayer\Connect\Api\Transaction\Data\DataInterfaceFactory;
 use TrueLayer\Connect\Api\Transaction\Data\SearchResultsInterface;
@@ -123,7 +123,7 @@ class Repository implements RepositoryInterface
         try {
             $this->resource->delete($entity);
         } catch (\Exception $exception) {
-            $this->logger->addErrorLog('Quote repository', $exception->getMessage());
+            $this->logger->error('Quote repository', $exception->getMessage());
             $exceptionMsg = self::COULD_NOT_DELETE_EXCEPTION;
             throw new CouldNotDeleteException(__(
                 $exceptionMsg,
@@ -251,7 +251,7 @@ class Repository implements RepositoryInterface
         try {
             $this->resource->save($entity);
         } catch (\Exception $exception) {
-            $this->logger->addErrorLog('Quote repository', $exception->getMessage());
+            $this->logger->error('Quote repository', $exception->getMessage());
             $exceptionMsg = self::COULD_NOT_SAVE_EXCEPTION;
             throw new CouldNotSaveException(__(
                 $exceptionMsg,

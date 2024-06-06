@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Logger;
+namespace TrueLayer\Connect\Service\Log;
 
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigProvider;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -16,15 +16,15 @@ use Monolog\Logger;
  */
 class DebugLogger extends Logger
 {
-
     /**
      * @var Json
      */
-    private $json;
+    private Json $json;
+
     /**
      * @var ConfigProvider
      */
-    private $configProvider;
+    private ConfigProvider $configProvider;
 
     /**
      * DebugLogger constructor.
@@ -48,7 +48,7 @@ class DebugLogger extends Logger
     }
 
     /**
-     * Add debug data to truelayer Log
+     * Add log entry
      *
      * @param string $type
      * @param mixed $data
@@ -59,10 +59,27 @@ class DebugLogger extends Logger
             return;
         }
 
-        if (is_array($data) || is_object($data)) {
-            $this->addRecord(static::INFO, $type . ': ' . $this->json->serialize($data));
-        } else {
-            $this->addRecord(static::INFO, $type . ': ' . $data);
+        $this->addRecord(static::INFO, $type . ': ' . $this->convertDataToString($data));
+    }
+
+    /**
+     * @param $data
+     * @return string
+     */
+    private function convertDataToString($data): string
+    {
+        if (is_string($data)) {
+            return $data;
         }
+
+        if ($data instanceof \Exception) {
+            return $data->getMessage() . " " . $data->getTraceAsString();
+        }
+
+        if (is_array($data) || is_object($data)) {
+            return $this->json->serialize($data);
+        }
+
+        return 'failed to serialize error message';
     }
 }

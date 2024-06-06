@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Logger;
+namespace TrueLayer\Connect\Service\Log;
 
 use Magento\Framework\Serialize\Serializer\Json;
 use Monolog\Logger;

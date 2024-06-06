@@ -12,7 +12,7 @@ use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\Quote\Api\CartRepositoryInterface;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
 use TrueLayer\Connect\Service\Order\ProcessFailedWebhook;
@@ -90,7 +90,7 @@ class Webhook implements WebhookInterface
             ->useProduction(!$this->configProvider->isSandbox($this->getStoreId()))
             ->create()
             ->handler(function (TrueLayerWebhookInterface\EventInterface $event) {
-                $this->logRepository->addDebugLog('Webhook', $event->getBody());
+                $this->logRepository->debug('Webhook', $event->getBody());
             })
             ->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
                 $this->processSettledWebhook->execute($event->getPaymentId());
@@ -102,7 +102,7 @@ class Webhook implements WebhookInterface
         try {
             $webhook->execute();
         } catch (Exception $e) {
-            $this->logRepository->addErrorLog('Webhook', $e->getMessage());
+            $this->logRepository->error('Webhook', $e->getMessage());
             throw $e;
         }
     }
@@ -127,7 +127,7 @@ class Webhook implements WebhookInterface
             $quote = $this->quoteRepository->get($quoteId);
             return $quote->getStoreId();
         } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('Webhook processTransfer postData', $exception->getMessage());
+            $this->logRepository->error('Webhook processTransfer postData', $exception->getMessage());
             return 0;
         }
     }

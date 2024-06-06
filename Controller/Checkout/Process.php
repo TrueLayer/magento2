@@ -11,7 +11,7 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\Redirect;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Service\Order\ProcessReturn;
 
 /**
@@ -70,7 +70,7 @@ class Process extends Action implements HttpGetActionInterface
                 $resultRedirect->setPath('checkout/onepage/failure');
             }
         } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('Checkout Process', $exception->getMessage());
+            $this->logRepository->error('Checkout Process', $exception->getMessage());
             $this->messageManager->addErrorMessage('Error processing payment');
             $resultRedirect->setPath('checkout/cart/index');
         }

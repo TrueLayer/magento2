@@ -9,7 +9,7 @@ namespace TrueLayer\Connect\Service\Api;
 
 use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
 /**
@@ -65,6 +65,7 @@ class ClientFactory
 
     /**
      * @return ClientInterface|null
+     * @throws \TrueLayer\Exceptions\SignerException
      */
     private function getClient(): ?ClientInterface
     {
@@ -79,8 +80,8 @@ class ClientFactory
 
             return $client->create();
         } catch (\Exception $e) {
-            $this->logRepository->addDebugLog('Get Client', $e->getMessage());
-            return null;
+            $this->logRepository->debug('Get Client', $e->getMessage());
+            throw $e;
         }
     }
 }

@@ -11,7 +11,7 @@ use Exception;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 
 /**
@@ -48,27 +48,27 @@ class ProcessFailedWebhook
      */
     public function execute(string $uuid)
     {
-        $this->logRepository->addDebugLog('webhook - failed payment - start processing ', $uuid);
+        $this->logRepository->debug('webhook - failed payment - start processing ', $uuid);
 
         try {
             $transaction = $this->transactionRepository->getByPaymentUuid($uuid);
 
-            $this->logRepository->addDebugLog('webhook', [
+            $this->logRepository->debug('webhook', [
                 'transaction id' => $transaction->getEntityId(),
                 'order id' => $transaction->getOrderId(),
             ]);
 
             if (!$transaction->getOrderId()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, no order found');
+                $this->logRepository->debug('webhook', 'aborting, no order found');
                 return;
             }
 
             if ($transaction->getIsLocked()) {
-                $this->logRepository->addDebugLog('webhook', 'aborting, transaction is locked');
+                $this->logRepository->debug('webhook', 'aborting, transaction is locked');
                 return;
             }
 
-            $this->logRepository->addDebugLog('webhook', 'locking transaction and starting order deletion');
+            $this->logRepository->debug('webhook', 'locking transaction and starting order deletion');
             $this->transactionRepository->lock($transaction);
             $order = $this->orderRepository->get($transaction->getOrderId());
             $order->setState(Order::STATE_CANCELED)->setStatus(Order::STATE_CANCELED);
@@ -77,9 +77,9 @@ class ProcessFailedWebhook
             // Update transaction status
             $transaction->setStatus('payment_failed');
             $this->transactionRepository->unlock($transaction);
-            $this->logRepository->addDebugLog('webhook', 'transaction status set to failed');
+            $this->logRepository->debug('webhook', 'transaction status set to failed');
         } catch (Exception $e) {
-            $this->logRepository->addDebugLog('webhook - exception', $e->getMessage());
+            $this->logRepository->debug('webhook - exception', $e->getMessage());
             throw $e;
         }
     }

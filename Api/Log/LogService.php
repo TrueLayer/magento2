@@ -11,16 +11,15 @@ namespace TrueLayer\Connect\Api\Log;
  * Log repository interface
  * @api
  */
-interface RepositoryInterface
+interface LogService
 {
-
     /**
      * Add record to error log
      *
      * @param string $type
      * @param mixed $data
      */
-    public function addErrorLog(string $type, $data): void;
+    public function error(string $type, $data): LogService;
 
     /**
      * Add record to debug log
@@ -28,5 +27,10 @@ interface RepositoryInterface
      * @param string $type
      * @param mixed $data
      */
-    public function addDebugLog(string $type, $data): void;
+    public function debug(string $type, $data): LogService;
+
+    /**
+     * @param string $prefix
+     */
+    public function prefix(string $prefix): LogService;
 }

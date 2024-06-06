@@ -5,97 +5,90 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Model\Webapi;
+namespace TrueLayer\Connect\Service\Order;
 
-use Magento\Framework\Math\Random;
-use Magento\Sales\Model\Order;
-use Magento\Checkout\Model\Session;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
+use Magento\Framework\Exception\Plugin\AuthenticationException;
+use Magento\Sales\Api\Data\OrderInterface;
 use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Api\Webapi\CheckoutInterface;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
+use TrueLayer\Connect\Service\Api\ClientFactory;
+use TrueLayer\Connect\Service\Log\LogService;
 use TrueLayer\Interfaces\Client\ClientInterface;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Service\Api\ClientFactory;
 use TrueLayer\Interfaces\Payment\PaymentCreatedInterface;
 
-class Checkout implements CheckoutInterface
+class PaymentCreationService
 {
-    private Order $order;
-    private Random $mathRandom;
-    private LogRepository $logRepository;
-    private ConfigRepository $configRepository;
-    private TransactionRepository $transactionRepository;
-    private UserRepository $userRepository;
+    /**
+     * @var ClientFactory
+     */
     private ClientFactory $clientFactory;
 
     /**
-     * @param Random $mathRandom
-     * @param Session $session
-     * @param LogRepository $logRepository
+     * @var ConfigRepository
+     */
+    private ConfigRepository $configRepository;
+
+    /**
+     * @var TransactionRepository
+     */
+    private TransactionRepository $transactionRepository;
+
+    /**
+     * @var UserRepository
+     */
+    private UserRepository $userRepository;
+
+    /**
+     * @var LogService
+     */
+    private LogService $logger;
+
+    /**
+     * @param ClientFactory $clientFactory
      * @param ConfigRepository $configRepository
      * @param TransactionRepository $transactionRepository
      * @param UserRepository $userRepository
-     * @param ClientFactory $clientFactory
+     * @param LogService $logger
      */
     public function __construct(
-        Random $mathRandom,
-        Session $session,
-        LogRepository $logRepository,
+        ClientFactory $clientFactory,
         ConfigRepository $configRepository,
         TransactionRepository $transactionRepository,
         UserRepository $userRepository,
-        ClientFactory $clientFactory
+        LogService $logger
     ) {
-        $this->order = $session->getLastRealOrder();
-        $this->mathRandom = $mathRandom;
-        $this->logRepository = $logRepository;
+        $this->clientFactory = $clientFactory;
         $this->configRepository = $configRepository;
         $this->transactionRepository = $transactionRepository;
         $this->userRepository = $userRepository;
-        $this->clientFactory = $clientFactory;
+        $this->logger = $logger->prefix('PaymentCreationService');
     }
 
     /**
-     * @inheritDoc
-     */
-    public function orderRequest()
-    {
-        try {
-            return [
-                'response' => [
-                    'success' => true,
-                    'payment_page_url' => $this->getHppUrl()
-                ]
-            ];
-        } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('Checkout endpoint', $exception->getMessage());
-            
-            return [
-                'response' => [
-                    'success' => false,
-                    'message' => $exception->getMessage()
-                ]
-            ];
-        }
-    }
-
-    /**
-     * @return string
+     * @param OrderInterface $order
+     * @return PaymentCreatedInterface
+     * @throws AuthenticationException
      * @throws \TrueLayer\Exceptions\ApiRequestJsonSerializationException
      * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
      * @throws \TrueLayer\Exceptions\InvalidArgumentException
      * @throws \TrueLayer\Exceptions\SignerException
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getHppUrl(): string
+    public function createPayment(OrderInterface $order): PaymentCreatedInterface
     {
-        // Create the payment with a TL user id if we recognise the email address
-        $customerEmail = $this->order->getBillingAddress()->getEmail() ?: $this->order->getCustomerEmail();
+        $this->logger->debug('Start payment creation', ['order' => $order->getEntityId()]);
 
+        // Get the TL user id if we recognise the email address
+        $customerEmail = $order->getBillingAddress()->getEmail() ?: $order->getCustomerEmail();
         $existingUser = $this->userRepository->get($customerEmail);
-        $payment = $this->createPayment($customerEmail, $existingUser["truelayer_id"] ?? null);
+        $existingUserId = $existingUser["truelayer_id"] ?? null;
+
+        // Create the TL payment
+        $client = $this->clientFactory->create((int) $order->getStoreId());
+        $merchantAccountId = $this->getMerchantAccountId($client);
+        $paymentConfig = $this->createPaymentConfig($order, $merchantAccountId, $customerEmail, $existingUserId);
+        $payment = $client->payment()->fill($paymentConfig)->create();
 
         // If new user, we save it
         if (!$existingUser) {
@@ -106,42 +99,26 @@ class Checkout implements CheckoutInterface
         $transaction = $this->getTransaction()->setPaymentUuid($payment->getId());
         $this->transactionRepository->save($transaction);
 
-        return $payment->hostedPaymentsPage()
-            ->returnUri($this->configRepository->getBaseUrl() . 'truelayer/checkout/process/')
-            ->primaryColour($this->configRepository->getPaymentPagePrimaryColor())
-            ->secondaryColour($this->configRepository->getPaymentPageSecondaryColor())
-            ->tertiaryColour($this->configRepository->getPaymentPageTertiaryColor())
-            ->toUrl();
+        return $payment;
     }
 
     /**
+     * @param OrderInterface $order
+     * @param string $merchantAccId
      * @param string $customerEmail
      * @param string|null $existingUserId
-     * @return PaymentCreatedInterface
-     * @throws \TrueLayer\Exceptions\ApiRequestJsonSerializationException
-     * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
-     * @throws \TrueLayer\Exceptions\InvalidArgumentException
-     * @throws \TrueLayer\Exceptions\SignerException
+     * @return array
      */
-    private function createPayment(string $customerEmail, string $existingUserId = null): PaymentCreatedInterface
+    private function createPaymentConfig(OrderInterface $order, string $merchantAccId, string $customerEmail, string $existingUserId = null): array
     {
-        // Get a client configured for the store
-        $client = $this->clientFactory->create((int) $this->order->getStoreId());
-
-        if (!$client) {
-            throw new AuthenticationException(__('Credentials are not correct'));
-        }
-
-        $merchantAccountId = $this->getMerchantAccountId($client);
-
-        $paymentConfig = [
-            "amount_in_minor" => (int) round($this->order->getBaseGrandTotal() * 100, 0, PHP_ROUND_HALF_UP),
-            "currency" => $this->order->getBaseCurrencyCode(),
+        $config = [
+            "amount_in_minor" => (int) round($order->getBaseGrandTotal() * 100, 0, PHP_ROUND_HALF_UP),
+            "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
                     "filter" => [
                         "countries" => [
-                            $this->order->getShippingAddress()->getCountryId()
+                            $order->getShippingAddress()->getCountryId()
                         ],
                         "release_channel" => "general_availability",
                         "customer_segments" => $this->configRepository->getBankingProviders(),
@@ -157,21 +134,21 @@ class Checkout implements CheckoutInterface
                 "beneficiary" => [
                     "type" => "merchant_account",
                     "name" => $this->configRepository->getMerchantAccountName(),
-                    "merchant_account_id" => $merchantAccountId
+                    "merchant_account_id" => $merchantAccId
                 ]
             ],
             "user" => [
                 "id" => $existingUserId,
-                "name" => trim($this->order->getBillingAddress()->getFirstname()) .
+                "name" => trim($order->getBillingAddress()->getFirstname()) .
                     ' ' .
-                    trim($this->order->getBillingAddress()->getLastname()),
+                    trim($order->getBillingAddress()->getLastname()),
                 "email" => $customerEmail
             ]
         ];
 
-        $this->logRepository->addDebugLog('payment creation request', $paymentConfig);
+        $this->logger->debug('Payment config', $config);
 
-        return $client->payment()->fill($paymentConfig)->create();
+        return $config;
     }
 
     /**
@@ -181,6 +158,7 @@ class Checkout implements CheckoutInterface
      * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
      * @throws \TrueLayer\Exceptions\InvalidArgumentException
      * @throws \TrueLayer\Exceptions\SignerException
+     * @throws \Exception
      */
     private function getMerchantAccountId(ClientInterface $client): string
     {

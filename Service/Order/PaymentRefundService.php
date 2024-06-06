@@ -14,7 +14,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Service\Api\ClientFactory;
 
-class RefundOrder
+class PaymentRefundService
 {
 
     public const EXCEPTION_MSG = 'Unable to refund order #%1 on TrueLayer';

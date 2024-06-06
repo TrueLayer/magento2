@@ -5,24 +5,24 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Logger\Handler;
+namespace TrueLayer\Connect\Service\Log\Handler;
 
 use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
 
 /**
- * Debug logger handler class
+ * Error logger handler class
  */
-class Debug extends Base
+class Error extends Base
 {
 
     /**
      * @var int
      */
-    protected $loggerType = Logger::DEBUG;
+    protected $loggerType = Logger::ERROR;
 
     /**
      * @var string
      */
-    protected $fileName = '/var/log/truelayer/debug.log';
+    protected $fileName = '/var/log/truelayer/error.log';
 }
