@@ -9,7 +9,7 @@
 /** @var $viewModel TrueLayer\Connect\ViewModel\Checkout\Pending */
 $viewModel = $block->getData('view_model');
 ?>
-<div class="checkout-pending">
+<div class="checkout-pending" data-bind="scope:'truelayer-pending'">
     <h2>
         <?= $block->escapeHtml(__('Your payment has been accepted by your bank.')) ?>
         <br />
@@ -17,7 +17,8 @@ $viewModel = $block->getData('view_model');
             'We are redirecting you to the order confirmation page but it might take an extra second.'
         )) ?>
     </h2>
-    <div class="truelayer-loading" data-loader>
+
+    <div class="truelayer-loading" data-bind="visible: isShowLoader" style="display: none;">
         <div class="loading-container">
             <div class="loading"></div>
             <div class="progress"></div>
@@ -25,12 +26,12 @@ $viewModel = $block->getData('view_model');
     </div>
 
     <div class="truelayer-result">
-        <div class="message success" data-success style="display: none;">
+        <div class="message success" data-bind="visible: isSuccess" style="display: none;">
             <div>
                 <?= $block->escapeHtml(__('Success! You will now be redirected to another page.')) ?>
             </div>
         </div>
-        <div class="message info" data-error style="display: none;">
+        <div class="message info" data-bind="visible: isError" style="display: none;">
             <div>
                 <?= $block->escapeHtml(__('Your payment is being processed by your bank.')) ?>
                 <?= $block->escapeHtml(__('Please wait for an order confirmation email.')) ?>
@@ -39,12 +40,20 @@ $viewModel = $block->getData('view_model');
     </div>
 </div>
 <?php // phpcs:ignore Magento2.Legacy.PhtmlTemplate ?>
+
 <script type="text/x-magento-init">
         {
             ".checkout-pending": {
-                "TrueLayer_Connect/js/pending": {
-                    "refreshUrl": "<?= $block->escapeHtml($viewModel->getRefreshUrl()) ?>",
-                    "checkUrl": "<?= $block->escapeHtml($viewModel->getCheckUrl()) ?>"
+                "Magento_Ui/js/core/app": {
+                    "components": {
+                        "truelayer-pending": {
+                            "component": "TrueLayer_Connect/js/pending",
+                            "config": {
+                                "refreshUrl": "<?= $block->escapeUrl($viewModel->getRefreshUrl()) ?>",
+                                "checkUrl": "<?= $block->escapeUrl($viewModel->getCheckUrl()) ?>"
+                            }
+                        }
+                    }
                 }
             }
         }

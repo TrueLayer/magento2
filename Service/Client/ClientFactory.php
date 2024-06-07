@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Service\Api;
+namespace TrueLayer\Connect\Service\Client;
 
 use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;

@@ -16,7 +16,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Io\File;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Service\Api\ClientFactory;
+use TrueLayer\Connect\Service\Client\ClientFactory;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
 /**

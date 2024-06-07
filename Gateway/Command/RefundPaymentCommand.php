@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Gateway\Command;
 
+use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -39,15 +40,16 @@ class RefundPaymentCommand extends AbstractCommand
     }
 
     /**
-     * @param OrderInterface $order
      * @param array $subject
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @throws InvalidArgumentException
+     * @throws Exception
      */
-    protected function executeCommand(OrderInterface $order, array $subject): void
+    protected function executeCommand(array $subject): void
     {
+        $order = $this->getOrder($subject);
         $this->refundService->execute($order, (float) SubjectReader::readAmount($subject));
     }
 }

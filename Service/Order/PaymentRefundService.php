@@ -12,21 +12,20 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Service\Api\ClientFactory;
+use TrueLayer\Connect\Service\Client\ClientFactory;
 
 class PaymentRefundService
 {
-
     public const EXCEPTION_MSG = 'Unable to refund order #%1 on TrueLayer';
 
     /**
      * @var ClientFactory
      */
-    private $clientFactory;
+    private ClientFactory $clientFactory;
     /**
      * @var TransactionRepository
      */
-    private $transactionRepository;
+    private TransactionRepository $transactionRepository;
 
     /**
      * RefundOrder constructor.
@@ -47,31 +46,36 @@ class PaymentRefundService
      *
      * @param OrderInterface $order
      * @param float $amount
-     * @return array
+     * @return string|null
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws \TrueLayer\Exceptions\InvalidArgumentException
-     * @throws \TrueLayer\Exceptions\ValidationException
      */
-    public function execute(OrderInterface $order, float $amount): array
+    public function execute(OrderInterface $order, float $amount): ?string
     {
-        $transaction = $this->transactionRepository->getByOrderId((int)$order->getId());
+        $transaction = $this->transactionRepository->getByOrderId((int) $order->getEntityId());
 
-        if ($amount != 0) {
-            $client = $this->clientFactory->create((int)$order->getStoreId());
+        if ($amount == 0) {
+            return null;
+        }
+
+        $client = $this->clientFactory->create((int) $order->getStoreId());
+
+        try {
             $refundId = $client->refund()
                 ->payment($transaction->getPaymentUuid())
                 ->amountInMinor((int)bcmul((string)$amount, '100'))
                 ->reference($transaction->getInvoiceUuid())
                 ->create()
                 ->getId();
-            if (!$refundId) {
-                $exceptionMsg = (string)self::EXCEPTION_MSG;
-                throw new LocalizedException(__($exceptionMsg, $order->getIncrementId()));
-            }
+        } catch (\Exception $e) {
+            throw new LocalizedException(__(self::EXCEPTION_MSG, $order->getIncrementId()));
         }
 
-        return [];
+        if (!$refundId) {
+            throw new LocalizedException(__(self::EXCEPTION_MSG, $order->getIncrementId()));
+        }
+
+        return $refundId;
     }
 }

@@ -12,7 +12,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Service\Api\ClientFactory;
+use TrueLayer\Connect\Service\Client\ClientFactory;
 
 /**
  * Class ProcessReturn

@@ -14,7 +14,7 @@ define(
         'use strict';
 
         return Component.extend({
-            redirectAfterPlaceOrder: false,
+            redirectAfterPlaceOrder: true,
 
             defaults: {
                 template: 'TrueLayer_Connect/payment/truelayer'
@@ -26,7 +26,6 @@ define(
 
             afterPlaceOrder: function() {
                 redirectOnSuccess.redirectUrl = url.build('truelayer/checkout/redirect');
-                this.redirectAfterPlaceOrder = true;
             },
         });
     }

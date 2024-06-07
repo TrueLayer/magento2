@@ -17,17 +17,17 @@ use TrueLayer\Connect\Service\Order\ProcessReturn;
 /**
  * Process Controller
  */
-class Process extends Action implements HttpGetActionInterface
+class Process implements HttpGetActionInterface
 {
-
     /**
      * @var LogRepository
      */
-    private $logRepository;
+    private LogRepository $logger;
+
     /**
      * @var ProcessReturn
      */
-    private $processReturn;
+    private ProcessReturn $processReturn;
 
     /**
      * Process constructor.
@@ -41,15 +41,15 @@ class Process extends Action implements HttpGetActionInterface
         ProcessReturn $processReturn,
         LogRepository $logRepository
     ) {
-        parent::__construct($context);
         $this->processReturn = $processReturn;
-        $this->logRepository = $logRepository;
+        $this->logger = $logRepository;
     }
+
 
     /**
      * @return Redirect
      */
-    public function execute(): Redirect
+    public function old(): Redirect
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
@@ -70,7 +70,7 @@ class Process extends Action implements HttpGetActionInterface
                 $resultRedirect->setPath('checkout/onepage/failure');
             }
         } catch (\Exception $exception) {
-            $this->logRepository->error('Checkout Process', $exception->getMessage());
+            $this->logger->error('Checkout Process', $exception->getMessage());
             $this->messageManager->addErrorMessage('Error processing payment');
             $resultRedirect->setPath('checkout/cart/index');
         }

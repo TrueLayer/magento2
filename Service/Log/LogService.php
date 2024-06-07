@@ -8,8 +8,6 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Service\Log;
 
 use TrueLayer\Connect\Api\Log\LogService as LogRepositoryInterface;
-use TrueLayer\Connect\Logger\DebugLogger;
-use TrueLayer\Connect\Logger\ErrorLogger;
 
 /**
  * Logs repository class
@@ -32,10 +30,8 @@ class LogService implements LogRepositoryInterface
     private string $prefix = '';
 
     /**
-     * Repository constructor.
-     *
-     * @param DebugLogger $debugLogger
-     * @param ErrorLogger $errorLogger
+     * @param \TrueLayer\Connect\Service\Log\DebugLogger $debugLogger
+     * @param \TrueLayer\Connect\Service\Log\ErrorLogger $errorLogger
      */
     public function __construct(
         DebugLogger $debugLogger,

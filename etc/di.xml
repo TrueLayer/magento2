@@ -7,24 +7,16 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="TrueLayer\Connect\Api\Config\RepositoryInterface"
-                type="TrueLayer\Connect\Model\Config\Repository"/>
-    <preference for="TrueLayer\Connect\Api\Log\LogService"
-                type="TrueLayer\Connect\Service\Log\LogService"/>
-    <preference for="TrueLayer\Connect\Api\Webapi\CheckoutInterface"
-                type="TrueLayer\Connect\Model\Webapi\Checkout" />
-    <preference for="TrueLayer\Connect\Api\Transaction\Data\DataInterface"
-                type="TrueLayer\Connect\Model\Transaction\DataModel" />
-    <preference for="TrueLayer\Connect\Api\Transaction\RepositoryInterface"
-                type="TrueLayer\Connect\Model\Transaction\Repository" />
-    <preference for="TrueLayer\Connect\Api\Transaction\Data\SearchResultsInterface"
-                type="Magento\Framework\Api\SearchResults"/>
-    <preference for="TrueLayer\Connect\Api\Webapi\WebhookInterface"
-                type="TrueLayer\Connect\Model\Webapi\Webhook" />
-    <preference for="TrueLayer\Connect\Api\Webapi\PendingInterface"
-                type="TrueLayer\Connect\Model\Webapi\Pending" />
-    <preference for="TrueLayer\Connect\Api\User\RepositoryInterface"
-                type="TrueLayer\Connect\Model\User\Repository" />
+
+    <preference for="TrueLayer\Connect\Api\Config\RepositoryInterface" type="TrueLayer\Connect\Model\Config\Repository"/>
+    <preference for="TrueLayer\Connect\Api\Log\LogService" type="TrueLayer\Connect\Service\Log\LogService"/>
+    <preference for="TrueLayer\Connect\Api\Webapi\CheckoutInterface" type="TrueLayer\Connect\Model\Webapi\Checkout" />
+    <preference for="TrueLayer\Connect\Api\Transaction\Data\DataInterface" type="TrueLayer\Connect\Model\Transaction\DataModel" />
+    <preference for="TrueLayer\Connect\Api\Transaction\RepositoryInterface" type="TrueLayer\Connect\Model\Transaction\Repository" />
+    <preference for="TrueLayer\Connect\Api\Transaction\Data\SearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+    <preference for="TrueLayer\Connect\Api\Webapi\WebhookInterface" type="TrueLayer\Connect\Model\Webapi\Webhook" />
+    <preference for="TrueLayer\Connect\Api\Webapi\PendingInterface" type="TrueLayer\Connect\Model\Webapi\Pending" />
+    <preference for="TrueLayer\Connect\Api\User\RepositoryInterface" type="TrueLayer\Connect\Model\User\Repository" />
 
     <type name="TrueLayer\Connect\Service\Log\ErrorLogger">
         <arguments>
@@ -58,14 +50,12 @@
     <virtualType name="TrueLayerCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="create_payment" xsi:type="string">TrueLayerCreatePaymentCommand</item>
                 <item name="authorize" xsi:type="string">TrueLayerAuthorizePaymentCommand</item>
                 <item name="refund" xsi:type="string">TrueLayerRefundPaymentCommand</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <virtualType name="TrueLayerCreatePaymentCommand" type="TrueLayer\Connect\Gateway\Command\CreatePaymentCommand" />
     <virtualType name="TrueLayerAuthorizePaymentCommand" type="TrueLayer\Connect\Gateway\Command\AuthorizePaymentCommand" />
     <virtualType name="TrueLayerRefundPaymentCommand" type="TrueLayer\Connect\Gateway\Command\RefundPaymentCommand" />
 

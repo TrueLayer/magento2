@@ -39,6 +39,7 @@ abstract class AbstractCommand implements CommandInterface
     }
 
     /**
+     * Adds logging to executeCommand
      * @param array $commandSubject
      * @return null
      * @throws Exception
@@ -48,10 +49,10 @@ abstract class AbstractCommand implements CommandInterface
         $this->logger->debug('Start');
 
         try {
-            $this->executeCommand($this->getOrder($commandSubject), $commandSubject);
-            $this->logger->debug('Executed');
+            $this->executeCommand($commandSubject);
+            $this->logger->debug('End');
         } catch (Exception $e) {
-            $this->logger->error('Failed executing', $e);
+            $this->logger->error('Failed', $e);
             throw $e;
         }
 
@@ -70,9 +71,8 @@ abstract class AbstractCommand implements CommandInterface
     }
 
     /**
-     * @param OrderInterface $order
      * @param array $subject
      * @return mixed
      */
-    abstract protected function executeCommand(OrderInterface $order, array $subject): void;
+    abstract protected function executeCommand(array $subject): void;
 }
