@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Controller\Checkout;
 
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -18,13 +17,8 @@ use TrueLayer\Connect\Service\Order\HPPService;
 use TrueLayer\Connect\Service\Order\PaymentCreationService;
 
 
-class Redirect implements HttpGetActionInterface
+class Redirect extends BaseController
 {
-    /**
-     * @var Context
-     */
-    private Context $context;
-
     /**
      * @var Session
      */
@@ -67,12 +61,12 @@ class Redirect implements HttpGetActionInterface
         LogService $logger
     )
     {
-        $this->context = $context;
         $this->checkoutSession = $checkoutSession;
         $this->orderRepository = $orderRepository;
         $this->paymentCreationService = $paymentCreationService;
         $this->hppService = $hppService;
         $this->logger = $logger->prefix('RedirectToHpp');
+        parent::__construct($context);
     }
 
     /**
@@ -119,17 +113,6 @@ class Redirect implements HttpGetActionInterface
     private function redirectToFailPage(): ResponseInterface
     {
         $this->context->getMessageManager()->addErrorMessage(__('There was an issue creating your payment. Please try again.'));
-        return $this->redirect('checkout/cart');
-    }
-
-    /**
-     * @param string $to
-     * @return ResponseInterface
-     */
-    private function redirect(string $to): ResponseInterface
-    {
-        $response = $this->context->getResponse();
-        $this->context->getRedirect()->redirect($response, $to, []);
-        return $response;
+        return $this->redirect('checkout/cart/index');
     }
 }

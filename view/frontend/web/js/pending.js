@@ -8,49 +8,42 @@ define(['ko', 'uiComponent'], function (ko, Component) {
 
     return Component.extend({
         defaults: {
-            isShowLoader: ko.observable(true),
-            isSuccess: ko.observable(false),
+            isLoading: ko.observable(true),
             isError: ko.observable(false),
             requestCount: ko.observable(0),
-            maxRequestCount: 3,
+            maxRequestCount: 20,
             delay: 2500,
         },
 
         initialize() {
             this._super();
-            this.getRequest();
+            this.checkStatus();
         },
 
-        getRequest() {
-            if (this.requestCount() < this.maxRequestCount) {
-                fetch(this.checkUrl)
-                    .then((res) => {
-                        if (!res.ok) throw new Error();
-                        this.requestCount(this.requestCount() + 1);
-                        return res.json();
-                    })
-                    .then((json) => {
-                        const timer = setTimeout(() => {
-                            json === false ? this.getRequest() : this.successOrder();
-                            clearTimeout(timer);
-                        }, this.delay);
-                    })
-                    .catch(() => this.errorOrder());
-            } else {
-                this.errorOrder();
+        checkStatus() {
+            if (this.requestCount() >= this.maxRequestCount) {
+                this.isError(true);
+                this.isLoading(false);
             }
+
+            fetch(this.checkUrl)
+                .then((res) => {
+                    if (!res.ok) return false;
+                    this.requestCount(this.requestCount() + 1);
+                    return res.json();
+                })
+                .then((json) => {
+                    const timer = setTimeout(() => {
+                        json === false ? this.checkStatus() : this.away();
+                        clearTimeout(timer);
+                    }, this.delay);
+                })
+                .catch(() => this.checkStatus());
         },
 
-        successOrder() {
+        away() {
             this.requestCount(this.maxRequestCount);
-            this.isShowLoader(false);
-            this.isSuccess(true);
             window.location.replace(this.refreshUrl);
-        },
-
-        errorOrder() {
-            this.isShowLoader(false);
-            this.isError(true);
         }
     });
 });

@@ -7,19 +7,17 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Controller\Checkout;
 
-use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\View\Result\Page;
 use Magento\Framework\View\Result\PageFactory;
 
-class Pending extends Action implements HttpGetActionInterface
+class Pending extends BaseController
 {
     /**
      * @var PageFactory
      */
-    private $pageFactory;
+    private PageFactory $pageFactory;
 
     /**
      * Pending constructor.

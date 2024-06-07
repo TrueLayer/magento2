@@ -65,7 +65,6 @@ class PaymentRefundService
             $refundId = $client->refund()
                 ->payment($transaction->getPaymentUuid())
                 ->amountInMinor((int)bcmul((string)$amount, '100'))
-                ->reference($transaction->getInvoiceUuid())
                 ->create()
                 ->getId();
         } catch (\Exception $e) {

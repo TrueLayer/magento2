@@ -110,17 +110,16 @@ class ProcessSettledWebhook
             $this->orderRepository->save($order);
             $this->logRepository->debug('webhook', 'payment and order statuses updated');
 
+            // Update transaction status
+            $transaction->setStatus('payment_settled');
+            $this->transactionRepository->save($transaction);
+            $this->transactionRepository->unlock($transaction);
+            $this->logRepository->debug('webhook', 'transaction status set to settled');
+
             // Send emails
             $this->sendOrderEmail($order);
             $this->sendInvoiceEmail($order);
             $this->logRepository->debug('webhook', 'emails sent');
-
-            // Update transaction statis
-            $transaction->setStatus('payment_settled');
-
-            $this->transactionRepository->save($transaction);
-            $this->transactionRepository->unlock($transaction);
-            $this->logRepository->debug('webhook', 'transaction status set to settled');
         } catch (Exception $e) {
             $this->logRepository->debug('webhook - exception', $e->getMessage());
             throw $e;

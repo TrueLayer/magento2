@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © TrueLayer Ltd. All rights reserved.
  * See COPYING.txt for license details.

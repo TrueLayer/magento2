@@ -19,39 +19,57 @@ use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionReposito
  */
 class ProcessFailedWebhook
 {
-    private TransactionRepository $transactionRepository;
+    /**
+     * @var OrderRepositoryInterface
+     */
     private OrderRepositoryInterface $orderRepository;
+
+    /**
+     * @var PaymentFailureReasonService
+     */
+    private PaymentFailureReasonService $paymentFailureReasonService;
+
+    /**
+     * @var TransactionRepository
+     */
+    private TransactionRepository $transactionRepository;
+
+    /**
+     * @var LogRepository
+     */
     private LogRepository $logRepository;
 
     /**
-     * ProcessFailedWebhook constructor.
-     *
-     * @param TransactionRepository $transactionRepository
      * @param OrderRepositoryInterface $orderRepository
+     * @param PaymentFailureReasonService $paymentFailureReasonService
+     * @param TransactionRepository $transactionRepository
      * @param LogRepository $logRepository
      */
     public function __construct(
-        TransactionRepository $transactionRepository,
         OrderRepositoryInterface $orderRepository,
-        LogRepository $logRepository,
+        PaymentFailureReasonService $paymentFailureReasonService,
+        TransactionRepository $transactionRepository,
+        LogRepository $logRepository
     ) {
-        $this->transactionRepository = $transactionRepository;
         $this->orderRepository = $orderRepository;
+        $this->paymentFailureReasonService = $paymentFailureReasonService;
+        $this->transactionRepository = $transactionRepository;
         $this->logRepository = $logRepository;
     }
 
     /**
-     * Place order via webhook
-     *
-     * @param string $uuid
-     * @param string $userId
+     * @param string $paymentId
+     * @param string $failureReason
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute(string $uuid)
+    public function execute(string $paymentId, string $failureReason)
     {
-        $this->logRepository->debug('webhook - failed payment - start processing ', $uuid);
+        $this->logRepository->debug('webhook - failed payment - start processing ', $paymentId);
 
         try {
-            $transaction = $this->transactionRepository->getByPaymentUuid($uuid);
+            $transaction = $this->transactionRepository->getByPaymentUuid($paymentId);
 
             $this->logRepository->debug('webhook', [
                 'transaction id' => $transaction->getEntityId(),
@@ -72,6 +90,10 @@ class ProcessFailedWebhook
             $this->transactionRepository->lock($transaction);
             $order = $this->orderRepository->get($transaction->getOrderId());
             $order->setState(Order::STATE_CANCELED)->setStatus(Order::STATE_CANCELED);
+
+            $orderComment = "{$this->paymentFailureReasonService->getHumanReadableLabel($failureReason)} ({$failureReason})";
+            $order->addStatusToHistory($order->getStatus(), $orderComment, true);
+
             $this->orderRepository->save($order);
 
             // Update transaction status

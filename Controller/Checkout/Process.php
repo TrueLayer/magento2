@@ -7,74 +7,112 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Controller\Checkout;
 
-use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\Controller\Result\Redirect;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
-use TrueLayer\Connect\Service\Order\ProcessReturn;
+use TrueLayer\Connect\Service\Client\ClientFactory;
+use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
+use TrueLayer\Connect\Service\Order\PaymentFailureReasonService;
+use TrueLayer\Interfaces\Payment\PaymentFailedInterface;
+use TrueLayer\Interfaces\Payment\PaymentRetrievedInterface;
+use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
 
 /**
  * Process Controller
  */
-class Process implements HttpGetActionInterface
+class Process extends BaseController
 {
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private OrderRepositoryInterface $orderRepository;
+
+    /**
+     * @var ClientFactory
+     */
+    private ClientFactory $clientFactory;
+
+    /**
+     * @var TransactionRepository
+     */
+    private TransactionRepository $transactionRepository;
+
+    /**
+     * @var PaymentFailureReasonService
+     */
+    private PaymentFailureReasonService $paymentFailureReasonService;
+
     /**
      * @var LogRepository
      */
     private LogRepository $logger;
 
-    /**
-     * @var ProcessReturn
-     */
-    private ProcessReturn $processReturn;
 
-    /**
-     * Process constructor.
-     *
-     * @param Context $context
-     * @param ProcessReturn $processReturn
-     * @param LogRepository $logRepository
-     */
+
     public function __construct(
         Context $context,
-        ProcessReturn $processReturn,
+        OrderRepositoryInterface $orderRepository,
+        ClientFactory $clientFactory,
+        TransactionRepository $transactionRepository,
+        PaymentFailureReasonService $paymentFailureReasonService,
         LogRepository $logRepository
     ) {
-        $this->processReturn = $processReturn;
-        $this->logger = $logRepository;
+        $this->orderRepository = $orderRepository;
+        $this->clientFactory = $clientFactory;
+        $this->transactionRepository = $transactionRepository;
+        $this->paymentFailureReasonService = $paymentFailureReasonService;
+        $this->logger = $logRepository->prefix('Process');
+        parent::__construct($context);
     }
 
+    public function execute()
+    {
+        $payment = $this->getTruelayerPayment();
+
+        if (!$payment) {
+            $this->logger->error('Could not load TL payment');
+            $this->context->getMessageManager()->addErrorMessage(__('No payment found'));
+            return $this->redirect('checkout/cart/index');
+        }
+
+        if ($payment instanceof PaymentSettledInterface) {
+            return $this->redirect('checkout/onepage/success');
+        }
+
+        if ($payment instanceof PaymentFailedInterface) {
+            $message = $this->paymentFailureReasonService->getHumanReadableLabel($payment->getFailureReason());
+            $this->context->getMessageManager()->addErrorMessage($message);
+            return $this->redirect('checkout/onepage/failure');
+        }
+
+        return $this->redirect('truelayer/checkout/pending', ['payment_id' => $payment->getId()]);
+    }
 
     /**
-     * @return Redirect
+     * @return PaymentRetrievedInterface|null
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \TrueLayer\Exceptions\ApiRequestJsonSerializationException
+     * @throws \TrueLayer\Exceptions\ApiResponseUnsuccessfulException
+     * @throws \TrueLayer\Exceptions\SignerException
      */
-    public function old(): Redirect
+    private function getTruelayerPayment(): ?PaymentRetrievedInterface
     {
-        $resultRedirect = $this->resultRedirectFactory->create();
+        $paymentId = $this->context->getRequest()->getParam('payment_id');
 
-        if (!$transactionId = $this->getRequest()->getParam('payment_id')) {
-            $this->messageManager->addErrorMessage(__('Error in return data from TrueLayer'));
-            $resultRedirect->setPath('checkout/cart/index');
-            return $resultRedirect;
+        if (!$paymentId) {
+            return null;
         }
 
         try {
-            $result = $this->processReturn->execute((string)$transactionId);
-            if ($result['success']) {
-                $resultRedirect->setPath('checkout/onepage/success');
-            } elseif (in_array($result['status'], ['settled', 'executed', 'authorized'])) {
-                $resultRedirect->setPath('truelayer/checkout/pending', ['payment_id' => $transactionId]);
-            } else {
-                $this->messageManager->addErrorMessage($result['msg']);
-                $resultRedirect->setPath('checkout/onepage/failure');
-            }
-        } catch (\Exception $exception) {
-            $this->logger->error('Checkout Process', $exception->getMessage());
-            $this->messageManager->addErrorMessage('Error processing payment');
-            $resultRedirect->setPath('checkout/cart/index');
+            $transaction = $this->transactionRepository->getByPaymentUuid($paymentId);
+            $order = $this->orderRepository->get($transaction->getOrderId());
+            $client = $this->clientFactory->create((int)$order->getStoreId());
+            return $client->getPayment($paymentId);
+        } catch (\Exception $e) {
+            $this->logger->error('Could not load TL payment', $e);
         }
 
-        return $resultRedirect;
+        return null;
     }
 }

@@ -96,7 +96,7 @@ class Webhook implements WebhookInterface
                 $this->processSettledWebhook->execute($event->getPaymentId());
             })
             ->handler(function (TrueLayerWebhookInterface\PaymentFailedEventInterface $event) {
-                $this->processFailedWebhook->execute($event->getPaymentId());
+                $this->processFailedWebhook->execute($event->getPaymentId(), $event->getFailureReason());
             });
 
         try {
