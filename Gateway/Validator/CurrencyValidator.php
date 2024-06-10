@@ -17,11 +17,7 @@ use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
  */
 class CurrencyValidator extends AbstractValidator
 {
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
+    private ConfigInterface $config;
 
     /**
      * @param ResultInterfaceFactory $resultFactory

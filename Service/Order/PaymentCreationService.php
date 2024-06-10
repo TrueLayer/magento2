@@ -12,11 +12,11 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Math\Random;
+use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
 use TrueLayer\Connect\Service\Client\ClientFactory;
-use TrueLayer\Connect\Service\Log\LogService;
 use TrueLayer\Exceptions\ApiRequestJsonSerializationException;
 use TrueLayer\Exceptions\ApiResponseUnsuccessfulException;
 use TrueLayer\Exceptions\InvalidArgumentException;
@@ -27,34 +27,11 @@ use TrueLayer\Interfaces\Payment\PaymentCreatedInterface;
 
 class PaymentCreationService
 {
-    /**
-     * @var ClientFactory
-     */
     private ClientFactory $clientFactory;
-
-    /**
-     * @var ConfigRepository
-     */
     private ConfigRepository $configRepository;
-
-    /**
-     * @var TransactionRepository
-     */
     private TransactionRepository $transactionRepository;
-
-    /**
-     * @var UserRepository
-     */
     private UserRepository $userRepository;
-
-    /**
-     * @var Random
-     */
     private Random $mathRandom;
-
-    /**
-     * @var LogService
-     */
     private LogService $logger;
 
     /**

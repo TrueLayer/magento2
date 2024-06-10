@@ -24,6 +24,7 @@ interface DataInterface extends ExtensibleDataInterface
     public const UUID = 'uuid';
     public const TOKEN = 'token';
     public const STATUS = 'status';
+    public const FAILURE_REASON = 'failure_reason';
     public const INVOICE_UUID = 'invoice_uuid';
     public const PAYMENT_URL = 'payment_url';
     public const IS_LOCKED = 'is_locked';
@@ -109,6 +110,21 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setStatus(string $status): self;
+
+    /**
+     * Get failure reason.
+     *
+     * @return string|null
+     */
+    public function getFailureReason(): ?string;
+
+    /**
+     * Set failure reason.
+     *
+     * @param string $failureReason
+     * @return $this
+     */
+    public function setFailureReason(string $failureReason): self;
 
     /**
      * Return invoice_uuid.

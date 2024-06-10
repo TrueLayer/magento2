@@ -207,6 +207,7 @@ class Repository implements RepositoryInterface
         } elseif (!$this->resource->isUuidExists($uuid)) {
             throw new NoSuchEntityException(__('No record found for uuid: %1.', $uuid));
         }
+
         return $this->dataFactory->create()
             ->load($uuid, 'uuid');
     }
@@ -240,7 +241,7 @@ class Repository implements RepositoryInterface
     public function unlock(DataInterface $entity): DataInterface
     {
         $entity->setIsLocked(0);
-        return $this->save($entity);
+        return $entity;
     }
 
     /**

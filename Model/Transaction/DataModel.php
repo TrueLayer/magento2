@@ -126,6 +126,24 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
+    public function getFailureReason(): ?string
+    {
+        return $this->getData(self::FAILURE_REASON)
+            ? (string)$this->getData(self::FAILURE_REASON)
+            : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setFailureReason(string $failureReason): DataInterface
+    {
+        return $this->setData(self::FAILURE_REASON, $failureReason);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getInvoiceUuid(): ?string
     {
         return $this->getData(self::INVOICE_UUID)

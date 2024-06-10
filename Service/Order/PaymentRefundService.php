@@ -7,38 +7,37 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Order;
 
+use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
+use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Service\Client\ClientFactory;
+use TrueLayer\Exceptions\SignerException;
 
 class PaymentRefundService
 {
     public const EXCEPTION_MSG = 'Unable to refund order #%1 on TrueLayer';
 
-    /**
-     * @var ClientFactory
-     */
     private ClientFactory $clientFactory;
-    /**
-     * @var TransactionRepository
-     */
     private TransactionRepository $transactionRepository;
+    private LogService $logger;
 
     /**
-     * RefundOrder constructor.
-     *
      * @param ClientFactory $clientFactory
      * @param TransactionRepository $transactionRepository
+     * @param LogService $logger
      */
     public function __construct(
         ClientFactory $clientFactory,
-        TransactionRepository $transactionRepository
+        TransactionRepository $transactionRepository,
+        LogService $logger
     ) {
         $this->clientFactory = $clientFactory;
         $this->transactionRepository = $transactionRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -50,12 +49,13 @@ class PaymentRefundService
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
+     * @throws SignerException
      */
-    public function execute(OrderInterface $order, float $amount): ?string
+    public function refund(OrderInterface $order, float $amount): ?string
     {
         $transaction = $this->transactionRepository->getByOrderId((int) $order->getEntityId());
 
-        if ($amount == 0) {
+        if (!$amount == 0) {
             return null;
         }
 
@@ -67,7 +67,7 @@ class PaymentRefundService
                 ->amountInMinor((int)bcmul((string)$amount, '100'))
                 ->create()
                 ->getId();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new LocalizedException(__(self::EXCEPTION_MSG, $order->getIncrementId()));
         }
 

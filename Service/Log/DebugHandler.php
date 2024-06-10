@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Service\Log\Handler;
+namespace TrueLayer\Connect\Service\Log;
 
 use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
@@ -13,7 +13,7 @@ use Monolog\Logger;
 /**
  * Debug logger handler class
  */
-class Debug extends Base
+class DebugHandler extends Base
 {
 
     /**

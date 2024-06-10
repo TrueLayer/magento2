@@ -19,29 +19,10 @@ use TrueLayer\Connect\Service\Order\PaymentCreationService;
 
 class Redirect extends BaseController
 {
-    /**
-     * @var Session
-     */
     private Session $checkoutSession;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
     private OrderRepositoryInterface $orderRepository;
-
-    /**
-     * @var PaymentCreationService
-     */
     private PaymentCreationService $paymentCreationService;
-
-    /**
-     * @var HPPService
-     */
     private HPPService $hppService;
-
-    /**
-     * @var LogService
-     */
     private LogService $logger;
 
     /**

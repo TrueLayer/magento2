@@ -10,31 +10,37 @@
 
     <preference for="TrueLayer\Connect\Api\Config\RepositoryInterface" type="TrueLayer\Connect\Model\Config\Repository"/>
     <preference for="TrueLayer\Connect\Api\Log\LogService" type="TrueLayer\Connect\Service\Log\LogService"/>
-    <preference for="TrueLayer\Connect\Api\Webapi\CheckoutInterface" type="TrueLayer\Connect\Model\Webapi\Checkout" />
     <preference for="TrueLayer\Connect\Api\Transaction\Data\DataInterface" type="TrueLayer\Connect\Model\Transaction\DataModel" />
     <preference for="TrueLayer\Connect\Api\Transaction\RepositoryInterface" type="TrueLayer\Connect\Model\Transaction\Repository" />
     <preference for="TrueLayer\Connect\Api\Transaction\Data\SearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
     <preference for="TrueLayer\Connect\Api\Webapi\WebhookInterface" type="TrueLayer\Connect\Model\Webapi\Webhook" />
-    <preference for="TrueLayer\Connect\Api\Webapi\PendingInterface" type="TrueLayer\Connect\Model\Webapi\Pending" />
     <preference for="TrueLayer\Connect\Api\User\RepositoryInterface" type="TrueLayer\Connect\Model\User\Repository" />
 
-    <type name="TrueLayer\Connect\Service\Log\ErrorLogger">
+
+    <type name="TrueLayer\Connect\Service\Log\LogService">
         <arguments>
-            <argument name="name" xsi:type="string">TrueLayerError</argument>
-            <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\Handler\Error</item>
-            </argument>
+            <argument name="debugLogger" xsi:type="object">TruelayerDebugLogger</argument>
+            <argument name="errorLogger" xsi:type="object">TruelayerErrorLogger</argument>
         </arguments>
     </type>
 
-    <type name="TrueLayer\Connect\Service\Log\DebugLogger">
+    <virtualType name="TruelayerDebugLogger" type="Monolog\Logger">
         <arguments>
             <argument name="name" xsi:type="string">TrueLayerDebug</argument>
             <argument name="handlers" xsi:type="array">
-                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\Handler\Debug</item>
+                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\DebugHandler</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
+
+    <virtualType name="TruelayerErrorLogger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">TrueLayerError</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">TrueLayer\Connect\Service\Log\ErrorHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
 
     <virtualType name="TrueLayerFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>

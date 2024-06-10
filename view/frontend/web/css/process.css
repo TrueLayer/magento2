@@ -1,4 +1,4 @@
-.truelayer-checkout-pending .checkout-pending {
+.truelayer-checkout-pending {
     margin-top: 40px;
     display: flex;
     flex-direction: column;
@@ -6,10 +6,10 @@
     justify-content: flex-start;
 }
 
-.truelayer-checkout-pending .checkout-pending h2 {
+.truelayer-checkout-pending h2 {
     line-height: 1.4;
     text-align: center;
-} 
+}
 
 .truelayer-loading .loading-container,
 .truelayer-loading .loading {
@@ -26,7 +26,7 @@
 .truelayer-loading .loading {
     border: 3px solid transparent;
     border-color: transparent #3665ab transparent #3665ab;
-    animation: spin 1.5s linear 0s infinite normal;
+    animation: truelayer-spin 1.5s linear 0s infinite normal;
     transform-origin: 50% 50%;
 }
 
@@ -42,7 +42,7 @@
 
 .truelayer-loading .progress::before {
     content: '100%';
-    animation: progress 9s linear;
+    animation: truelayer-progress 9s linear;
 }
 
 .truelayer-result {
@@ -52,12 +52,12 @@
     letter-spacing: .5px;
 }
 
-@keyframes spin {
+@keyframes truelayer-spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg);}
 }
 
-@keyframes progress {
+@keyframes truelayer-progress {
     0% { content: '0%'; }
     1% { content: '1%'; }
     2% { content: '2%'; }

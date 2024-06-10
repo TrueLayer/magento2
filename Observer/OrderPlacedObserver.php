@@ -14,16 +14,9 @@ use Magento\Sales\Model\Order;
 use TrueLayer\Connect\Api\Log\LogService;
 
 
-class OrderPlacedHandler implements ObserverInterface
+class OrderPlacedObserver implements ObserverInterface
 {
-    /**
-     * @var OrderRepositoryInterface
-     */
     private OrderRepositoryInterface $orderRepository;
-
-    /**
-     * @var LogService
-     */
     private LogService $logger;
 
     /**

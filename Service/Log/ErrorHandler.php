@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Service\Log\Handler;
+namespace TrueLayer\Connect\Service\Log;
 
 use Magento\Framework\Logger\Handler\Base;
 use Monolog\Logger;
@@ -13,9 +13,8 @@ use Monolog\Logger;
 /**
  * Error logger handler class
  */
-class Error extends Base
+class ErrorHandler extends Base
 {
-
     /**
      * @var int
      */

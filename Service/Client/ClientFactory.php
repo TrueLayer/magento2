@@ -8,81 +8,63 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Client;
 
+use Exception;
 use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Exceptions\SignerException;
 use TrueLayer\Interfaces\Client\ClientInterface;
+use TrueLayer\Settings;
 
-/**
- * TrueLayer Client Factory
- */
 class ClientFactory
 {
-    /**
-     * @var int
-     */
-    private $storeId = 0;
-    /**
-     * @var ConfigRepository
-     */
-    private $configProvider;
-    /**
-     * @var LogRepository
-     */
-    private $logRepository;
-    /**
-     * @var array
-     */
-    private $credentials;
+    private ConfigRepository $configProvider;
+    private LogService $logger;
 
     /**
      * @param ConfigRepository $configProvider
-     * @param LogRepository $logRepository
+     * @param LogService $logger
      */
     public function __construct(
         ConfigRepository $configProvider,
-        LogRepository $logRepository
+        LogService $logger
     ) {
         $this->configProvider = $configProvider;
-        $this->logRepository = $logRepository;
+        $this->logger = $logger->prefix('ClientFactory');
     }
 
     /**
      * @param int $storeId
      * @param array|null $data
      * @return ClientInterface|null
+     * @throws SignerException
      */
     public function create(int $storeId = 0, ?array $data = []): ?ClientInterface
     {
-        $this->storeId = $storeId;
-        if (isset($data['credentials'])) {
-            $this->credentials = $data['credentials'];
-        } else {
-            $this->credentials = $this->configProvider->getCredentials((int)$storeId);
-        }
+        $credentials = $data['credentials'] ?? $this->configProvider->getCredentials($storeId);
 
-        return $this->getClient();
+        try {
+            return $this->createClient($credentials);
+        } catch (Exception $e) {
+            $this->logger->debug('Create Fail', $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
+     * @param array $credentials
      * @return ClientInterface|null
-     * @throws \TrueLayer\Exceptions\SignerException
+     * @throws SignerException
      */
-    private function getClient(): ?ClientInterface
+    private function createClient(array $credentials): ?ClientInterface
     {
-        try {
-            \TrueLayer\Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
-            $client = Client::configure()
-                ->clientId($this->credentials['client_id'])
-                ->clientSecret($this->credentials['client_secret'])
-                ->keyId($this->credentials['key_id'])
-                ->pemFile($this->credentials['private_key'])
-                ->useProduction(!$this->configProvider->isSandbox());
-
-            return $client->create();
-        } catch (\Exception $e) {
-            $this->logRepository->debug('Get Client', $e->getMessage());
-            throw $e;
-        }
+        Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
+        return Client::configure()
+            ->clientId($credentials['client_id'])
+            ->clientSecret($credentials['client_secret'])
+            ->keyId($credentials['key_id'])
+            ->pemFile($credentials['private_key'])
+            ->useProduction(!$this->configProvider->isSandbox())
+            ->create();
     }
 }

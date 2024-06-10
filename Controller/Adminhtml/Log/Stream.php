@@ -22,7 +22,6 @@ use Magento\Framework\Filesystem\Driver\File;
  */
 class Stream extends Action implements HttpPostActionInterface
 {
-
     /**
      * Error log file path pattern
      */
@@ -32,22 +31,10 @@ class Stream extends Action implements HttpPostActionInterface
      */
     public const MAX_LINES = 100;
 
-    /**
-     * @var JsonFactory
-     */
-    private $resultJsonFactory;
-    /**
-     * @var DirectoryList
-     */
-    private $dir;
-    /**
-     * @var File
-     */
-    private $file;
-    /**
-     * @var RequestInterface
-     */
-    private $request;
+    private JsonFactory $resultJsonFactory;
+    private DirectoryList $dir;
+    private File $file;
+    private RequestInterface $request;
 
     /**
      * Check constructor.

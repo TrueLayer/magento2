@@ -16,15 +16,8 @@ use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 
 abstract class AbstractCommand implements CommandInterface
 {
-    /**
-     * @var OrderRepositoryInterface
-     */
     protected OrderRepositoryInterface $orderRepository;
-
-    /**
-     * @var LogRepository
-     */
-    private LogRepository $logger;
+    protected LogRepository $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository

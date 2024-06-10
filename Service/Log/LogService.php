@@ -7,36 +7,31 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Log;
 
-use TrueLayer\Connect\Api\Log\LogService as LogRepositoryInterface;
+use Monolog\Logger;
+use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigProvider;
+use TrueLayer\Connect\Api\Log\LogService as LogServiceInterface;
 
 /**
  * Logs repository class
  */
-class LogService implements LogRepositoryInterface
+class LogService implements LogServiceInterface
 {
-    /**
-     * @var DebugLogger
-     */
-    private DebugLogger $debugLogger;
-
-    /**
-     * @var ErrorLogger
-     */
-    private ErrorLogger $errorLogger;
-
-    /**
-     * @var string
-     */
+    private ConfigProvider $configProvider;
+    private Logger $debugLogger;
+    private Logger $errorLogger;
     private string $prefix = '';
 
     /**
-     * @param \TrueLayer\Connect\Service\Log\DebugLogger $debugLogger
-     * @param \TrueLayer\Connect\Service\Log\ErrorLogger $errorLogger
+     * @param ConfigProvider $configProvider
+     * @param Logger $debugLogger
+     * @param Logger $errorLogger
      */
     public function __construct(
-        DebugLogger $debugLogger,
-        ErrorLogger $errorLogger
+        ConfigProvider $configProvider,
+        Logger $debugLogger,
+        Logger $errorLogger
     ) {
+        $this->configProvider = $configProvider;
         $this->debugLogger = $debugLogger;
         $this->errorLogger = $errorLogger;
     }
@@ -46,7 +41,7 @@ class LogService implements LogRepositoryInterface
      */
     public function error(string $type, $data = ''): self
     {
-        $this->errorLogger->addLog("[$this->prefix $type]", $data);
+        $this->errorLogger->addRecord(Logger::ERROR, $this->buildMessage($type, $data));
 
         return $this;
     }
@@ -56,7 +51,9 @@ class LogService implements LogRepositoryInterface
      */
     public function debug(string $type, $data = ''): self
     {
-        $this->debugLogger->addLog("[$this->prefix $type]", $data);
+        if ($this->configProvider->isDebugLoggingEnabled()) {
+            $this->debugLogger->addRecord(Logger::INFO, $this->buildMessage($type, $data));
+        }
 
         return $this;
     }
@@ -69,5 +66,42 @@ class LogService implements LogRepositoryInterface
         $this->prefix = $prefix;
 
         return $this;
+    }
+
+    /**
+     * @param string $type
+     * @param mixed $data
+     * @return string
+     */
+    private function buildMessage(string $type, $data = ''): string
+    {
+        return "$this->prefix: $type: {$this->convertDataToString($data)}";
+    }
+
+    /**
+     * @param $data
+     * @return string
+     */
+    private function convertDataToString($data): string
+    {
+        if (is_string($data)) {
+            return $data;
+        }
+
+        if ($data instanceof \Exception) {
+            return $data->getMessage() . " " . $data->getTraceAsString();
+        }
+
+        if (empty($data)) {
+            return '';
+        }
+
+        if (is_array($data) || is_object($data)) {
+            if ($result = json_encode($data)) {
+                return $result;
+            }
+        }
+
+        return 'failed to serialize error message';
     }
 }

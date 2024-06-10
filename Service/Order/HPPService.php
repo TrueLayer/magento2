@@ -12,9 +12,6 @@ use TrueLayer\Interfaces\Payment\PaymentCreatedInterface;
 
 class HPPService
 {
-    /**
-     * @var ConfigRepository
-     */
     private ConfigRepository $configRepository;
 
     /**

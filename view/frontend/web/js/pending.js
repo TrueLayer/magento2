@@ -11,8 +11,8 @@ define(['ko', 'uiComponent'], function (ko, Component) {
             isLoading: ko.observable(true),
             isError: ko.observable(false),
             requestCount: ko.observable(0),
-            maxRequestCount: 20,
-            delay: 2500,
+            maxRequestCount: 45,
+            delay: 4000,
         },
 
         initialize() {
@@ -24,9 +24,10 @@ define(['ko', 'uiComponent'], function (ko, Component) {
             if (this.requestCount() >= this.maxRequestCount) {
                 this.isError(true);
                 this.isLoading(false);
+                return;
             }
 
-            fetch(this.checkUrl)
+            fetch(window.location.href + '&json=1')
                 .then((res) => {
                     if (!res.ok) return false;
                     this.requestCount(this.requestCount() + 1);
@@ -34,16 +35,16 @@ define(['ko', 'uiComponent'], function (ko, Component) {
                 })
                 .then((json) => {
                     const timer = setTimeout(() => {
-                        json === false ? this.checkStatus() : this.away();
+                        if (json && json.redirect) {
+                            window.location.replace(json.redirect);
+                        } else {
+                            this.checkStatus();
+                        }
+
                         clearTimeout(timer);
                     }, this.delay);
                 })
                 .catch(() => this.checkStatus());
-        },
-
-        away() {
-            this.requestCount(this.maxRequestCount);
-            window.location.replace(this.refreshUrl);
         }
     });
 });

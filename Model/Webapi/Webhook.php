@@ -7,18 +7,29 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Model\Webapi;
 
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\AuthorizationException;
+use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\Quote\Api\CartRepositoryInterface;
+use ReflectionException;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
-use TrueLayer\Connect\Service\Order\ProcessFailedWebhook;
-use TrueLayer\Connect\Service\Order\ProcessSettledWebhook;
+use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
+use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
+use TrueLayer\Connect\Service\Order\RefundUpdate\RefundFailedService;
+use TrueLayer\Connect\Service\Validation\ValidationService;
 use TrueLayer\Exceptions\Exception;
+use TrueLayer\Exceptions\InvalidArgumentException;
+use TrueLayer\Exceptions\SignerException;
+use TrueLayer\Exceptions\WebhookHandlerException;
+use TrueLayer\Exceptions\WebhookHandlerInvalidArgumentException;
+use TrueLayer\Exceptions\WebhookVerificationFailedException;
 use TrueLayer\Interfaces\Webhook as TrueLayerWebhookInterface;
+use TrueLayer\Settings;
 use TrueLayer\Webhook as TrueLayerWebhook;
 
 /**
@@ -26,84 +37,90 @@ use TrueLayer\Webhook as TrueLayerWebhook;
  */
 class Webhook implements WebhookInterface
 {
-    private LogRepository $logRepository;
-
-    private ProcessSettledWebhook $processSettledWebhook;
-
-    private ProcessFailedWebhook $processFailedWebhook;
-
+    private PaymentSettledService $paymentSettledService;
+    private PaymentFailedService $paymentFailedService;
+    private RefundFailedService $refundFailedService;
     private ConfigRepository $configProvider;
-
     private JsonSerializer $jsonSerializer;
-
     private File $file;
-
     private TransactionRepository $transactionRepository;
-
     private CartRepositoryInterface $quoteRepository;
+    private ValidationService $validationService;
+    private LogRepository $logger;
 
     /**
-     * Webhook constructor.
-     *
-     * @param LogRepository $logRepository
-     * @param ProcessSettledWebhook $processSettledWebhook
-     * @param ProcessFailedWebhook $processFailedWebhook
+     * @param PaymentSettledService $paymentSettledService
+     * @param PaymentFailedService $paymentFailedService
+     * @param RefundFailedService $refundFailedService
      * @param ConfigRepository $configProvider
      * @param JsonSerializer $jsonSerializer
      * @param File $file
      * @param TransactionRepository $transactionRepository
      * @param CartRepositoryInterface $quoteRepository
+     * @param ValidationService $validationService
+     * @param LogRepository $logger
      */
     public function __construct(
-        LogRepository           $logRepository,
-        ProcessSettledWebhook   $processSettledWebhook,
-        ProcessFailedWebhook    $processFailedWebhook,
-        ConfigRepository         $configProvider,
+        PaymentSettledService $paymentSettledService,
+        PaymentFailedService $paymentFailedService,
+        RefundFailedService $refundFailedService,
+        ConfigRepository        $configProvider,
         JsonSerializer          $jsonSerializer,
         File                    $file,
         TransactionRepository   $transactionRepository,
-        CartRepositoryInterface $quoteRepository
+        CartRepositoryInterface $quoteRepository,
+        ValidationService $validationService,
+        LogRepository           $logger
     ) {
-        $this->logRepository = $logRepository;
-        $this->processSettledWebhook = $processSettledWebhook;
-        $this->processFailedWebhook = $processFailedWebhook;
+        $this->paymentSettledService = $paymentSettledService;
+        $this->paymentFailedService = $paymentFailedService;
+        $this->refundFailedService = $refundFailedService;
         $this->configProvider = $configProvider;
         $this->jsonSerializer = $jsonSerializer;
         $this->file = $file;
         $this->transactionRepository = $transactionRepository;
         $this->quoteRepository = $quoteRepository;
+        $this->validationService = $validationService;
+        $this->logger = $logger->prefix('Webhook');
     }
 
     /**
+     * @throws AuthorizationException
      * @throws Exception
-     * @throws \ReflectionException
-     * @throws \TrueLayer\Exceptions\InvalidArgumentException
-     * @throws \TrueLayer\Exceptions\SignerException
-     * @throws \TrueLayer\Exceptions\WebhookHandlerException
-     * @throws \TrueLayer\Exceptions\WebhookHandlerInvalidArgumentException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     * @throws SignerException
+     * @throws WebhookHandlerException
+     * @throws WebhookHandlerInvalidArgumentException
+     * @throws NoSuchEntityException
      */
     public function processTransfer()
     {
-        \TrueLayer\Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
+        Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
 
         $webhook = TrueLayerWebhook::configure()
             ->useProduction(!$this->configProvider->isSandbox($this->getStoreId()))
             ->create()
             ->handler(function (TrueLayerWebhookInterface\EventInterface $event) {
-                $this->logRepository->debug('Webhook', $event->getBody());
+                $this->logger->debug('Webhook', $event->getBody());
             })
             ->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
-                $this->processSettledWebhook->execute($event->getPaymentId());
+                $this->paymentSettledService->handle($event->getPaymentId());
             })
             ->handler(function (TrueLayerWebhookInterface\PaymentFailedEventInterface $event) {
-                $this->processFailedWebhook->execute($event->getPaymentId(), $event->getFailureReason());
+                $this->paymentFailedService->handle($event->getPaymentId(), $event->getFailureReason());
+            })
+            ->handler(function(TrueLayerWebhookInterface\RefundFailedEventInterface $event) {
+                $this->refundFailedService->handle($event->getPaymentId(), $event->getFailureReason());
             });
 
         try {
             $webhook->execute();
-        } catch (Exception $e) {
-            $this->logRepository->error('Webhook', $e->getMessage());
-            throw $e;
+        } catch (WebhookVerificationFailedException $e) {
+            throw new AuthorizationException(__('Invalid signature')); // 401
+        } catch (NoSuchEntityException $e) {
+            $this->logger->error('Not found');
+            throw $e; // 404
         }
     }
 
@@ -113,13 +130,12 @@ class Webhook implements WebhookInterface
     private function getStoreId(): int
     {
         try {
-            $post = $this->file->fileGetContents('php://input');
-            $postArray = $this->jsonSerializer->unserialize($post);
-            if (!isset($postArray['payment_id']) || !$this->isValidUuid((string)$postArray['payment_id'])) {
+            $paymentId = $this->getPaymentId();
+            if (!$paymentId) {
                 return 0;
             }
 
-            $transaction = $this->transactionRepository->getByPaymentUuid($postArray['payment_id']);
+            $transaction = $this->transactionRepository->getByPaymentUuid($paymentId);
             if (!$quoteId = $transaction->getQuoteId()) {
                 return 0;
             }
@@ -127,20 +143,24 @@ class Webhook implements WebhookInterface
             $quote = $this->quoteRepository->get($quoteId);
             return $quote->getStoreId();
         } catch (\Exception $exception) {
-            $this->logRepository->error('Webhook processTransfer postData', $exception->getMessage());
+            $this->logger->error('Unable to get store id', $exception);
             return 0;
         }
     }
 
     /**
-     * Check if string is valid Uuid
-     *
-     * @param string $paymentId
-     * @return bool
+     * @return string|null
+     * @throws FileSystemException
      */
-    private function isValidUuid(string $paymentId): bool
+    private function getPaymentId(): ?string
     {
-        $pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
-        return preg_match($pattern, $paymentId) === 1;
+        $post = $this->file->fileGetContents('php://input');
+        $postArray = $this->jsonSerializer->unserialize($post);
+
+        if (!isset($postArray['payment_id']) || !$this->validationService->isUUID((string) $postArray['payment_id'])) {
+            return null;
+        }
+
+        return $postArray['payment_id'];
     }
 }

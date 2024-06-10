@@ -13,16 +13,13 @@ use Magento\Framework\App\ResponseInterface;
 
 abstract class BaseController implements HttpGetActionInterface
 {
-    /**
-     * @var Context
-     */
     protected Context $context;
 
     /**
      * @param Context $context
      */
     public function __construct(
-        Context $context,
+        Context $context
     ) {
         $this->context = $context;
     }

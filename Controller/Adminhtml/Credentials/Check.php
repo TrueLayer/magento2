@@ -24,28 +24,12 @@ use TrueLayer\Interfaces\Client\ClientInterface;
  */
 class Check extends Action implements HttpPostActionInterface
 {
-
     private const PEM_UPLOAD_FILE = '/truelayer/temp/private_key.pem';
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-    /**
-     * @var ClientFactory
-     */
-    private $clientFactory;
-    /**
-     * @var Json
-     */
-    private $resultJson;
-    /**
-     * @var ConfigRepository
-     */
-    private $configProvider;
-    /**
-     * @var File
-     */
-    private $file;
+    private DirectoryList $directoryList;
+    private ClientFactory $clientFactory;
+    private Json $resultJson;
+    private ConfigRepository $configProvider;
+    private File $file;
 
     /**
      * Check constructor.

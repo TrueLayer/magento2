@@ -7,9 +7,11 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Order;
 
+use Magento\Framework\Phrase;
+
 class PaymentFailureReasonService
 {
-    public function getHumanReadableLabel(string $reason): \Magento\Framework\Phrase
+    public function getHumanReadableLabel(string $reason = null): Phrase
     {
         switch($reason) {
             case 'cancelled':

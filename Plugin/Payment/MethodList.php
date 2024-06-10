@@ -17,10 +17,7 @@ use Magento\Payment\Model\MethodList as Subject;
  */
 class MethodList
 {
-    /**
-     * @var ConfigRepository
-     */
-    private $configRepository;
+    private ConfigRepository $configRepository;
 
     /**
      * MethodList constructor.
