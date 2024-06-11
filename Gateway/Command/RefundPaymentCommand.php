@@ -31,7 +31,7 @@ class RefundPaymentCommand extends AbstractCommand
         LogService               $logger
     ) {
         $this->refundService = $refundService;
-        parent::__construct($orderRepository, $logger->prefix("RefundPaymentCommand"));
+        parent::__construct($orderRepository, $logger->addPrefix("RefundPaymentCommand"));
     }
 
     /**
@@ -44,6 +44,7 @@ class RefundPaymentCommand extends AbstractCommand
     protected function executeCommand(array $subject): void
     {
         $order = $this->getOrder($subject);
+        $this->logger->addPrefix($order->getEntityId());
         $this->refundService->refund($order, (float) SubjectReader::readAmount($subject));
     }
 }

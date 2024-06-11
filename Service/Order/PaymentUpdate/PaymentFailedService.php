@@ -31,7 +31,7 @@ class PaymentFailedService
     ) {
         $this->orderRepository = $orderRepository;
         $this->transactionService = $transactionService;
-        $this->logger = $logger->prefix('PaymentFailedService');
+        $this->logger = $logger;
     }
 
     /**
@@ -41,12 +41,14 @@ class PaymentFailedService
      */
     public function handle(string $paymentId, string $failureReason): void
     {
-        $this->logger->prefix($paymentId);
+        $prefix = "PaymentFailedService $paymentId";
+        $this->logger->addPrefix($prefix);
 
         $this->transactionService
-            ->logger($this->logger)
             ->paymentId($paymentId)
             ->execute(fn($transaction) => $this->cancelOrder($transaction, $failureReason));
+
+        $this->logger->removePrefix($prefix);
     }
 
     /**

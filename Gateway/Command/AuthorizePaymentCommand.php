@@ -19,7 +19,7 @@ class AuthorizePaymentCommand extends AbstractCommand
      */
     public function __construct(OrderRepositoryInterface $orderRepository, LogRepository $logger)
     {
-        parent::__construct($orderRepository, $logger->prefix("AuthorizePaymentCommand"));
+        parent::__construct($orderRepository, $logger->addPrefix("AuthorizePaymentCommand"));
     }
 
     /**

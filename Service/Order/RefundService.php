@@ -45,7 +45,7 @@ class RefundService
         $this->clientFactory = $clientFactory;
         $this->paymentTransactionRepository = $paymentTransactionRepository;
         $this->refundTransactionRepository = $refundTransactionRepository;
-        $this->logger = $logger->prefix('RefundService');
+        $this->logger = $logger;
     }
 
     /**
@@ -61,7 +61,7 @@ class RefundService
      */
     public function refund(OrderInterface $order, float $amount): ?string
     {
-        $this->logger->prefix($order->getEntityId());
+        $this->logger->addPrefix('RefundService')->debug('Start');
 
         if ($amount == 0) {
             return null;
@@ -82,6 +82,8 @@ class RefundService
 
         $this->refundTransactionRepository->save($refundTransaction);
         $this->logger->debug('Refund transaction created', $refundTransaction->getEntityId());
+
+        $this->logger->removePrefix('RefundService');
 
         return $refundId;
     }

@@ -60,7 +60,7 @@ class Process extends BaseController
         ConfigRepository $configRepository,
         TransactionRepository $transactionRepository,
         SessionHelper $sessionHelper,
-        LogRepository $logRepository
+        LogRepository $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->jsonFactory = $jsonFactory;
@@ -71,7 +71,7 @@ class Process extends BaseController
         $this->paymentSettledService = $paymentSettledService;
         $this->paymentFailedService = $paymentFailedService;
         $this->sessionHelper = $sessionHelper;
-        $this->logger = $logRepository->prefix('Process');
+        $this->logger = $logger->addPrefix('Process');
         parent::__construct($context);
     }
 

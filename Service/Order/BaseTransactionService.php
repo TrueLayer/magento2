@@ -17,12 +17,9 @@ abstract class BaseTransactionService
 
     /**
      * @param LogService $logger
-     * @return $this
      */
-    public function logger(LogService $logger): self
-    {
+    public function __construct(LogService $logger) {
         $this->logger = $logger;
-        return $this;
     }
 
     /**
@@ -31,20 +28,22 @@ abstract class BaseTransactionService
      */
     public function execute(Callable $fn): void
     {
+        $this->logger->addPrefix('Transaction')->debug('Start');
+
         $transaction = $this->getTransaction();
         $this->validateTransaction($transaction);
 
         if ($transaction->getIsLocked()) {
-            $this->logger->debug('Aborting, locked transaction');
+            $this->logger->debug('Aborting, locked');
             return;
         }
 
         if (!in_array($transaction->getStatus(), ['NULL', null])) {
-            $this->logger->debug('Aborting, transaction already completed');
+            $this->logger->debug('Aborting, already completed');
             return;
         }
 
-        $this->logger->debug('Locking transaction');
+        $this->logger->debug('Locking');
         $transaction->setIsLocked(true);
         $this->saveTransaction($transaction);
 
@@ -58,6 +57,7 @@ abstract class BaseTransactionService
             $transaction->setIsLocked(false);
             $this->saveTransaction($transaction);
             $this->logger->debug('Unlocked transaction');
+            $this->logger->removePrefix('Transaction');
         }
     }
 
@@ -76,12 +76,13 @@ abstract class BaseTransactionService
      */
     private function validateTransaction(BaseTransactionDataInterface $transaction): void
     {
-        $this->logger->debug("Transaction", [
+        $this->logger->debug("Details", [
             'transaction id' => $transaction->getEntityId(),
             'order id' => $transaction->getOrderId(),
         ]);
 
         if (!$transaction->getOrderId()) {
+            $this->logger->error('Transaction with missing order found');
             throw new Exception('Transaction with missing order found');
         }
     }

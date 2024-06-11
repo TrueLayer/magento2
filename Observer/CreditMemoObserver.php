@@ -29,7 +29,7 @@ class CreditMemoObserver implements ObserverInterface
     public function __construct(RefundTransactionRepositoryInterface $refundTransactionRepository, LogService $logger)
     {
         $this->refundTransactionRepository = $refundTransactionRepository;
-        $this->logger = $logger->prefix('CreditMemoObserver');
+        $this->logger = $logger->addPrefix('CreditMemoObserver');
     }
 
     /**
@@ -75,6 +75,6 @@ class CreditMemoObserver implements ObserverInterface
 
         $refundTransaction->setCreditMemoId((int)$creditMemo->getEntityId());
         $this->refundTransactionRepository->save($refundTransaction);
-        $this->logger->debug('Refund transaction updated');
+        $this->logger->debug('Transaction updated');
     }
 }

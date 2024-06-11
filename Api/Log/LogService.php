@@ -32,5 +32,11 @@ interface LogService
     /**
      * @param string|int $prefix
      */
-    public function prefix($prefix): LogService;
+    public function addPrefix($prefix): LogService;
+
+    /**
+     * @param string|int $prefix
+     * @return LogService
+     */
+    public function removePrefix($prefix): LogService;
 }

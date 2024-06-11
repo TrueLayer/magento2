@@ -56,7 +56,7 @@ class PaymentCreationService
         $this->transactionRepository = $transactionRepository;
         $this->userRepository = $userRepository;
         $this->mathRandom = $mathRandom;
-        $this->logger = $logger->prefix('PaymentCreationService');
+        $this->logger = $logger;
     }
 
     /**
@@ -71,8 +71,7 @@ class PaymentCreationService
      */
     public function createPayment(OrderInterface $order): PaymentCreatedInterface
     {
-        $this->logger->prefix($order->getEntityId());
-        $this->logger->debug('Start');
+        $this->logger->addPrefix('PaymentCreationService')->debug('Start');
 
         // Get the TL user id if we recognise the email address
         $customerEmail = $order->getBillingAddress()->getEmail() ?: $order->getCustomerEmail();
@@ -84,7 +83,7 @@ class PaymentCreationService
         $this->logger->debug('Create client');
 
         $merchantAccountId = $this->getMerchantAccountId($client, $order);
-        $this->logger->debug('Found merchant account', $merchantAccountId);
+        $this->logger->debug('Merchant account', $merchantAccountId);
 
         $paymentConfig = $this->createPaymentConfig($order, $merchantAccountId, $customerEmail, $existingUserId);
         $payment = $client->payment()->fill($paymentConfig)->create();
@@ -113,15 +112,18 @@ class PaymentCreationService
      */
     private function createPaymentConfig(OrderInterface $order, string $merchantAccId, string $customerEmail, string $existingUserId = null): array
     {
+        $countries = null;
+        if ($shippingAddress = $order->getShippingAddress()) {
+            $countries = [ $shippingAddress->getCountryId() ];
+        }
+
         $config = [
             "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
                     "filter" => [
-                        "countries" => [
-                            $order->getShippingAddress()->getCountryId()
-                        ],
+                        "countries" =>  $countries,
                         "release_channel" => "general_availability",
                         "customer_segments" => $this->configRepository->getBankingProviders(),
                         "excludes" => [
@@ -175,7 +177,7 @@ class PaymentCreationService
             }
         }
 
-        throw new Exception(__('No merchant account found'));
+        throw new Exception('No merchant account found');
     }
 
     /**

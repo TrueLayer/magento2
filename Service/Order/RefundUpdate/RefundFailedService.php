@@ -39,7 +39,7 @@ class RefundFailedService
         $this->orderRepository = $orderRepository;
         $this->creditmemoRepository = $creditmemoRepository;
         $this->transactionService = $transactionService;
-        $this->logger = $logger->prefix('RefundFailedService');
+        $this->logger = $logger;
     }
 
     /**
@@ -51,10 +51,10 @@ class RefundFailedService
      */
     public function handle(string $refundId, string $failureReason)
     {
-        $this->logger->prefix($refundId);
+        $prefix = "RefundFailedService $refundId";
+        $this->logger->addPrefix($prefix)->debug('Start');
 
         $this->transactionService
-            ->logger($this->logger)
             ->refundId($refundId)
             ->execute(function (RefundTransactionDataInterface $transaction) use ($failureReason) {
                 $order = $this->orderRepository->get($transaction->getOrderId());
@@ -63,6 +63,8 @@ class RefundFailedService
                 $this->markCreditMemoRefunded($creditMemo, $failureReason);
                 $transaction->setStatus('refund_failed');
             });
+
+        $this->logger->removePrefix($prefix);
     }
 
     /**

@@ -30,7 +30,7 @@ class ClientFactory
         LogService $logger
     ) {
         $this->configProvider = $configProvider;
-        $this->logger = $logger->prefix('ClientFactory');
+        $this->logger = $logger;
     }
 
     /**
@@ -46,7 +46,7 @@ class ClientFactory
         try {
             return $this->createClient($credentials);
         } catch (Exception $e) {
-            $this->logger->debug('Create Fail', $e->getMessage());
+            $this->logger->debug('Client Creation Failed', $e->getMessage());
             throw $e;
         }
     }

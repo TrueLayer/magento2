@@ -78,7 +78,7 @@ class Webhook implements WebhookInterface
         $this->file = $file;
         $this->transactionRepository = $transactionRepository;
         $this->quoteRepository = $quoteRepository;
-        $this->logger = $logger->prefix('Webhook');
+        $this->logger = $logger->addPrefix('Webhook');
     }
 
     /**
@@ -92,13 +92,15 @@ class Webhook implements WebhookInterface
      */
     public function processTransfer()
     {
+        $this->refundFailedService->handle('b0327151-99a4-4e38-85fc-2a6795982b4b', 'foo');
+
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
 
         $webhook = TrueLayerWebhook::configure()
             ->useProduction(!$this->configProvider->isSandbox($this->getStoreId()))
             ->create()
             ->handler(function (TrueLayerWebhookInterface\EventInterface $event) {
-                $this->logger->debug('Webhook', $event->getBody());
+                $this->logger->debug('Body', $event->getBody());
             })
             ->handler(function (TrueLayerWebhookInterface\PaymentSettledEventInterface $event) {
                 $this->paymentSettledService->handle($event->getPaymentId());

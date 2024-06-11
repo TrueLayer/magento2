@@ -50,7 +50,7 @@ class PaymentSettledService
         $this->invoiceSender = $invoiceSender;
         $this->configRepository = $configRepository;
         $this->transactionService = $transactionService;
-        $this->logger = $logger->prefix('PaymentSettledService');
+        $this->logger = $logger;
     }
 
     /**
@@ -62,10 +62,10 @@ class PaymentSettledService
      */
     public function handle(string $paymentId)
     {
-        $this->logger->prefix($paymentId);
+        $prefix = "PaymentSettledService $paymentId";
+        $this->logger->addPrefix($prefix);
 
         $this->transactionService
-            ->logger($this->logger)
             ->paymentId($paymentId)
             ->execute(function (PaymentTransactionDataInterface $transaction) use ($paymentId) {
                 $order = $this->orderRepository->get($transaction->getOrderId());
@@ -74,6 +74,8 @@ class PaymentSettledService
                 $this->sendOrderEmail($order);
                 $this->sendInvoiceEmail($order);
             });
+
+        $this->logger->removePrefix($prefix);
     }
 
     private function updateOrder(OrderInterface $order, string $paymentId)

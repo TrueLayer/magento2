@@ -19,7 +19,7 @@ class LogService implements LogServiceInterface
     private ConfigProvider $configProvider;
     private Logger $debugLogger;
     private Logger $errorLogger;
-    private string $prefix = '';
+    private array $prefixes = [];
 
     /**
      * @param ConfigProvider $configProvider
@@ -61,21 +61,42 @@ class LogService implements LogServiceInterface
     /**
      * @inheriDoc
      */
-    public function prefix(string $prefix): self
+    public function addPrefix($prefix): self
     {
-        $this->prefix = $prefix;
-
+        $this->prefixes[] = $prefix;
         return $this;
     }
 
     /**
-     * @param string $type
+     * @param int|string $prefix
+     * @return $this
+     */
+    public function removePrefix($prefix): LogService
+    {
+        foreach ($this->prefixes as $key => $value) {
+            if ($value ===$prefix) {
+                unset($this->prefixes[$key]);
+                return $this;
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $msg
      * @param mixed $data
      * @return string
      */
-    private function buildMessage(string $type, $data = ''): string
+    private function buildMessage(string $msg, $data = ''): string
     {
-        return "$this->prefix: $type: {$this->convertDataToString($data)}";
+        $parts = $this->prefixes;
+        $parts[] = $msg;
+        
+        if ($serialisedData = $this->convertDataToString($data)) {
+            $parts[] = $serialisedData;
+        }
+
+        return join(' > ', $parts);
     }
 
     /**
@@ -84,10 +105,6 @@ class LogService implements LogServiceInterface
      */
     private function convertDataToString($data): string
     {
-        if (is_string($data)) {
-            return $data;
-        }
-
         if ($data instanceof \Exception) {
             return $data->getMessage() . " " . $data->getTraceAsString();
         }
@@ -102,6 +119,6 @@ class LogService implements LogServiceInterface
             }
         }
 
-        return 'failed to serialize error message';
+        return "{$data}";
     }
 }

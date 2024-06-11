@@ -47,7 +47,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
         $this->resource = $resource;
         $this->dataFactory = $dataFactory;
         $this->collectionFactory = $collectionFactory;
-        $this->logger = $logger->prefix('RefundTransactionRepository');
+        $this->logger = $logger;
     }
 
     /**
@@ -107,7 +107,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
             $this->resource->save($entity);
             return $entity;
         } catch (\Exception $exception) {
-            $this->logger->error('Save failed', $exception);
+            $this->logger->error('Could not save refund transaction', $exception);
             throw new CouldNotSaveException(__(self::COULD_NOT_SAVE_EXCEPTION, $exception->getMessage()));
         }
     }
@@ -124,7 +124,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
         $transaction = $this->dataFactory->create()->load($value, $col);
 
         if (!$transaction->getEntityId()) {
-            $this->logger->error('Entity not found', $value);
+            $this->logger->error('Refund transaction not found', $value);
             throw new NoSuchEntityException(__('No record found for %1: %2.', $col, $value));
         }
 

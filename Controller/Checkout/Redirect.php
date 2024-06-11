@@ -65,7 +65,7 @@ class Redirect extends BaseController
         $this->hppService = $hppService;
         $this->transactionRepository = $transactionRepository;
         $this->sessionHelper = $sessionHelper;
-        $this->logger = $logger->prefix('RedirectToHpp');
+        $this->logger = $logger->addPrefix('RedirectToHpp');
         parent::__construct($context);
     }
 
@@ -97,8 +97,11 @@ class Redirect extends BaseController
     private function createPaymentAndRedirect(): ResponseInterface
     {
         $order = $this->checkoutSession->getLastRealOrder();
+        $this->logger->addPrefix("order {$order->getEntityId()}");
+
         $created = $this->paymentCreationService->createPayment($order);
         $url = $this->hppService->getRedirectUrl($created);
+
         $transaction = $this->transactionRepository->getByPaymentUuid($created->getId());
         $this->sessionHelper->allowQuoteRestoration($transaction->getQuoteId());
 
