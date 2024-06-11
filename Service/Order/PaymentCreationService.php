@@ -13,9 +13,10 @@ use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Math\Random;
 use TrueLayer\Connect\Api\Log\LogService;
-use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
-use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
+use TrueLayer\Connect\Helper\AmountHelper;
 use TrueLayer\Connect\Service\Client\ClientFactory;
 use TrueLayer\Exceptions\ApiRequestJsonSerializationException;
 use TrueLayer\Exceptions\ApiResponseUnsuccessfulException;
@@ -70,7 +71,7 @@ class PaymentCreationService
      */
     public function createPayment(OrderInterface $order): PaymentCreatedInterface
     {
-        $this->logger->prefix("PaymentCreationService {$order->getEntityId()}");
+        $this->logger->prefix($order->getEntityId());
         $this->logger->debug('Start');
 
         // Get the TL user id if we recognise the email address
@@ -79,26 +80,26 @@ class PaymentCreationService
         $existingUserId = $existingUser["truelayer_id"] ?? null;
 
         // Create the TL payment
-        $this->logger->debug('Create client');
         $client = $this->clientFactory->create((int) $order->getStoreId());
+        $this->logger->debug('Create client');
 
-        $this->logger->debug('Find merchant account id');
         $merchantAccountId = $this->getMerchantAccountId($client, $order);
+        $this->logger->debug('Found merchant account', $merchantAccountId);
 
-        $this->logger->debug('Create payment');
         $paymentConfig = $this->createPaymentConfig($order, $merchantAccountId, $customerEmail, $existingUserId);
         $payment = $client->payment()->fill($paymentConfig)->create();
+        $this->logger->debug('Created payment', $payment->getId());
 
         // If new user, we save it
         if (!$existingUser) {
-            $this->logger->debug('Save new user');
             $this->userRepository->set($customerEmail, $payment->getUserId());
+            $this->logger->debug('Saved new user');
         }
 
         // Link the quote id to the payment id in the transaction table
-        $this->logger->debug('Create transaction entry');
         $transaction = $this->getTransaction($order)->setPaymentUuid($payment->getId());
         $this->transactionRepository->save($transaction);
+        $this->logger->debug('Payment transaction created', $transaction->getEntityId());
 
         return $payment;
     }
@@ -113,7 +114,7 @@ class PaymentCreationService
     private function createPaymentConfig(OrderInterface $order, string $merchantAccId, string $customerEmail, string $existingUserId = null): array
     {
         $config = [
-            "amount_in_minor" => (int) round($order->getBaseGrandTotal() * 100, 0, PHP_ROUND_HALF_UP),
+            "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
@@ -179,10 +180,10 @@ class PaymentCreationService
 
     /**
      * @param OrderInterface $order
-     * @return DataInterface
+     * @return PaymentTransactionDataInterface
      * @throws LocalizedException
      */
-    private function getTransaction(OrderInterface $order): DataInterface
+    private function getTransaction(OrderInterface $order): PaymentTransactionDataInterface
     {
         try {
             return $this->transactionRepository->getByOrderId((int) $order->getEntityId());

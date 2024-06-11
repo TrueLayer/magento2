@@ -7,71 +7,69 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Order\PaymentUpdate;
 
-use Magento\Framework\Exception\InputException;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
+use Exception;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService;
-use TrueLayer\Connect\Service\Order\PaymentFailureReasonService;
-use TrueLayer\Connect\Api\Transaction\Data\DataInterface as TransactionInterface;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
+use TrueLayer\Connect\Helper\PaymentFailureReasonHelper;
 
 class PaymentFailedService
 {
     private OrderRepositoryInterface $orderRepository;
-    private PaymentFailureReasonService $paymentFailureReasonService;
-    private TransactionService $transactionService;
+    private PaymentTransactionService $transactionService;
     private LogService $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository
-     * @param PaymentFailureReasonService $paymentFailureReasonService
-     * @param TransactionService $transactionService
+     * @param PaymentTransactionService $transactionService
      * @param LogService $logger
      */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        PaymentFailureReasonService $paymentFailureReasonService,
-        TransactionService $transactionService,
-        LogService $logger
+        OrderRepositoryInterface    $orderRepository,
+        PaymentTransactionService  $transactionService,
+        LogService                  $logger
     ) {
         $this->orderRepository = $orderRepository;
-        $this->paymentFailureReasonService = $paymentFailureReasonService;
         $this->transactionService = $transactionService;
-        $this->logger = $logger;
+        $this->logger = $logger->prefix('PaymentFailedService');
     }
 
     /**
      * @param string $paymentId
      * @param string $failureReason
-     * @throws InputException
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
+     * @throws Exception
      */
     public function handle(string $paymentId, string $failureReason): void
     {
+        $this->logger->prefix($paymentId);
+
         $this->transactionService
-            ->logger($this->logger->prefix("PaymentFailedService $paymentId"))
+            ->logger($this->logger)
             ->paymentId($paymentId)
             ->execute(fn($transaction) => $this->cancelOrder($transaction, $failureReason));
     }
 
     /**
-     * @param TransactionInterface $transaction
+     * @param PaymentTransactionDataInterface $transaction
      * @param string $failureReason
      */
-    private function cancelOrder(TransactionInterface $transaction, string $failureReason): void
+    private function cancelOrder(PaymentTransactionDataInterface $transaction, string $failureReason): void
     {
         $order = $this->orderRepository->get($transaction->getOrderId());
 
         if (!$order->isCanceled()) {
             $order->cancel();
+            $this->logger->debug('Order cancelled');
         }
 
-        $orderComment = "Order cancelled. {$this->paymentFailureReasonService->getHumanReadableLabel($failureReason)} ($failureReason)";
+        $niceMessage = PaymentFailureReasonHelper::getHumanReadableLabel($failureReason);
+        $orderComment = "Order cancelled. {$niceMessage} ($failureReason)";
         $order->addStatusToHistory($order->getStatus(), $orderComment, true);
         $this->orderRepository->save($order);
+        $this->logger->debug('Order comment added');
 
         $transaction->setStatus('payment_failed');
         $transaction->setFailureReason($failureReason);
+        $this->logger->debug('Payment transaction updated');
     }
 }

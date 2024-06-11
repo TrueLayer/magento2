@@ -3,4 +3,7 @@
     <event name="checkout_submit_all_after">
         <observer name="truelayer_connect_order_place_after" instance="TrueLayer\Connect\Observer\OrderPlacedObserver" />
     </event>
+    <event name="sales_order_creditmemo_save_after">
+        <observer name="truelayer_connect_creditmemo_save_after" instance="TrueLayer\Connect\Observer\CreditMemoObserver" />
+    </event>
 </config>

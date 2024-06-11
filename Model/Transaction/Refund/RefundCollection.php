@@ -5,17 +5,12 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Model\Transaction;
+namespace TrueLayer\Connect\Model\Transaction\Refund;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
-use TrueLayer\Connect\Model\Transaction\DataModel as Model;
 
-/**
- * Transaction Resource Collection
- */
-class Collection extends AbstractCollection
+class RefundCollection extends AbstractCollection
 {
-
     /**
      * Define resource model
      *
@@ -23,6 +18,6 @@ class Collection extends AbstractCollection
      */
     protected function _construct()
     {
-        $this->_init(Model::class, ResourceModel::class);
+        $this->_init(RefundTransactionDataModel::class, RefundTransactionResourceModel::class);
     }
 }

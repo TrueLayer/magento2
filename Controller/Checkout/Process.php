@@ -20,13 +20,14 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Controller\Result\Json as JsonResult;
 use Magento\Framework\Controller\Result\JsonFactory;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Helper\SessionHelper;
+use TrueLayer\Connect\Helper\ValidationHelper;
 use TrueLayer\Connect\Model\Config\Repository as ConfigRepository;
 use TrueLayer\Connect\Service\Client\ClientFactory;
-use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
-use TrueLayer\Connect\Service\Order\PaymentFailureReasonService;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
+use TrueLayer\Connect\Helper\PaymentFailureReasonHelper;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
-use TrueLayer\Connect\Service\Validation\ValidationService;
 use TrueLayer\Interfaces\Payment\PaymentFailedInterface;
 use TrueLayer\Interfaces\Payment\PaymentRetrievedInterface;
 use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
@@ -37,16 +38,15 @@ use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
  */
 class Process extends BaseController
 {
-    private PaymentFailedService $paymentFailedService;
-    private PaymentSettledService $paymentSettledService;
     private OrderRepositoryInterface $orderRepository;
     private PageFactory $pageFactory;
     private JsonFactory $jsonFactory;
+    private PaymentFailedService $paymentFailedService;
+    private PaymentSettledService $paymentSettledService;
     private ClientFactory $clientFactory;
     private ConfigRepository $configRepository;
     private TransactionRepository $transactionRepository;
-    private PaymentFailureReasonService $paymentFailureReasonService;
-    private ValidationService $validationService;
+    private SessionHelper $sessionHelper;
     private LogRepository $logger;
 
     public function __construct(
@@ -59,8 +59,7 @@ class Process extends BaseController
         PaymentFailedService $paymentFailedService,
         ConfigRepository $configRepository,
         TransactionRepository $transactionRepository,
-        PaymentFailureReasonService $paymentFailureReasonService,
-        ValidationService $validationService,
+        SessionHelper $sessionHelper,
         LogRepository $logRepository
     ) {
         $this->orderRepository = $orderRepository;
@@ -71,8 +70,7 @@ class Process extends BaseController
         $this->transactionRepository = $transactionRepository;
         $this->paymentSettledService = $paymentSettledService;
         $this->paymentFailedService = $paymentFailedService;
-        $this->paymentFailureReasonService = $paymentFailureReasonService;
-        $this->validationService = $validationService;
+        $this->sessionHelper = $sessionHelper;
         $this->logger = $logRepository->prefix('Process');
         parent::__construct($context);
     }
@@ -88,7 +86,7 @@ class Process extends BaseController
         $paymentId = $this->context->getRequest()->getParam('payment_id');
 
         // Validate payment id
-        if (!$paymentId || !$this->validationService->isUUID($paymentId)) {
+        if (!$paymentId || !ValidationHelper::isUUID($paymentId)) {
             return $this->noPaymentFoundResponse();
         }
 
@@ -129,8 +127,9 @@ class Process extends BaseController
         }
 
         if ($transaction->getStatus() === 'payment_failed') {
-            $message = $this->paymentFailureReasonService->getHumanReadableLabel($transaction->getFailureReason());
-            $this->context->getMessageManager()->addErrorMessage($message);
+            $this->sessionHelper->restoreQuote($transaction->getQuoteId());
+            $message = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
+            $this->context->getMessageManager()->addErrorMessage($message . ' ' . __('Please try again.'));
             return $this->urlResponse('checkout/cart');
         }
 

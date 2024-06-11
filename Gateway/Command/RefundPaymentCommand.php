@@ -13,23 +13,22 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order\Creditmemo;
-use TrueLayer\Connect\Service\Order\PaymentRefundService;
+use TrueLayer\Connect\Service\Order\RefundService;
 use TrueLayer\Connect\Api\Log\LogService;
 
 class RefundPaymentCommand extends AbstractCommand
 {
-    private PaymentRefundService $refundService;
+    private RefundService $refundService;
 
     /**
-     * @param PaymentRefundService $refundService
+     * @param RefundService $refundService
      * @param OrderRepositoryInterface $orderRepository
      * @param LogService $logger
      */
     public function __construct(
-        PaymentRefundService     $refundService,
+        RefundService            $refundService,
         OrderRepositoryInterface $orderRepository,
-        LogService            $logger
+        LogService               $logger
     ) {
         $this->refundService = $refundService;
         parent::__construct($orderRepository, $logger->prefix("RefundPaymentCommand"));
@@ -44,16 +43,7 @@ class RefundPaymentCommand extends AbstractCommand
      */
     protected function executeCommand(array $subject): void
     {
-        /** @var Order\Payment $payment */
-        $payment = SubjectReader::readPayment($subject)->getPayment();
-
-        /** @var Creditmemo $creditMemo */
-        $creditMemo = $payment->getCreditmemo();
-
-
         $order = $this->getOrder($subject);
-        $refundId = $this->refundService->refund($order, (float) SubjectReader::readAmount($subject));
-
-        $creditMemo->setCustomAttribute('truelayer_refund_id', $refundId);
+        $this->refundService->refund($order, (float) SubjectReader::readAmount($subject));
     }
 }

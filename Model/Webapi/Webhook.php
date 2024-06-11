@@ -16,12 +16,13 @@ use Magento\Quote\Api\CartRepositoryInterface;
 use ReflectionException;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
-use TrueLayer\Connect\Api\Transaction\RepositoryInterface as TransactionRepository;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
+use TrueLayer\Connect\Helper\ValidationHelper;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
 use TrueLayer\Connect\Service\Order\RefundUpdate\RefundFailedService;
-use TrueLayer\Connect\Service\Validation\ValidationService;
+use TrueLayer\Connect\Helper\ValidationService;
 use TrueLayer\Exceptions\Exception;
 use TrueLayer\Exceptions\InvalidArgumentException;
 use TrueLayer\Exceptions\SignerException;
@@ -45,7 +46,6 @@ class Webhook implements WebhookInterface
     private File $file;
     private TransactionRepository $transactionRepository;
     private CartRepositoryInterface $quoteRepository;
-    private ValidationService $validationService;
     private LogRepository $logger;
 
     /**
@@ -57,7 +57,6 @@ class Webhook implements WebhookInterface
      * @param File $file
      * @param TransactionRepository $transactionRepository
      * @param CartRepositoryInterface $quoteRepository
-     * @param ValidationService $validationService
      * @param LogRepository $logger
      */
     public function __construct(
@@ -69,7 +68,6 @@ class Webhook implements WebhookInterface
         File                    $file,
         TransactionRepository   $transactionRepository,
         CartRepositoryInterface $quoteRepository,
-        ValidationService $validationService,
         LogRepository           $logger
     ) {
         $this->paymentSettledService = $paymentSettledService;
@@ -80,7 +78,6 @@ class Webhook implements WebhookInterface
         $this->file = $file;
         $this->transactionRepository = $transactionRepository;
         $this->quoteRepository = $quoteRepository;
-        $this->validationService = $validationService;
         $this->logger = $logger->prefix('Webhook');
     }
 
@@ -92,7 +89,6 @@ class Webhook implements WebhookInterface
      * @throws SignerException
      * @throws WebhookHandlerException
      * @throws WebhookHandlerInvalidArgumentException
-     * @throws NoSuchEntityException
      */
     public function processTransfer()
     {
@@ -111,7 +107,7 @@ class Webhook implements WebhookInterface
                 $this->paymentFailedService->handle($event->getPaymentId(), $event->getFailureReason());
             })
             ->handler(function(TrueLayerWebhookInterface\RefundFailedEventInterface $event) {
-                $this->refundFailedService->handle($event->getPaymentId(), $event->getFailureReason());
+                $this->refundFailedService->handle($event->getRefundId(), $event->getFailureReason());
             });
 
         try {
@@ -119,8 +115,8 @@ class Webhook implements WebhookInterface
         } catch (WebhookVerificationFailedException $e) {
             throw new AuthorizationException(__('Invalid signature')); // 401
         } catch (NoSuchEntityException $e) {
-            $this->logger->error('Not found');
-            throw $e; // 404
+            // We intentionally do not surface a 404 status code
+            $this->logger->error('Aborting webhook, payment or refund not found');
         }
     }
 
@@ -157,7 +153,7 @@ class Webhook implements WebhookInterface
         $post = $this->file->fileGetContents('php://input');
         $postArray = $this->jsonSerializer->unserialize($post);
 
-        if (!isset($postArray['payment_id']) || !$this->validationService->isUUID((string) $postArray['payment_id'])) {
+        if (!isset($postArray['payment_id']) || !ValidationHelper::isUUID((string) $postArray['payment_id'])) {
             return null;
         }
 

@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Api\Transaction\Data;
+namespace TrueLayer\Connect\Api\Transaction;
 
 use Magento\Framework\Api\ExtensibleDataInterface;
 
@@ -13,20 +13,15 @@ use Magento\Framework\Api\ExtensibleDataInterface;
  * Interface for transaction model
  * @api
  */
-interface DataInterface extends ExtensibleDataInterface
+interface BaseTransactionDataInterface extends ExtensibleDataInterface
 {
     /**
      * Constants for keys of data array.
      */
     public const ENTITY_ID = 'entity_id';
-    public const QUOTE_ID = 'quote_id';
     public const ORDER_ID = 'order_id';
-    public const UUID = 'uuid';
-    public const TOKEN = 'token';
     public const STATUS = 'status';
     public const FAILURE_REASON = 'failure_reason';
-    public const INVOICE_UUID = 'invoice_uuid';
-    public const PAYMENT_URL = 'payment_url';
     public const IS_LOCKED = 'is_locked';
 
     /**
@@ -35,21 +30,6 @@ interface DataInterface extends ExtensibleDataInterface
      * @return int ID.
      */
     public function getEntityId(): int;
-
-    /**
-     * Returns the quote ID.
-     *
-     * @return int|null quote ID.
-     */
-    public function getQuoteId(): ?int;
-
-    /**
-     * Sets the quote ID.
-     *
-     * @param int $quoteId
-     * @return $this
-     */
-    public function setQuoteId(int $quoteId): self;
 
     /**
      * Returns the order ID.
@@ -65,21 +45,6 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setOrderId(int $orderId): self;
-
-    /**
-     * Return token.
-     *
-     * @return string|null
-     */
-    public function getToken(): ?string;
-
-    /**
-     * Set token.
-     *
-     * @param string $value
-     * @return $this
-     */
-    public function setToken(string $value): self;
 
     /**
      * Return the payment uuid.
@@ -127,47 +92,17 @@ interface DataInterface extends ExtensibleDataInterface
     public function setFailureReason(string $failureReason): self;
 
     /**
-     * Return invoice_uuid.
-     *
-     * @return string|null
-     */
-    public function getInvoiceUuid(): ?string;
-
-    /**
-     * Set invoice_uid.
-     *
-     * @param string $invoiceUuid
-     * @return $this
-     */
-    public function setInvoiceUuid(string $invoiceUuid): self;
-
-    /**
-     * Return payment_url.
-     *
-     * @return string|null
-     */
-    public function getPaymentUrl(): ?string;
-
-    /**
-     * Set payment_url.
-     *
-     * @param string $paymentUrl
-     * @return $this
-     */
-    public function setPaymentUrl(string $paymentUrl): self;
-
-    /**
      * Return is_locked.
      *
-     * @return int|null
+     * @return bool
      */
-    public function getIsLocked(): ?int;
+    public function getIsLocked(): bool;
 
     /**
      * Set is_locked.
      *
-     * @param int $isLocked
+     * @param bool $isLocked
      * @return $this
      */
-    public function setIsLocked(int $isLocked): self;
+    public function setIsLocked(bool $isLocked): self;
 }

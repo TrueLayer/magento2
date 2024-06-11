@@ -18,7 +18,7 @@ use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogService;
-use TrueLayer\Connect\Api\Transaction\Data\DataInterface as TransactionInterface;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 
 class PaymentSettledService
 {
@@ -26,7 +26,7 @@ class PaymentSettledService
     private OrderSender $orderSender;
     private ConfigRepository $configRepository;
     private OrderRepositoryInterface $orderRepository;
-    private TransactionService $transactionService;
+    private PaymentTransactionService $transactionService;
     private LogService $logger;
 
     /**
@@ -34,23 +34,23 @@ class PaymentSettledService
      * @param OrderSender $orderSender
      * @param InvoiceSender $invoiceSender
      * @param ConfigRepository $configRepository
-     * @param TransactionService $transactionService
+     * @param PaymentTransactionService $transactionService
      * @param LogService $logger
      */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        OrderSender $orderSender,
-        InvoiceSender $invoiceSender,
-        ConfigRepository $configRepository,
-        TransactionService $transactionService,
-        LogService $logger
+        OrderRepositoryInterface   $orderRepository,
+        OrderSender                $orderSender,
+        InvoiceSender              $invoiceSender,
+        ConfigRepository           $configRepository,
+        PaymentTransactionService $transactionService,
+        LogService                 $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderSender = $orderSender;
         $this->invoiceSender = $invoiceSender;
         $this->configRepository = $configRepository;
         $this->transactionService = $transactionService;
-        $this->logger = $logger;
+        $this->logger = $logger->prefix('PaymentSettledService');
     }
 
     /**
@@ -62,10 +62,12 @@ class PaymentSettledService
      */
     public function handle(string $paymentId)
     {
+        $this->logger->prefix($paymentId);
+
         $this->transactionService
-            ->logger($this->logger->prefix("PaymentSettledService $paymentId"))
+            ->logger($this->logger)
             ->paymentId($paymentId)
-            ->execute(function (TransactionInterface $transaction) use ($paymentId) {
+            ->execute(function (PaymentTransactionDataInterface $transaction) use ($paymentId) {
                 $order = $this->orderRepository->get($transaction->getOrderId());
                 $this->updateOrder($order, $paymentId);
                 $transaction->setStatus('payment_settled');

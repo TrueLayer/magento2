@@ -30,7 +30,7 @@ interface LogService
     public function debug(string $type, $data): LogService;
 
     /**
-     * @param string $prefix
+     * @param string|int $prefix
      */
-    public function prefix(string $prefix): LogService;
+    public function prefix($prefix): LogService;
 }

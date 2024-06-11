@@ -5,16 +5,16 @@
  */
 declare(strict_types=1);
 
-namespace TrueLayer\Connect\Model\Transaction;
+namespace TrueLayer\Connect\Model\Transaction\Payment;
 
 use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Model\AbstractModel;
-use TrueLayer\Connect\Api\Transaction\Data\DataInterface;
+use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 
 /**
- * Transaction DataModel
+ * Transaction PaymentTransactionDataModel
  */
-class DataModel extends AbstractModel implements ExtensibleDataInterface, DataInterface
+class PaymentTransactionDataModel extends AbstractModel implements ExtensibleDataInterface, PaymentTransactionDataInterface
 {
 
     /**
@@ -22,7 +22,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
      */
     public function _construct()
     {
-        $this->_init(ResourceModel::class);
+        $this->_init(PaymentTransactionResourceModel::class);
     }
 
     /**
@@ -46,7 +46,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setQuoteId(int $quoteId): DataInterface
+    public function setQuoteId(int $quoteId): PaymentTransactionDataInterface
     {
         return $this->setData(self::QUOTE_ID, $quoteId);
     }
@@ -64,7 +64,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setOrderId(int $orderId): DataInterface
+    public function setOrderId(int $orderId): PaymentTransactionDataInterface
     {
         return $this->setData(self::ORDER_ID, $orderId);
     }
@@ -82,7 +82,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setToken(string $value): DataInterface
+    public function setToken(string $value): PaymentTransactionDataInterface
     {
         return $this->setData(self::TOKEN, $value);
     }
@@ -100,7 +100,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setPaymentUuid(string $value): DataInterface
+    public function setPaymentUuid(string $value): PaymentTransactionDataInterface
     {
         return $this->setData(self::UUID, $value);
     }
@@ -118,7 +118,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setStatus(string $status): DataInterface
+    public function setStatus(string $status): PaymentTransactionDataInterface
     {
         return $this->setData(self::STATUS, $status);
     }
@@ -136,7 +136,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setFailureReason(string $failureReason): DataInterface
+    public function setFailureReason(string $failureReason): PaymentTransactionDataInterface
     {
         return $this->setData(self::FAILURE_REASON, $failureReason);
     }
@@ -154,7 +154,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setInvoiceUuid(string $invoiceUuid): DataInterface
+    public function setInvoiceUuid(string $invoiceUuid): PaymentTransactionDataInterface
     {
         return $this->setData(self::INVOICE_UUID, $invoiceUuid);
     }
@@ -172,7 +172,7 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function setPaymentUrl(string $paymentUrl): DataInterface
+    public function setPaymentUrl(string $paymentUrl): PaymentTransactionDataInterface
     {
         return $this->setData(self::PAYMENT_URL, $paymentUrl);
     }
@@ -180,18 +180,16 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
-    public function getIsLocked(): ?int
+    public function getIsLocked(): bool
     {
-        return $this->getData(self::IS_LOCKED)
-            ? (int)$this->getData(self::IS_LOCKED)
-            : null;
+        return (bool) $this->getData(self::IS_LOCKED);
     }
 
     /**
      * @inheritDoc
      */
-    public function setIsLocked(int $isLocked): DataInterface
+    public function setIsLocked(bool $isLocked): PaymentTransactionDataInterface
     {
-        return $this->setData(self::IS_LOCKED, $isLocked);
+        return $this->setData(self::IS_LOCKED, $isLocked ? 1 : 0);
     }
 }

@@ -36,13 +36,13 @@ class OrderPlacedObserver implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $this->logger->debug('Start');
-
         $order = $observer->getEvent()->getOrder();
 
         if ($order->getPayment()->getMethod() !== 'truelayer') {
             return;
         }
+
+        $this->logger->debug('Start');
 
         // Set order status to pending payment
         $order
