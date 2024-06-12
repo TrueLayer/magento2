@@ -9,6 +9,7 @@ namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
@@ -29,6 +30,7 @@ class ProcessWebhook
 {
 
     public const SUCCESS_MSG = 'Order #%1 successfully captured on TrueLayer';
+
     /**
      * @var CheckoutSession
      */
@@ -127,11 +129,19 @@ class ProcessWebhook
             );
 
             if (!$quoteId = $transaction->getQuoteId()) {
-                $this->logRepository->addDebugLog('webhook', 'no quote id found in transaction');
-                return;
+                $message = 'No quote id found in transaction';
+                $this->logRepository->addDebugLog('webhook', $message);
+                throw new LocalizedException(__($message));
             }
 
             $quote = $this->quoteRepository->get($quoteId);
+
+            if ($transaction->getAmount() != (int)bcmul((string)$quote->getBaseGrandTotal(), '100')) {
+                $message = 'Quote amount was changed';
+                $this->logRepository->addDebugLog('webhook', $message);
+                throw new LocalizedException(__($message));
+            }
+
             $this->checkoutSession->setQuoteId($quoteId);
 
             if (!$this->transactionRepository->isLocked($transaction)) {
@@ -150,6 +160,7 @@ class ProcessWebhook
             }
         } catch (Exception $e) {
             $this->logRepository->addDebugLog('webhook exception', $e->getMessage());
+            throw new LocalizedException(__($e->getMessage()));
         }
     }
 
@@ -176,7 +187,7 @@ class ProcessWebhook
             $this->sendInvoiceEmail($order);
         } catch (Exception $e) {
             $this->logRepository->addDebugLog('place order', $e->getMessage());
-            return false;
+            throw new LocalizedException(__($e->getMessage()));
         }
 
         return $order->getEntityId();

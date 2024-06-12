@@ -54,6 +54,22 @@ class DataModel extends AbstractModel implements ExtensibleDataInterface, DataIn
     /**
      * @inheritDoc
      */
+    public function getAmount(): int
+    {
+        return (int)$this->getData(self::AMOUNT);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setAmount(int $amount): DataInterface
+    {
+        return $this->setData(self::AMOUNT, $amount);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getOrderId(): ?int
     {
         return $this->getData(self::ORDER_ID)

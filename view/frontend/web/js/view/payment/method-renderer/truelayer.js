@@ -1,113 +1,129 @@
-/**
- * Copyright © TrueLayer Ltd. All rights reserved.
- * See COPYING.txt for license details.
- */
-/*browser:true*/
-/*global define*/
-define(
-    [
-        'jquery',
-        'Magento_Checkout/js/view/payment/default',
-        'Magento_Checkout/js/model/error-processor',
-        'Magento_Checkout/js/model/quote',
-        'Magento_Customer/js/model/customer',
-        'Magento_Checkout/js/model/url-builder',
-        'Magento_Checkout/js/model/full-screen-loader',
-        'mage/storage',
-        'Magento_Ui/js/model/messageList',
-        'Magento_Checkout/js/model/payment/additional-validators',
-        'uiRegistry'
-    ],
-    function ($, Component, errorProcessor, quote, customer, urlBuilder, fullScreenLoader, storage, messageList, additionalValidators, uiRegistry) {
-        'use strict';
+define([
+    'ko',
+    'Magento_Checkout/js/view/payment/default',
+    'Magento_Checkout/js/model/quote',
+    'Magento_Customer/js/model/customer',
+    'Magento_Checkout/js/model/step-navigator',
+    'Magento_Checkout/js/action/set-payment-information',
+    'mage/translate',
+    'Magento_Ui/js/model/messageList',
+    'https://cdn.jsdelivr.net/npm/truelayer-web-sdk/dist/sdk.min.js',
+], function (ko, Component, quote, customer, stepNavigator, setPaymentInformation, $t, messageList, truelayerSdk) {
+    'use strict';
 
-        var payload = '';
+    return Component.extend({
+        defaults: {
+            template: 'TrueLayer_Connect/payment/truelayer',
+            successMessage: ko.observable(''),
+            infoMessage: ko.observable(''),
+            buttonSize: ko.observable('small'), // 'small' or 'large',
+            isWidgetInit: ko.observable(false),
+            orderResult: null,
+            doneFuncCompletedProtection: ko.observable(0), // Fix: savety against infinite requests
+        },
 
-        return Component.extend({
-            defaults: {
-                template: 'TrueLayer_Connect/payment/truelayer'
-            },
+        initialize() {
+            this._super();
 
-            getCode: function() {
-                return 'truelayer';
-            },
+            this.isPaymentStepLoaded();
+            stepNavigator.steps.subscribe(() => this.isPaymentStepLoaded());
 
-            placeOrder: function (data, event) {
-                if (event) {
-                    event.preventDefault();
+            return this;
+        },
+
+        isPaymentStepLoaded() {
+            const steps = stepNavigator.steps();
+            const payment = steps.find((step) => step.code === 'payment');
+
+            if (payment && payment.isVisible()) {
+                // Fix: Correcting a duplicate request "set-payment-information"
+                // Trigger prompt on page load when no payment method is selected
+                if (!quote.paymentMethod()) {
+                    setPaymentInformation(messageList, { method: this.getCode() }, false);
                 }
+                
+                const timeout = setTimeout(async () => {
+                    this.orderResult = await this.orderRequest(customer.isLoggedIn(), quote.getQuoteId());
+                    this.initWidget();
 
-                this.isPlaceOrderActionAllowed(false);
-                var _this = this;
+                    clearTimeout(timeout);
+                }, 500);
+            }
+        },
 
-                if (additionalValidators.validate()) {
-                    fullScreenLoader.startLoader();
-                    _this._placeOrder();
-                }
-            },
+        getCode: () => 'truelayer',
 
-            _placeOrder: function () {
-                return this.setPaymentInformation().done(function () {
-                    this.orderRequest(customer.isLoggedIn(), quote.getQuoteId());
-                }.bind(this));
-            },
-
-            setPaymentInformation: function() {
-                var serviceUrl, payload;
-
-                payload = {
-                    cartId: quote.getQuoteId(),
-                    billingAddress: quote.billingAddress(),
-                    paymentMethod: this.getData()
-                };
-
-                if (customer.isLoggedIn()) {
-                    serviceUrl = urlBuilder.createUrl('/carts/mine/set-payment-information', {});
-                } else {
-                    payload.email = quote.guestEmail;
-                    serviceUrl = urlBuilder.createUrl('/guest-carts/:quoteId/set-payment-information', {
-                        quoteId: quote.getQuoteId()
-                    });
-                }
-
-                return storage.post(
-                    serviceUrl, JSON.stringify(payload)
-                );
-            },
-
-            orderRequest: function(isLoggedIn, cartId) {
-                var url = 'rest/V1/truelayer/order-request';
-
-                payload = {
-                    isLoggedIn: isLoggedIn,
-                    cartId: cartId,
-                    paymentMethod: this.getData()
-                };
-
-                storage.post(
-                    url,
-                    JSON.stringify(payload)
-                ).done(function (response) {
-                    if (response[0].success) {
-                        fullScreenLoader.stopLoader();
-                        window.location.replace(response[0].payment_page_url);
-                    } else {
-                        fullScreenLoader.stopLoader();
-                        this.addError(response[0].message);
-                    }
-                }.bind(this));
-            },
-
-            /**
-             * Adds error message
-             *
-             * @param {String} message
-             */
-            addError: function (message) {
-                messageList.addErrorMessage({
-                    message: message
+        async orderRequest(isLoggedIn, cartId) {
+            try {
+                const response = await fetch(`${window.location.origin}/rest/V1/truelayer/order-request`, {
+                    method: 'POST',
+                    headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        isLoggedIn,
+                        cartId,
+                        paymentMethod: this.getData(),
+                    }),
                 });
-            },
-        });
-    }
-);
+
+                const result = await response.json();
+
+                if (result[0].success) {
+                    return result[0].response;
+                } else {
+                    throw new Error($t('Failed getting order request result.'));
+                }
+            } catch (error) {
+                messageList.addErrorMessage({ message: error });
+            }
+        },
+
+        initWidget() {
+            this.isWidgetInit(true);
+            this.doneFuncCompletedProtection(0);
+
+            truelayerSdk.initWebSdk({
+                uiSettings: {
+                    size: this.buttonSize(),
+                    recommendedPaymentMethod: true,
+                },
+
+                onError: (error) => messageList.addErrorMessage({ message: $t('Widget error: ') + error }),
+                onDone: (response) => this.onDone(response),
+            })
+            .mount(document.getElementById('truelayer-widget-iframe'))
+            .start({
+                paymentId: this.orderResult['payment_id'],
+                resourceToken: this.orderResult['resource_token'],
+            });
+        },
+
+        async onDone(response) {
+            this.doneFuncCompletedProtection(this.doneFuncCompletedProtection() + 1);
+
+            if (this.doneFuncCompletedProtection() === 1) {
+                if (response.resultStatus === 'success') {
+                    this.successMessage($t('Payment success: page will reload.'));
+                    window.location.replace(`/truelayer/checkout/process/payment_id/${this.orderResult['transaction_id']}`);
+                }
+
+                if (response.resultStatus === 'pending') {
+                    this.infoMessage($t('Payment pending: page will reload.'));
+                    window.location.replace(`/truelayer/checkout/process/payment_id/${this.orderResult['transaction_id']}`);
+                }
+
+                if (response.resultStatus === 'failed') {
+                    this.isWidgetInit(false);
+                    this.orderResult = await this.orderRequest(customer.isLoggedIn(), quote.getQuoteId());
+
+                    const timeout = setTimeout(() => {
+                        this.initWidget();
+                        clearTimeout(timeout);
+                    }, 1000);
+                }
+            }
+        },
+    });
+});

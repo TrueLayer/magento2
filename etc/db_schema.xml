@@ -8,6 +8,7 @@
     <table name="truelayer_transaction" engine="innodb" resource="default" comment="TrueLayer Transaction Table">
         <column name="entity_id" xsi:type="int" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
         <column name="quote_id" xsi:type="int" padding="10" nullable="false" unsigned="true" comment="Quote Id"/>
+        <column name="amount" xsi:type="int" padding="10" nullable="false" default="0" comment="Amount"/>
         <column name="order_id" xsi:type="int" nullable="true" unsigned="true" comment="Order Id"/>
         <column name="token" xsi:type="varchar" length="128" nullable="false" comment="Token"/>
         <column name="uuid" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Uuid from Response"/>
