@@ -1,0 +1,63 @@
+//
+//  Common
+//  _____________________________________________
+
+& when (@media-common = true) {
+
+    // Modify base payment method styles for truelayer method
+    .truelayer-payment-method {
+        .payment-method-title  {
+            label {
+                position: relative;
+                padding-left: 32px;
+
+                &::before {
+                    content: '';
+
+                    position: absolute;
+                    top: -6px;
+                    left: 0;
+        
+                    width: 24px;
+                    height: 24px;
+                    background: url("TrueLayer_Connect::images/bank.svg") no-repeat center center;
+                }
+            }
+        }
+
+        .payment-method-content {
+            iframe {
+                border: 0;
+            }
+
+            .small [name="tl-checkout-widget"],
+            .small .loader {
+                height: 60px;
+                margin-bottom: 18px;
+            }
+
+            .large [name="tl-checkout-widget"],
+            .large .loader {
+                min-height: 160px;
+                margin-bottom: 18px;
+            }
+
+            .widget-button {
+                position: relative;
+                z-index: 10;
+                max-width: 450px;
+            }
+
+            .loader {
+                display: block;
+                background: url("@{baseDir}images/loader-1.gif") no-repeat center center;
+                background-size: 36px;
+            }
+        }
+
+        .message.success,
+        .message.info {
+            margin-bottom: 24px;
+        }
+    }
+}

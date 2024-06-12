@@ -124,7 +124,7 @@ class MakeRequest
      * Executes TrueLayer Api for Order Request and returns redirect to platform Url
      *
      * @param string $token
-     * @return string
+     * @return array
      * @throws AuthenticationException
      * @throws CouldNotSaveException
      * @throws InputException
@@ -133,7 +133,7 @@ class MakeRequest
      * @throws \TrueLayer\Exceptions\InvalidArgumentException
      * @throws \TrueLayer\Exceptions\ValidationException
      */
-    public function execute(string $token): string
+    public function execute(string $token)
     {
         $transaction = $this->transactionRepository->getByToken($token);
         $quote = $this->quoteRepository->get($transaction->getQuoteId());
@@ -163,15 +163,15 @@ class MakeRequest
         }
 
         if ($payment->getId()) {
-            $transaction->setUuid($payment->getId());
+            $transaction->setUuid($payment->getId())
+                ->setAmount($paymentData['amount_in_minor']);
             $this->transactionRepository->save($transaction);
-            $this->duplicateCurrentQuote($quote);
-            return $payment->hostedPaymentsPage()
-                ->returnUri($this->getReturnUrl())
-                ->primaryColour($this->configProvider->getPaymentPagePrimaryColor())
-                ->secondaryColour($this->configProvider->getPaymentPageSecondaryColor())
-                ->tertiaryColour($this->configProvider->getPaymentPageTertiaryColor())
-                ->toUrl();
+
+            return [
+                'payment_id' => $payment->getId(),
+                'resource_token' => $payment->getResourceToken(),
+                'transaction_id' => $transaction->getUuid(),
+            ];
         }
 
         $msg = self::REQUEST_EXCEPTION;
@@ -233,7 +233,8 @@ class MakeRequest
                     "type" => "merchant_account",
                     "name" => $this->configProvider->getMerchantAccountName(),
                     "merchant_account_id" => $merchantAccountId
-                ]
+                ],
+                "retry" => []
             ],
             "user" => [
                 "name" => trim($quote->getBillingAddress()->getFirstname()) .
@@ -251,74 +252,5 @@ class MakeRequest
         $this->logRepository->addDebugLog('order request', $data);
 
         return $data;
-    }
-
-    /**
-     * Duplicate current quote and set this as active session.
-     * This prevents quotes to change during checkout process
-     *
-     * @param Quote $quote
-     * @throws NoSuchEntityException
-     * @throws CouldNotSaveException
-     */
-    private function duplicateCurrentQuote(Quote $quote)
-    {
-        $quote->setIsActive(false);
-        $this->quoteRepository->save($quote);
-        if ($customerId = $quote->getCustomerId()) {
-            $cartId = $this->cartManagement->createEmptyCartForCustomer($customerId);
-        } else {
-            $cartId = $this->cartManagement->createEmptyCart();
-        }
-        $newQuote = $this->quoteRepository->get($cartId);
-        $newQuote->merge($quote);
-
-        $newQuote->removeAllAddresses();
-        if (!$quote->getIsVirtual()) {
-            $addressData = $this->dataObjectProcessor->buildOutputDataArray(
-                $quote->getShippingAddress(),
-                AddressInterface::class
-            );
-            unset($addressData['id']);
-            $shippingAddress = $this->quoteAddressFactory->create();
-            $this->dataObjectHelper->populateWithArray(
-                $shippingAddress,
-                $addressData,
-                AddressInterface::class
-            );
-            $newQuote->setShippingAddress(
-                $shippingAddress
-            );
-        }
-
-        $addressData = $this->dataObjectProcessor->buildOutputDataArray(
-            $quote->getBillingAddress(),
-            AddressInterface::class
-        );
-        unset($addressData['id']);
-        $billingAddress = $this->quoteAddressFactory->create();
-        $this->dataObjectHelper->populateWithArray(
-            $billingAddress,
-            $addressData,
-            AddressInterface::class
-        );
-        $newQuote->setBillingAddress(
-            $billingAddress
-        );
-
-        $newQuote->setTotalsCollectedFlag(false)->collectTotals();
-        $this->quoteRepository->save($newQuote);
-
-        $this->checkoutSession->replaceQuote($newQuote);
-    }
-
-    /**
-     * Get return url
-     *
-     * @return string
-     */
-    private function getReturnUrl(): string
-    {
-        return $this->configProvider->getBaseUrl() . 'truelayer/checkout/process/';
     }
 }

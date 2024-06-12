@@ -70,8 +70,8 @@ class Checkout implements CheckoutInterface
         //web api can't return first level associative array
         $return = [];
         try {
-            $paymentUrl = $this->orderRequest->execute($token);
-            $return['response'] = ['success' => true, 'payment_page_url' => $paymentUrl];
+            $response = $this->orderRequest->execute($token);
+            $return['response'] = ['success' => true, 'response' => $response];
             return $return;
         } catch (\Exception $exception) {
             $this->logRepository->addErrorLog('Checkout endpoint', $exception->getMessage());

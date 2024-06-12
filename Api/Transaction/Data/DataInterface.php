@@ -20,6 +20,7 @@ interface DataInterface extends ExtensibleDataInterface
      */
     public const ENTITY_ID = 'entity_id';
     public const QUOTE_ID = 'quote_id';
+    public const AMOUNT = 'amount';
     public const ORDER_ID = 'order_id';
     public const UUID = 'uuid';
     public const TOKEN = 'token';
@@ -49,6 +50,21 @@ interface DataInterface extends ExtensibleDataInterface
      * @return $this
      */
     public function setQuoteId(int $quoteId): self;
+
+    /**
+     * Returns transaction amount.
+     *
+     * @return int quote ID.
+     */
+    public function getAmount(): int;
+
+    /**
+     * Sets transaction amount.
+     *
+     * @param int $amount
+     * @return $this
+     */
+    public function setAmount(int $amount): self;
 
     /**
      * Returns the order ID.
