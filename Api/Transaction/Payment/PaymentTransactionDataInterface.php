@@ -21,8 +21,9 @@ interface PaymentTransactionDataInterface extends BaseTransactionDataInterface
     public const QUOTE_ID = 'quote_id';
     public const UUID = 'uuid';
     public const TOKEN = 'token';
-    public const INVOICE_UUID = 'invoice_uuid';
-    public const PAYMENT_URL = 'payment_url';
+
+    public const PAYMENT_FAILED = 'payment_failed';
+    public const PAYMENT_SETTLED = 'payment_settled';
 
     /**
      * Returns the quote ID.
@@ -55,32 +56,22 @@ interface PaymentTransactionDataInterface extends BaseTransactionDataInterface
     public function setToken(string $value): self;
 
     /**
-     * Return invoice_uuid.
-     *
-     * @return string|null
-     */
-    public function getInvoiceUuid(): ?string;
-
-    /**
-     * Set invoice_uid.
-     *
-     * @param string $invoiceUuid
      * @return $this
      */
-    public function setInvoiceUuid(string $invoiceUuid): self;
+    public function setPaymentFailed(): self;
 
     /**
-     * Return payment_url.
-     *
-     * @return string|null
+     * @return bool
      */
-    public function getPaymentUrl(): ?string;
+    public function isPaymentFailed(): bool;
 
     /**
-     * Set payment_url.
-     *
-     * @param string $paymentUrl
      * @return $this
      */
-    public function setPaymentUrl(string $paymentUrl): self;
+    public function setPaymentSettled(): self;
+
+    /**
+     * @return bool
+     */
+    public function isPaymentSettled(): bool;
 }

@@ -49,9 +49,8 @@ class RefundService
     }
 
     /**
-     * Executes TrueLayer Api for Order Refund
-     *
      * @param OrderInterface $order
+     * @param string $invoiceIncrementId
      * @param float $amount
      * @return string|null
      * @throws InputException
@@ -59,7 +58,7 @@ class RefundService
      * @throws NoSuchEntityException
      * @throws SignerException
      */
-    public function refund(OrderInterface $order, float $amount): ?string
+    public function refund(OrderInterface $order, string $invoiceIncrementId, float $amount): ?string
     {
         $this->logger->addPrefix('RefundService')->debug('Start');
 
@@ -71,7 +70,7 @@ class RefundService
         $paymentId = $transaction->getPaymentUuid();
 
         $amountInMinor = AmountHelper::toMinor($amount);
-        $refundId = $this->createRefund($order, $amountInMinor, $transaction);
+        $refundId = $this->createRefund($order, $amountInMinor, $transaction, $invoiceIncrementId);
         $this->logger->debug('Created refund', $refundId);
 
         $refundTransaction = $this->refundTransactionRepository->create()
@@ -92,17 +91,18 @@ class RefundService
      * @param OrderInterface $order
      * @param int $amount
      * @param TransactionInterface $transaction
+     * @param string $invoiceIncrementId
      * @return string
      * @throws LocalizedException
      * @throws SignerException
      */
-    private function createRefund(OrderInterface $order, int $amount, TransactionInterface $transaction): string
+    private function createRefund(OrderInterface $order, int $amount, TransactionInterface $transaction, string $invoiceIncrementId): string
     {
         $client = $this->clientFactory->create((int) $order->getStoreId());
 
         try {
             $refundId = $client->refund()
-                ->reference($transaction->getInvoiceUuid())
+                ->reference($invoiceIncrementId)
                 ->payment($transaction->getPaymentUuid())
                 ->amountInMinor($amount)
                 ->create()

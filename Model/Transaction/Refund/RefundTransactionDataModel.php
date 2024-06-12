@@ -156,4 +156,20 @@ class RefundTransactionDataModel extends AbstractModel implements ExtensibleData
     {
         return $this->setData(self::CREDITMEMO_ID, $creditMemoId);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function setRefundFailed(): RefundTransactionDataInterface
+    {
+        return $this->setStatus(RefundTransactionDataInterface::REFUND_FAILED);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isRefundFailed(): bool
+    {
+        return $this->getStatus() === RefundTransactionDataInterface::REFUND_FAILED;
+    }
 }

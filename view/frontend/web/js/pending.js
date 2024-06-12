@@ -3,7 +3,7 @@
  * See COPYING.txt for license details.
  */
 
-define(['ko', 'uiComponent'], function (ko, Component) {
+define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComponent'], function ($, url, ko, customerData, Component) {
     'use strict';
 
     return Component.extend({
@@ -11,8 +11,8 @@ define(['ko', 'uiComponent'], function (ko, Component) {
             isLoading: ko.observable(true),
             isError: ko.observable(false),
             requestCount: ko.observable(0),
-            maxRequestCount: 45,
-            delay: 4000,
+            maxRequestCount: 30,
+            statusUrl: url.build('truelayer/checkout/status'),
         },
 
         initialize() {
@@ -27,24 +27,38 @@ define(['ko', 'uiComponent'], function (ko, Component) {
                 return;
             }
 
-            fetch(window.location.href + '&json=1')
-                .then((res) => {
-                    if (!res.ok) return false;
-                    this.requestCount(this.requestCount() + 1);
-                    return res.json();
-                })
-                .then((json) => {
-                    const timer = setTimeout(() => {
-                        if (json && json.redirect) {
-                            window.location.replace(json.redirect);
-                        } else {
-                            this.checkStatus();
-                        }
+            this.requestCount(this.requestCount() + 1);
 
-                        clearTimeout(timer);
-                    }, this.delay);
-                })
-                .catch(() => this.checkStatus());
+            $.ajax({
+                url: this.statusUrl + window.location.search + '&attempt=' + this.requestCount(),
+                type: 'POST',
+                dataType: 'json',
+                success: (data) => {
+                    if (data && data.redirect) {
+                        var sections = ['cart', 'checkout-data'];
+                        customerData.invalidate(sections);
+                        customerData.reload(sections, true);
+                        window.location.replace(data.redirect);
+                    }
+                },
+                complete: () => {
+                    setTimeout(
+                        this.checkStatus.bind(this),
+                        Math.min(this.requestCount() * 2000, 30000)
+                    );
+                }
+            })
         }
     });
 });
+
+
+/*
+ require([
+         'Magento_Customer/js/customer-data'
+     ], function (customerData) {
+         var sections = ['cart'];
+         customerData.invalidate(sections);
+         customerData.reload(sections, true);
+     });
+ */

@@ -9,7 +9,12 @@ namespace TrueLayer\Connect\Helper;
 
 class ValidationHelper
 {
-    public static function isUUID(string $input): bool {
+    /**
+     * @param mixed $input
+     * @return bool
+     */
+    public static function isUUID($input): bool {
+        if (!is_string($input)) return false;
         $pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
         return preg_match($pattern, $input) === 1;
     }

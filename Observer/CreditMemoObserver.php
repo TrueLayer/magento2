@@ -10,6 +10,7 @@ namespace TrueLayer\Connect\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
@@ -49,6 +50,7 @@ class CreditMemoObserver implements ObserverInterface
         $this->logger->debug('Get transaction');
 
         try {
+            // Find matching transaction with missing creditmemo id
             $refundTransaction = $this->refundTransactionRepository->getOneByColumns([
                 RefundTransactionDataInterface::AMOUNT => AmountHelper::toMinor($creditMemo->getGrandTotal()),
                 RefundTransactionDataInterface::ORDER_ID => $order->getEntityId(),
@@ -60,21 +62,28 @@ class CreditMemoObserver implements ObserverInterface
         }
 
         if (!$refundTransaction || !$refundTransaction->getEntityId()) {
-            $refundTransaction = $this->refundTransactionRepository->getByCreditMemoId((int) $creditMemo->getEntityId());
-            if ($refundTransaction->getIsLocked()) {
-                return;
-            }
-
+            if ($this->findByCreditMemo($creditMemo)) return; // We already have a credit memo id, we can abort.
             $this->logger->error('Transaction not found');
             throw new LocalizedException(__('Something has gone wrong. Please check the refund status in your TrueLayer Console account.'));
         }
 
-        if ($refundTransaction->getCreditMemoId()) {
-            return;
-        }
-
-        $refundTransaction->setCreditMemoId((int)$creditMemo->getEntityId());
+        $refundTransaction->setCreditMemoId((int) $creditMemo->getEntityId());
         $this->refundTransactionRepository->save($refundTransaction);
         $this->logger->debug('Transaction updated');
+    }
+
+    /**
+     * @param Order\Creditmemo $creditMemo
+     * @return RefundTransactionDataInterface|null
+     */
+    private function findByCreditMemo(Order\Creditmemo $creditMemo): ?RefundTransactionDataInterface
+    {
+        try {
+            $creditMemoId = (int) $creditMemo->getEntityId();
+            return $this->refundTransactionRepository->getByCreditMemoId($creditMemoId);
+        } catch (NoSuchEntityException $e) {
+            $this->logger->debug('No transaction found with creditmemo id', $e);
+            return null;
+        }
     }
 }

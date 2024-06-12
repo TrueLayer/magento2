@@ -70,7 +70,7 @@ class PaymentSettledService
             ->execute(function (PaymentTransactionDataInterface $transaction) use ($paymentId) {
                 $order = $this->orderRepository->get($transaction->getOrderId());
                 $this->updateOrder($order, $paymentId);
-                $transaction->setStatus('payment_settled');
+                $transaction->setPaymentSettled();
                 $this->sendOrderEmail($order);
                 $this->sendInvoiceEmail($order);
             });

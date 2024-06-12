@@ -13,6 +13,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order\Payment;
 use TrueLayer\Connect\Service\Order\RefundService;
 use TrueLayer\Connect\Api\Log\LogService;
 
@@ -43,8 +44,12 @@ class RefundPaymentCommand extends AbstractCommand
      */
     protected function executeCommand(array $subject): void
     {
+        /** @var  Payment $payment */
+        $payment = SubjectReader::readPayment($subject)->getPayment();
+        $invoiceIncrementId = $payment->getCreditMemo()->getInvoice()->getIncrementId();
+
         $order = $this->getOrder($subject);
         $this->logger->addPrefix($order->getEntityId());
-        $this->refundService->refund($order, (float) SubjectReader::readAmount($subject));
+        $this->refundService->refund($order, $invoiceIncrementId, (float) SubjectReader::readAmount($subject));
     }
 }

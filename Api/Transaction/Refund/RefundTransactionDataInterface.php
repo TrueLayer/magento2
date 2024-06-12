@@ -23,6 +23,8 @@ interface RefundTransactionDataInterface extends BaseTransactionDataInterface
     public const REFUND_UUID = 'refund_uuid';
     public const AMOUNT = 'amount';
 
+    public const REFUND_FAILED = 'refund_failed';
+
     /**
      * @return string|null
      */
@@ -71,4 +73,14 @@ interface RefundTransactionDataInterface extends BaseTransactionDataInterface
      * @return $this
      */
     public function setFailureReason(string $failureReason): self;
+
+    /**
+     * @return $this
+     */
+    public function setRefundFailed(): self;
+
+    /**
+     * @return bool
+     */
+    public function isRefundFailed(): bool;
 }

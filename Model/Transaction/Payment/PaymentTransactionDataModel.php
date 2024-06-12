@@ -144,42 +144,6 @@ class PaymentTransactionDataModel extends AbstractModel implements ExtensibleDat
     /**
      * @inheritDoc
      */
-    public function getInvoiceUuid(): ?string
-    {
-        return $this->getData(self::INVOICE_UUID)
-            ? (string)$this->getData(self::INVOICE_UUID)
-            : null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setInvoiceUuid(string $invoiceUuid): PaymentTransactionDataInterface
-    {
-        return $this->setData(self::INVOICE_UUID, $invoiceUuid);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPaymentUrl(): ?string
-    {
-        return $this->getData(self::PAYMENT_URL)
-            ? (string)$this->getData(self::PAYMENT_URL)
-            : null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setPaymentUrl(string $paymentUrl): PaymentTransactionDataInterface
-    {
-        return $this->setData(self::PAYMENT_URL, $paymentUrl);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getIsLocked(): bool
     {
         return (bool) $this->getData(self::IS_LOCKED);
@@ -191,5 +155,37 @@ class PaymentTransactionDataModel extends AbstractModel implements ExtensibleDat
     public function setIsLocked(bool $isLocked): PaymentTransactionDataInterface
     {
         return $this->setData(self::IS_LOCKED, $isLocked ? 1 : 0);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setPaymentFailed(): PaymentTransactionDataInterface
+    {
+        return $this->setStatus(PaymentTransactionDataInterface::PAYMENT_FAILED);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPaymentFailed(): bool
+    {
+        return $this->getStatus() === PaymentTransactionDataInterface::PAYMENT_FAILED;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setPaymentSettled(): PaymentTransactionDataInterface
+    {
+        return $this->setStatus(PaymentTransactionDataInterface::PAYMENT_SETTLED);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPaymentSettled(): bool
+    {
+        return $this->getStatus() === PaymentTransactionDataInterface::PAYMENT_SETTLED;
     }
 }

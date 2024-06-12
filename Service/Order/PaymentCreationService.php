@@ -112,18 +112,15 @@ class PaymentCreationService
      */
     private function createPaymentConfig(OrderInterface $order, string $merchantAccId, string $customerEmail, string $existingUserId = null): array
     {
-        $countries = null;
-        if ($shippingAddress = $order->getShippingAddress()) {
-            $countries = [ $shippingAddress->getCountryId() ];
-        }
-
         $config = [
             "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
                 "provider_selection" => [
                     "filter" => [
-                        "countries" =>  $countries,
+                        "countries" =>  [
+                            $order->getBillingAddress()->getCountryId()
+                        ],
                         "release_channel" => "general_availability",
                         "customer_segments" => $this->configRepository->getBankingProviders(),
                         "excludes" => [

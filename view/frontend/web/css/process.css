@@ -1,5 +1,5 @@
 .truelayer-checkout-pending {
-    margin-top: 40px;
+    margin-top: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -14,8 +14,8 @@
 .truelayer-loading .loading-container,
 .truelayer-loading .loading {
     position: relative;
-    height: 130px;
-    width: 130px;
+    height: 100px;
+    width: 100px;
     border-radius: 100%;
 }
 

@@ -61,7 +61,7 @@ class RefundFailedService
                 $creditMemo = $this->getCreditMemo($transaction);
                 $this->refundOrder($order, $creditMemo);
                 $this->markCreditMemoRefunded($creditMemo, $failureReason);
-                $transaction->setStatus('refund_failed');
+                $transaction->setRefundFailed();
             });
 
         $this->logger->removePrefix($prefix);

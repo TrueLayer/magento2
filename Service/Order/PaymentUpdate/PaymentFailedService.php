@@ -70,7 +70,7 @@ class PaymentFailedService
         $this->orderRepository->save($order);
         $this->logger->debug('Order comment added');
 
-        $transaction->setStatus('payment_failed');
+        $transaction->setPaymentFailed();
         $transaction->setFailureReason($failureReason);
         $this->logger->debug('Payment transaction updated');
     }
