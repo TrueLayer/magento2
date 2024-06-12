@@ -92,8 +92,6 @@ class Webhook implements WebhookInterface
      */
     public function processTransfer()
     {
-        $this->refundFailedService->handle('b0327151-99a4-4e38-85fc-2a6795982b4b', 'foo');
-
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
 
         $webhook = TrueLayerWebhook::configure()
