@@ -16,6 +16,7 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\Message\MessageInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Helper\ValidationHelper;
@@ -117,8 +118,14 @@ class Status extends BaseController implements HttpPostActionInterface
 
         if ($transaction->isPaymentFailed()) {
             $this->session->restoreQuote();
-            $message = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
-            $this->context->getMessageManager()->addErrorMessage($message . ' ' . __('Please try again.'));
+
+            $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
+            $errorText = $errorText . ' ' . __('Please try again.');
+
+            $messageManager = $this->context->getMessageManager();
+            $message = $messageManager->createMessage(MessageInterface::TYPE_ERROR)->setText($errorText);
+            $messageManager->addUniqueMessages([ $message ]);
+
             return $this->urlResponse('checkout/cart');
         }
 

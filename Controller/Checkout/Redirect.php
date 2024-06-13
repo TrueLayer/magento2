@@ -70,6 +70,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
         } catch (Exception $e) {
             $this->logger->error('Failed to create payment and redirect to HPP', $e);
             $this->failOrder();
+            $this->checkoutSession->restoreQuote();
             return $this->redirectToFailPage();
         }
     }

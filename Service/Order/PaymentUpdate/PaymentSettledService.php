@@ -89,7 +89,7 @@ class PaymentSettledService
         // Update order state & status
         $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
         $this->orderRepository->save($order);
-        $this->logger->debug('payment and order statuses updated');
+        $this->logger->debug('Payment and order statuses updated');
     }
 
     /**

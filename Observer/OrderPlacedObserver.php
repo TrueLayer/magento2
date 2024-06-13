@@ -28,7 +28,7 @@ class OrderPlacedObserver implements ObserverInterface
         LogService $logger
     ) {
         $this->orderRepository = $orderRepository;
-        $this->logger = $logger->addPrefix('OrderPlacedHandler');
+        $this->logger = $logger->addPrefix('OrderPlacedObserver');
     }
 
     /**

@@ -11,8 +11,9 @@ define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComp
             isLoading: ko.observable(true),
             isError: ko.observable(false),
             requestCount: ko.observable(0),
-            maxRequestCount: 30,
+            maxRequestCount: 15,
             statusUrl: url.build('truelayer/checkout/status'),
+            isRedirecting: false,
         },
 
         initialize() {
@@ -35,17 +36,19 @@ define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComp
                 dataType: 'json',
                 success: (data) => {
                     if (data && data.redirect) {
+                        this.isRedirecting = true;
+
                         var sections = ['cart', 'checkout-data'];
                         customerData.invalidate(sections);
                         customerData.reload(sections, true);
+
                         window.location.replace(data.redirect);
                     }
                 },
                 complete: () => {
-                    setTimeout(
-                        this.checkStatus.bind(this),
-                        Math.min(this.requestCount() * 2000, 30000)
-                    );
+                    if (!this.isRedirecting) {
+                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 2000);
+                    }
                 }
             })
         }
