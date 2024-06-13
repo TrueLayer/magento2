@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Observer;
 
+use Exception;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -36,6 +37,7 @@ class CreditMemoObserver implements ObserverInterface
     /**
      * @param Observer $observer
      * @throws LocalizedException
+     * @throws Exception
      */
     public function execute(Observer $observer)
     {
@@ -56,7 +58,7 @@ class CreditMemoObserver implements ObserverInterface
                 RefundTransactionDataInterface::ORDER_ID => $order->getEntityId(),
                 RefundTransactionDataInterface::CREDITMEMO_ID => ['null' => true],
             ], [RefundTransactionDataInterface::ENTITY_ID => 'DESC']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Failed loading transaction', $e);
             throw $e;
         }

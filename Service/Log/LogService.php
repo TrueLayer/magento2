@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Service\Log;
 
+use Exception;
 use Monolog\Logger;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigProvider;
 use TrueLayer\Connect\Api\Log\LogService as LogServiceInterface;
@@ -105,7 +106,7 @@ class LogService implements LogServiceInterface
      */
     private function convertDataToString($data): string
     {
-        if ($data instanceof \Exception) {
+        if ($data instanceof Exception) {
             return $data->getMessage() . " " . $data->getTraceAsString();
         }
 
@@ -119,6 +120,6 @@ class LogService implements LogServiceInterface
             }
         }
 
-        return "{$data}";
+        return "$data";
     }
 }

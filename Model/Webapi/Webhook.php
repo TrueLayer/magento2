@@ -22,7 +22,6 @@ use TrueLayer\Connect\Helper\ValidationHelper;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
 use TrueLayer\Connect\Service\Order\RefundUpdate\RefundFailedService;
-use TrueLayer\Connect\Helper\ValidationService;
 use TrueLayer\Exceptions\Exception;
 use TrueLayer\Exceptions\InvalidArgumentException;
 use TrueLayer\Exceptions\SignerException;

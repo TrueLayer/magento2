@@ -65,7 +65,7 @@ class PaymentFailedService
         }
 
         $niceMessage = PaymentFailureReasonHelper::getHumanReadableLabel($failureReason);
-        $orderComment = "Order cancelled. {$niceMessage} ($failureReason)";
+        $orderComment = "Order cancelled. $niceMessage ($failureReason)";
         $order->addStatusToHistory($order->getStatus(), $orderComment, true);
         $this->orderRepository->save($order);
         $this->logger->debug('Order comment added');

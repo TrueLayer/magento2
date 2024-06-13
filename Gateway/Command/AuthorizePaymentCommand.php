@@ -9,6 +9,7 @@ namespace TrueLayer\Connect\Gateway\Command;
 
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order\Payment;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 
 class AuthorizePaymentCommand extends AbstractCommand
@@ -27,9 +28,16 @@ class AuthorizePaymentCommand extends AbstractCommand
      */
     protected function executeCommand(array $subject): void
     {
+        /** @var  Payment $payment */
+        $payment = SubjectReader::readPayment($subject)->getPayment();
+
         // Set the transaction to pending so that the order is created in a pending state
         // The pending state set by magento is not the one we want, so we will overwrite that in OrderPlacedHandler
         // This status will also help third party code that may be listening to transactions.
-        SubjectReader::readPayment($subject)->getPayment()->setIsTransactionPending(true);
+        $payment->setIsTransactionPending(true);
+
+        // Do not send emails when the order is placed
+        // We will instead send emails when the payment is settled
+        $payment->getOrder()->setCanSendNewEmailFlag(false);
     }
 }

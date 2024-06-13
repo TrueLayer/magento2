@@ -18,7 +18,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order;
 use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Service\Order\HPPService;
 use TrueLayer\Connect\Service\Order\PaymentCreationService;

@@ -60,7 +60,7 @@ class PaymentSettledService
      * @throws LocalizedException
      * @throws Exception
      */
-    public function handle(string $paymentId)
+    public function handle(string $paymentId): void
     {
         $prefix = "PaymentSettledService $paymentId";
         $this->logger->addPrefix($prefix);
@@ -78,7 +78,7 @@ class PaymentSettledService
         $this->logger->removePrefix($prefix);
     }
 
-    private function updateOrder(OrderInterface $order, string $paymentId)
+    private function updateOrder(OrderInterface $order, string $paymentId): void
     {
         // Update order payment
         $payment = $order->getPayment();

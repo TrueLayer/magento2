@@ -50,7 +50,7 @@ abstract class BaseTransactionService
         try {
             $this->logger->debug('Execute logic');
             $fn($transaction);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Exception in transaction', $e);
             throw $e;
         } finally {

@@ -12,7 +12,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
-use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface;
 use TrueLayer\Connect\Service\Order\BaseTransactionService;
 
