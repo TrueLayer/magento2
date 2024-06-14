@@ -12,7 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Math\Random;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
@@ -33,7 +33,7 @@ class PaymentCreationService
     private TransactionRepository $transactionRepository;
     private UserRepository $userRepository;
     private Random $mathRandom;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param ClientFactory $clientFactory
@@ -41,7 +41,7 @@ class PaymentCreationService
      * @param TransactionRepository $transactionRepository
      * @param UserRepository $userRepository
      * @param Random $mathRandom
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         ClientFactory $clientFactory,
@@ -49,7 +49,7 @@ class PaymentCreationService
         TransactionRepository $transactionRepository,
         UserRepository $userRepository,
         Random $mathRandom,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->clientFactory = $clientFactory;
         $this->configRepository = $configRepository;
@@ -110,8 +110,12 @@ class PaymentCreationService
      * @param string|null $existingUserId
      * @return array
      */
-    private function createPaymentConfig(OrderInterface $order, string $merchantAccId, string $customerEmail, string $existingUserId = null): array
-    {
+    private function createPaymentConfig(
+        OrderInterface $order,
+        string $merchantAccId,
+        string $customerEmail,
+        string $existingUserId = null
+    ): array {
         $config = [
             "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
             "currency" => $order->getBaseCurrencyCode(),

@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Model\Transaction\Payment;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterfaceFactory;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
@@ -25,19 +25,19 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     private $dataFactory;
     private PaymentTransactionResourceModel $resource;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * PaymentTransactionRepository constructor.
      *
      * @param PaymentTransactionResourceModel $resource
      * @param PaymentTransactionDataInterfaceFactory $dataFactory
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         PaymentTransactionResourceModel $resource,
         PaymentTransactionDataInterfaceFactory $dataFactory,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->resource = $resource;
         $this->dataFactory = $dataFactory;

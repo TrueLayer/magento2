@@ -17,7 +17,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Checkout\Model\Session;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 use TrueLayer\Connect\Helper\ValidationHelper;
 use TrueLayer\Connect\Model\Config\Repository as ConfigRepository;
 use TrueLayer\Connect\Service\Client\ClientFactory;
@@ -32,7 +32,7 @@ use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
 
 class Status extends BaseController implements HttpPostActionInterface
 {
-    const CHECK_API_AFTER_ATTEMPTS = 7;
+    private const CHECK_API_AFTER_ATTEMPTS = 7;
 
     private Session $session;
     private OrderRepositoryInterface $orderRepository;
@@ -100,7 +100,6 @@ class Status extends BaseController implements HttpPostActionInterface
         // No updates available on the payment, show a spinner page and start polling
         return $this->pendingResponse();
     }
-
 
     /**
      * @param string $paymentId

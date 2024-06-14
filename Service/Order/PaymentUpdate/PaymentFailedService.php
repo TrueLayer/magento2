@@ -9,7 +9,7 @@ namespace TrueLayer\Connect\Service\Order\PaymentUpdate;
 
 use Exception;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Helper\PaymentFailureReasonHelper;
 
@@ -17,17 +17,17 @@ class PaymentFailedService
 {
     private OrderRepositoryInterface $orderRepository;
     private PaymentTransactionService $transactionService;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository
      * @param PaymentTransactionService $transactionService
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
-        OrderRepositoryInterface    $orderRepository,
-        PaymentTransactionService  $transactionService,
-        LogService                  $logger
+        OrderRepositoryInterface $orderRepository,
+        PaymentTransactionService $transactionService,
+        LogServiceInterface $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->transactionService = $transactionService;

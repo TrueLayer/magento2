@@ -17,7 +17,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 
 class PaymentSettledService
@@ -27,7 +27,7 @@ class PaymentSettledService
     private ConfigRepository $configRepository;
     private OrderRepositoryInterface $orderRepository;
     private PaymentTransactionService $transactionService;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository
@@ -35,7 +35,7 @@ class PaymentSettledService
      * @param InvoiceSender $invoiceSender
      * @param ConfigRepository $configRepository
      * @param PaymentTransactionService $transactionService
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         OrderRepositoryInterface   $orderRepository,
@@ -43,7 +43,7 @@ class PaymentSettledService
         InvoiceSender              $invoiceSender,
         ConfigRepository           $configRepository,
         PaymentTransactionService $transactionService,
-        LogService                 $logger
+        LogServiceInterface $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->orderSender = $orderSender;

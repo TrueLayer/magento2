@@ -11,21 +11,20 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use TrueLayer\Connect\Api\Log\LogService;
-
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 
 class OrderPlacedObserver implements ObserverInterface
 {
     private OrderRepositoryInterface $orderRepository;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         OrderRepositoryInterface $orderRepository,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->logger = $logger->addPrefix('OrderPlacedObserver');

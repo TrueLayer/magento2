@@ -11,7 +11,8 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 use Magento\Framework\Model\AbstractModel;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 
-class RefundTransactionDataModel extends AbstractModel implements ExtensibleDataInterface, RefundTransactionDataInterface
+class RefundTransactionDataModel extends AbstractModel
+    implements ExtensibleDataInterface, RefundTransactionDataInterface
 {
     /**
      * @inheritDoc

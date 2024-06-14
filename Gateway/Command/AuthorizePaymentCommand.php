@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Gateway\Command;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Payment;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 
 class AuthorizePaymentCommand extends AbstractCommand
 {

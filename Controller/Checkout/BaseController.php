@@ -13,11 +13,11 @@ use Magento\Framework\Controller\AbstractResult;
 use Magento\Framework\Controller\Result\Json as JsonResult;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 
 abstract class BaseController
 {
-    const CACHE_CONTROL = 'no-store, no-cache, must-revalidate, max-age=0';
+    private const CACHE_CONTROL = 'no-store, no-cache, must-revalidate, max-age=0';
 
     protected Context $context;
     protected LogRepository $logger;
@@ -55,7 +55,7 @@ abstract class BaseController
     /**
      * @return ResultInterface|ResponseInterface
      */
-    protected abstract function executeAction();
+    abstract protected function executeAction();
 
     /**
      * @param string $to

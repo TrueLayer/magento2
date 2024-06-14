@@ -15,7 +15,7 @@ use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Payment;
 use TrueLayer\Connect\Service\Order\RefundService;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 
 class RefundPaymentCommand extends AbstractCommand
 {
@@ -24,12 +24,12 @@ class RefundPaymentCommand extends AbstractCommand
     /**
      * @param RefundService $refundService
      * @param OrderRepositoryInterface $orderRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
-        RefundService            $refundService,
+        RefundService $refundService,
         OrderRepositoryInterface $orderRepository,
-        LogService               $logger
+        LogServiceInterface $logger
     ) {
         $this->refundService = $refundService;
         parent::__construct($orderRepository, $logger->addPrefix("RefundPaymentCommand"));

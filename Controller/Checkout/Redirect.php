@@ -18,7 +18,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Service\Order\HPPService;
 use TrueLayer\Connect\Service\Order\PaymentCreationService;
 use TrueLayer\Connect\Service\Order\PaymentErrorMessageManager;
@@ -43,7 +43,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
      * @param PaymentCreationService $paymentCreationService
      * @param PaymentErrorMessageManager $paymentErrorMessageManager
      * @param HPPService $hppService
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         Context $context,
@@ -53,9 +53,8 @@ class Redirect extends BaseController implements HttpGetActionInterface
         PaymentCreationService $paymentCreationService,
         PaymentErrorMessageManager $paymentErrorMessageManager,
         HPPService $hppService,
-        LogService $logger
-    )
-    {
+        LogServiceInterface $logger
+    ) {
         $this->checkoutSession = $checkoutSession;
         $this->orderRepository = $orderRepository;
         $this->paymentCreationService = $paymentCreationService;
@@ -71,7 +70,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
     public function executeAction(): ResponseInterface
     {
         try {
-           return $this->createPaymentAndRedirect();
+            return $this->createPaymentAndRedirect();
         } catch (Exception $e) {
             $this->logger->error('Failed to create payment and redirect to HPP', $e);
             $this->failOrder();

@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Service\Order\PaymentUpdate;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
 use TrueLayer\Connect\Service\Order\BaseTransactionService;
@@ -22,9 +22,9 @@ class PaymentTransactionService extends BaseTransactionService
 
     /**
      * @param PaymentTransactionRepositoryInterface $transactionRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
-    public function __construct(PaymentTransactionRepositoryInterface $transactionRepository, LogService $logger)
+    public function __construct(PaymentTransactionRepositoryInterface $transactionRepository, LogServiceInterface $logger)
     {
         $this->transactionRepository = $transactionRepository;
         parent::__construct($logger);

@@ -14,7 +14,7 @@ use Magento\Sales\Api\CreditmemoRepositoryInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Creditmemo;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 
 class RefundFailedService
@@ -22,19 +22,19 @@ class RefundFailedService
     private OrderRepositoryInterface $orderRepository;
     private CreditmemoRepositoryInterface $creditmemoRepository;
     private RefundTransactionService $transactionService;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param OrderRepositoryInterface $orderRepository
      * @param CreditmemoRepositoryInterface $creditmemoRepository
      * @param RefundTransactionService $transactionService
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         OrderRepositoryInterface $orderRepository,
         CreditmemoRepositoryInterface $creditmemoRepository,
         RefundTransactionService $transactionService,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->orderRepository = $orderRepository;
         $this->creditmemoRepository = $creditmemoRepository;
@@ -94,7 +94,8 @@ class RefundFailedService
      */
     private function markCreditMemoRefunded(Creditmemo $creditMemo, string $failureReason): void
     {
-        $creditMemo->addComment("Refund of {$creditMemo->getBaseCurrencyCode()}{$creditMemo->getBaseGrandTotal()} failed ($failureReason)");
+        $amount = "{$creditMemo->getBaseCurrencyCode()}{$creditMemo->getBaseGrandTotal()}";
+        $creditMemo->addComment("Refund of $amount failed ($failureReason)");
         $creditMemo->setGrandTotal(0);
         $creditMemo->setBaseGrandTotal(0);
         $creditMemo->setState(Creditmemo::STATE_CANCELED);
@@ -109,9 +110,11 @@ class RefundFailedService
      */
     private function refundOrder(OrderInterface $order, Creditmemo $creditMemo): void
     {
-        $totalRefundedOriginal = $order->getTotalRefunded();
+        $totalRefundedOriginal = $order->getBaseTotalRefunded();
         $totalRefunded = $totalRefundedOriginal - $creditMemo->getBaseGrandTotal();
-        $order->setTotalRefunded($totalRefunded);
+        $order->setBaseTotalRefunded($totalRefunded);
+
+        $order->setTotalRefunded($order->getTotalRefunded() - $creditMemo->getGrandTotal());
 
         $this->orderRepository->save($order);
         $this->logger->debug('Order refund reversed', [

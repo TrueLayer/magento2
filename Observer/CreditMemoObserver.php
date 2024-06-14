@@ -13,22 +13,21 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface;
 use TrueLayer\Connect\Helper\AmountHelper;
 
-
 class CreditMemoObserver implements ObserverInterface
 {
     private RefundTransactionRepositoryInterface $refundTransactionRepository;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param RefundTransactionRepositoryInterface $refundTransactionRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
-    public function __construct(RefundTransactionRepositoryInterface $refundTransactionRepository, LogService $logger)
+    public function __construct(RefundTransactionRepositoryInterface $refundTransactionRepository, LogServiceInterface $logger)
     {
         $this->refundTransactionRepository = $refundTransactionRepository;
         $this->logger = $logger->addPrefix('CreditMemoObserver');
@@ -64,9 +63,13 @@ class CreditMemoObserver implements ObserverInterface
         }
 
         if (!$refundTransaction || !$refundTransaction->getEntityId()) {
-            if ($this->findByCreditMemo($creditMemo)) return; // We already have a credit memo id, we can abort.
+            if ($this->findByCreditMemo($creditMemo)) {
+                return; // We already have a credit memo id, we can abort.
+            }
             $this->logger->error('Transaction not found');
-            throw new LocalizedException(__('Something has gone wrong. Please check the refund status in your TrueLayer Console account.'));
+            throw new LocalizedException(
+                __('Something has gone wrong. Please check the refund status in your TrueLayer Console account.')
+            );
         }
 
         $refundTransaction->setCreditMemoId((int) $creditMemo->getEntityId());

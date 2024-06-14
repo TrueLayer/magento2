@@ -11,7 +11,7 @@ namespace TrueLayer\Connect\Service\Client;
 use Exception;
 use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Exceptions\SignerException;
 use TrueLayer\Interfaces\Client\ClientInterface;
 use TrueLayer\Settings;
@@ -19,15 +19,15 @@ use TrueLayer\Settings;
 class ClientFactory
 {
     private ConfigRepository $configProvider;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param ConfigRepository $configProvider
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         ConfigRepository $configProvider,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->configProvider = $configProvider;
         $this->logger = $logger;

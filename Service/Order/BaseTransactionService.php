@@ -8,17 +8,18 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 
 abstract class BaseTransactionService
 {
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
-    public function __construct(LogService $logger) {
+    public function __construct(LogServiceInterface $logger)
+    {
         $this->logger = $logger;
     }
 
@@ -26,7 +27,7 @@ abstract class BaseTransactionService
      * @param callable $fn
      * @throws Exception
      */
-    public function execute(Callable $fn): void
+    public function execute(callable $fn): void
     {
         $this->logger->addPrefix('Transaction')->debug('Start');
 
@@ -64,12 +65,12 @@ abstract class BaseTransactionService
     /**
      * @return BaseTransactionDataInterface
      */
-    protected abstract function getTransaction(): BaseTransactionDataInterface;
+    abstract protected function getTransaction(): BaseTransactionDataInterface;
 
     /**
      * @param BaseTransactionDataInterface $transaction
      */
-    protected abstract function saveTransaction(BaseTransactionDataInterface $transaction): void;
+    abstract protected function saveTransaction(BaseTransactionDataInterface $transaction): void;
 
     /**
      * @throws Exception

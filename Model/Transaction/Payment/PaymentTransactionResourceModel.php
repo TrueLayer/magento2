@@ -37,7 +37,6 @@ class PaymentTransactionResourceModel extends AbstractDb
         return (bool)$connection->fetchOne($select, $bind);
     }
 
-
     /**
      * Check is entity exists
      *

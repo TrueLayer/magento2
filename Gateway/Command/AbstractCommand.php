@@ -12,7 +12,7 @@ use Magento\Payment\Gateway\CommandInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 
 abstract class AbstractCommand implements CommandInterface
 {

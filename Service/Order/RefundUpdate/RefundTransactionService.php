@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Service\Order\RefundUpdate;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface;
 use TrueLayer\Connect\Service\Order\BaseTransactionService;
@@ -22,9 +22,9 @@ class RefundTransactionService extends BaseTransactionService
 
     /**
      * @param RefundTransactionRepositoryInterface $transactionRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
-    public function __construct(RefundTransactionRepositoryInterface $transactionRepository, LogService $logger)
+    public function __construct(RefundTransactionRepositoryInterface $transactionRepository, LogServiceInterface $logger)
     {
         $this->transactionRepository = $transactionRepository;
         parent::__construct($logger);

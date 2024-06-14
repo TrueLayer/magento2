@@ -15,7 +15,7 @@ use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\Quote\Api\CartRepositoryInterface;
 use ReflectionException;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
 use TrueLayer\Connect\Helper\ValidationHelper;
@@ -105,7 +105,7 @@ class Webhook implements WebhookInterface
             ->handler(function (TrueLayerWebhookInterface\PaymentFailedEventInterface $event) {
                 $this->paymentFailedService->handle($event->getPaymentId(), $event->getFailureReason());
             })
-            ->handler(function(TrueLayerWebhookInterface\RefundFailedEventInterface $event) {
+            ->handler(function (TrueLayerWebhookInterface\RefundFailedEventInterface $event) {
                 $this->refundFailedService->handle($event->getRefundId(), $event->getFailureReason());
             });
 

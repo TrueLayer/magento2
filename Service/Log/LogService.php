@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Service\Log;
 use Exception;
 use Monolog\Logger;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigProvider;
-use TrueLayer\Connect\Api\Log\LogService as LogServiceInterface;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogServiceInterface;
 
 /**
  * Logs repository class
@@ -72,7 +72,7 @@ class LogService implements LogServiceInterface
      * @param int|string $prefix
      * @return $this
      */
-    public function removePrefix($prefix): LogService
+    public function removePrefix($prefix): LogServiceInterface
     {
         foreach ($this->prefixes as $key => $value) {
             if ($value ===$prefix) {

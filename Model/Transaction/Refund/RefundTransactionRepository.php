@@ -9,8 +9,8 @@ namespace TrueLayer\Connect\Model\Transaction\Refund;
 
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use TrueLayer\Connect\Api\Log\LogService;
-use TrueLayer\Connect\Api\Log\LogService as LogRepository;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterfaceFactory;
@@ -28,7 +28,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     private $collectionFactory;
 
     private RefundTransactionResourceModel $resource;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * PaymentTransactionRepository constructor.
@@ -108,7 +108,8 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
             return $entity;
         } catch (\Exception $exception) {
             $this->logger->error('Could not save refund transaction', $exception);
-            throw new CouldNotSaveException(__(self::COULD_NOT_SAVE_EXCEPTION, $exception->getMessage()));
+            $msg = self::COULD_NOT_SAVE_EXCEPTION;
+            throw new CouldNotSaveException(__($msg, $exception->getMessage()));
         }
     }
 

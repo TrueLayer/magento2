@@ -13,7 +13,7 @@ class PaymentFailureReasonHelper
 {
     public static function getHumanReadableLabel(string $reason = null): Phrase
     {
-        switch($reason) {
+        switch ($reason) {
             case 'cancelled':
                 return __('You cancelled the payment.');
             case 'expired':

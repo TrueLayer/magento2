@@ -12,7 +12,7 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
-use TrueLayer\Connect\Api\Log\LogService;
+use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface as TransactionInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
@@ -28,19 +28,19 @@ class RefundService
     private ClientFactory $clientFactory;
     private TransactionRepository $paymentTransactionRepository;
     private RefundTransactionRepositoryInterface $refundTransactionRepository;
-    private LogService $logger;
+    private LogServiceInterface $logger;
 
     /**
      * @param ClientFactory $clientFactory
      * @param TransactionRepository $paymentTransactionRepository
      * @param RefundTransactionRepositoryInterface $refundTransactionRepository
-     * @param LogService $logger
+     * @param LogServiceInterface $logger
      */
     public function __construct(
         ClientFactory $clientFactory,
         TransactionRepository $paymentTransactionRepository,
         RefundTransactionRepositoryInterface $refundTransactionRepository,
-        LogService $logger
+        LogServiceInterface $logger
     ) {
         $this->clientFactory = $clientFactory;
         $this->paymentTransactionRepository = $paymentTransactionRepository;
@@ -96,8 +96,12 @@ class RefundService
      * @throws LocalizedException
      * @throws SignerException
      */
-    private function createRefund(OrderInterface $order, int $amount, TransactionInterface $transaction, string $invoiceIncrementId): string
-    {
+    private function createRefund(
+        OrderInterface $order,
+        int $amount,
+        TransactionInterface $transaction,
+        string $invoiceIncrementId
+    ): string {
         $client = $this->clientFactory->create((int) $order->getStoreId());
 
         try {
@@ -109,16 +113,18 @@ class RefundService
                 ->getId();
         } catch (ApiResponseUnsuccessfulException $e) {
             $this->logger->error('Refund invalid input', $e->getDetail());
-            throw new LocalizedException(__(self::EXCEPTION_MSG . $e->getDetail(), $order->getIncrementId()));
-        }
-        catch (Exception $e) {
+            $msg = self::EXCEPTION_MSG . $e->getDetail();
+            throw new LocalizedException(__($msg, $order->getIncrementId()));
+        } catch (Exception $e) {
             $this->logger->error('Refund failed', $e);
-            throw new LocalizedException(__(self::EXCEPTION_MSG, $order->getIncrementId()));
+            $msg = self::EXCEPTION_MSG;
+            throw new LocalizedException(__($msg, $order->getIncrementId()));
         }
 
         if (!$refundId) {
             $this->logger->error('No refund ID');
-            throw new LocalizedException(__(self::EXCEPTION_MSG, $order->getIncrementId()));
+            $msg = self::EXCEPTION_MSG;
+            throw new LocalizedException(__($msg, $order->getIncrementId()));
         }
 
         return $refundId;

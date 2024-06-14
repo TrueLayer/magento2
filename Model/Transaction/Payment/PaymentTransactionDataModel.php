@@ -14,7 +14,8 @@ use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 /**
  * Transaction PaymentTransactionDataModel
  */
-class PaymentTransactionDataModel extends AbstractModel implements ExtensibleDataInterface, PaymentTransactionDataInterface
+class PaymentTransactionDataModel extends AbstractModel
+    implements ExtensibleDataInterface, PaymentTransactionDataInterface
 {
 
     /**

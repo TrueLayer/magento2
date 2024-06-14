@@ -9,7 +9,7 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
     <preference for="TrueLayer\Connect\Api\Config\RepositoryInterface" type="TrueLayer\Connect\Model\Config\Repository"/>
-    <preference for="TrueLayer\Connect\Api\Log\LogService" type="TrueLayer\Connect\Service\Log\LogService"/>
+    <preference for="TrueLayer\Connect\Api\Log\LogServiceInterface" type="TrueLayer\Connect\Service\Log\LogService"/>
     <preference for="TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface" type="TrueLayer\Connect\Model\Transaction\Payment\PaymentTransactionDataModel" />
     <preference for="TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface" type="TrueLayer\Connect\Model\Transaction\Payment\PaymentTransactionRepository" />
     <preference for="TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionRepositoryInterface" type="TrueLayer\Connect\Model\Transaction\Refund\RefundTransactionRepository" />
