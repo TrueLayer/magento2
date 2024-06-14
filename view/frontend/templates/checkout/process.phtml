@@ -6,12 +6,11 @@
  */
 
 /** @var $block Magento\Framework\View\Element\Template */
-/** @var $escaper Magento\Framework\Escaper */
 ?>
 
 <div class="truelayer-checkout-pending" data-bind="scope:'truelayer-pending'">
     <h2 data-bind="visible: isLoading">
-        <?=$escaper->escapeHtml(__('Please wait, we are processing your payment'))?>
+        <?=$block->escapeHtml(__('Please wait, we are processing your payment'))?>
     </h2>
 
     <div class="truelayer-loading" data-bind="visible: isLoading">
@@ -23,8 +22,8 @@
 
     <div class="message info" data-bind="visible: isError" style="display: none;">
         <div>
-            <?=$escaper->escapeHtml(__('Your payment is taking longer than usual to authorize.'))?>
-            <?=$escaper->escapeHtml(__('Please wait for an order confirmation email.'))?>
+            <?=$block->escapeHtml(__('Your payment is taking longer than usual to authorize.'))?>
+            <?=$block->escapeHtml(__('Please wait for an order confirmation email.'))?>
         </div>
     </div>
 </div>
