@@ -52,7 +52,7 @@
         <column name="payment_uuid" xsi:type="varchar" length="128" nullable="true" comment="TL Payment UUID"/>
         <column name="amount" xsi:type="int" nullable="true" unsigned="true" comment="Refund Amount"/>
         <column name="status" xsi:type="varchar" length="128" nullable="true" comment="Status"/>
-        <column name="is_locked" xsi:type="smallint" unsigned="true" nullable="true" identity="false" comment="Is Used For Create Order"/>
+        <column name="is_locked" xsi:type="smallint" unsigned="true" nullable="true" identity="false" comment="Is Transaction Locked"/>
         <column name="failure_reason" xsi:type="varchar" nullable="true" length="128" comment="Payment Failure Reason" />
         <column name="created_at" xsi:type="timestamp" default="CURRENT_TIMESTAMP" nullable="false" comment="Created At"/>
         <column name="updated_at" xsi:type="timestamp" on_update="true" default="CURRENT_TIMESTAMP" nullable="false" comment="Updated At"/>

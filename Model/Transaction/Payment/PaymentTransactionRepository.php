@@ -57,7 +57,6 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     public function get(int $entityId): PaymentTransactionDataInterface
     {
-
         if (!$entityId) {
             $errorMsg = static::INPUT_EXCEPTION;
             throw new InputException(__($errorMsg, 'EntityId'));
