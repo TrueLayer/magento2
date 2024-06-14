@@ -12,7 +12,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
             isError: ko.observable(false),
             requestCount: ko.observable(0),
             maxRequestCount: 15,
-            statusUrl: url.build('truelayer/checkout/status'),
+            statusUrl: url.build('/truelayer/checkout/status'),
             isRedirecting: false,
         },
 
@@ -33,7 +33,8 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
             $.ajax({
                 url: this.statusUrl + window.location.search + '&attempt=' + this.requestCount(),
                 type: 'POST',
-                contentType: "application/json",
+                dataType: 'json',
+                contentType: 'application/json',
                 success: (data) => {
                     if (data && data.redirect) {
                         this.isRedirecting = true;
