@@ -16,7 +16,6 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Checkout\Model\Session;
-use Magento\Framework\Message\MessageInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService as LogRepository;
 use TrueLayer\Connect\Helper\ValidationHelper;
@@ -24,6 +23,7 @@ use TrueLayer\Connect\Model\Config\Repository as ConfigRepository;
 use TrueLayer\Connect\Service\Client\ClientFactory;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Helper\PaymentFailureReasonHelper;
+use TrueLayer\Connect\Service\Order\PaymentErrorMessageManager;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
 use TrueLayer\Interfaces\Payment\PaymentFailedInterface;
@@ -41,6 +41,7 @@ class Status extends BaseController implements HttpPostActionInterface
     private ClientFactory $clientFactory;
     private ConfigRepository $configRepository;
     private TransactionRepository $transactionRepository;
+    private PaymentErrorMessageManager $paymentErrorMessageManager;
 
     public function __construct(
         Context $context,
@@ -52,6 +53,7 @@ class Status extends BaseController implements HttpPostActionInterface
         PaymentFailedService $paymentFailedService,
         ConfigRepository $configRepository,
         TransactionRepository $transactionRepository,
+        PaymentErrorMessageManager $paymentErrorMessageManager,
         LogRepository $logger
     ) {
         $this->session = $session;
@@ -61,6 +63,7 @@ class Status extends BaseController implements HttpPostActionInterface
         $this->transactionRepository = $transactionRepository;
         $this->paymentSettledService = $paymentSettledService;
         $this->paymentFailedService = $paymentFailedService;
+        $this->paymentErrorMessageManager = $paymentErrorMessageManager;
         $logger->addPrefix('StatusController');
         parent::__construct($context, $jsonFactory, $logger);
     }
@@ -120,11 +123,7 @@ class Status extends BaseController implements HttpPostActionInterface
             $this->session->restoreQuote();
 
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
-            $errorText = $errorText . ' ' . __('Please try again.');
-
-            $messageManager = $this->context->getMessageManager();
-            $message = $messageManager->createMessage(MessageInterface::TYPE_ERROR)->setText($errorText);
-            $messageManager->addUniqueMessages([ $message ]);
+            $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 
             return $this->urlResponse('checkout/cart');
         }

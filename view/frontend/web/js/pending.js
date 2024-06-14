@@ -3,7 +3,7 @@
  * See COPYING.txt for license details.
  */
 
-define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComponent'], function ($, url, ko, customerData, Component) {
+define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Component) {
     'use strict';
 
     return Component.extend({
@@ -33,15 +33,10 @@ define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComp
             $.ajax({
                 url: this.statusUrl + window.location.search + '&attempt=' + this.requestCount(),
                 type: 'POST',
-                dataType: 'json',
+                contentType: "application/json",
                 success: (data) => {
                     if (data && data.redirect) {
                         this.isRedirecting = true;
-
-                        var sections = ['cart', 'checkout-data'];
-                        customerData.invalidate(sections);
-                        customerData.reload(sections, true);
-
                         window.location.replace(data.redirect);
                     }
                 },
@@ -54,14 +49,3 @@ define(['jquery', 'mage/url', 'ko', 'Magento_Customer/js/customer-data', 'uiComp
         }
     });
 });
-
-
-/*
- require([
-         'Magento_Customer/js/customer-data'
-     ], function (customerData) {
-         var sections = ['cart'];
-         customerData.invalidate(sections);
-         customerData.reload(sections, true);
-     });
- */

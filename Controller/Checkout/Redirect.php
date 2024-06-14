@@ -21,6 +21,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogService;
 use TrueLayer\Connect\Service\Order\HPPService;
 use TrueLayer\Connect\Service\Order\PaymentCreationService;
+use TrueLayer\Connect\Service\Order\PaymentErrorMessageManager;
 use TrueLayer\Exceptions\ApiRequestJsonSerializationException;
 use TrueLayer\Exceptions\ApiResponseUnsuccessfulException;
 use TrueLayer\Exceptions\InvalidArgumentException;
@@ -31,6 +32,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
     private Session $checkoutSession;
     private OrderRepositoryInterface $orderRepository;
     private PaymentCreationService $paymentCreationService;
+    private PaymentErrorMessageManager $paymentErrorMessageManager;
     private HPPService $hppService;
 
     /**
@@ -39,6 +41,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
      * @param Session $checkoutSession
      * @param OrderRepositoryInterface $orderRepository
      * @param PaymentCreationService $paymentCreationService
+     * @param PaymentErrorMessageManager $paymentErrorMessageManager
      * @param HPPService $hppService
      * @param LogService $logger
      */
@@ -48,6 +51,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
         Session $checkoutSession,
         OrderRepositoryInterface $orderRepository,
         PaymentCreationService $paymentCreationService,
+        PaymentErrorMessageManager $paymentErrorMessageManager,
         HPPService $hppService,
         LogService $logger
     )
@@ -55,6 +59,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
         $this->checkoutSession = $checkoutSession;
         $this->orderRepository = $orderRepository;
         $this->paymentCreationService = $paymentCreationService;
+        $this->paymentErrorMessageManager = $paymentErrorMessageManager;
         $this->hppService = $hppService;
         $logger = $logger->addPrefix('RedirectController');
         parent::__construct($context, $jsonFactory, $logger);
@@ -113,7 +118,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
      */
     private function redirectToFailPage(): ResponseInterface
     {
-        $this->context->getMessageManager()->addErrorMessage(__('There was an issue creating your payment. Please try again.'));
+        $this->paymentErrorMessageManager->addMessage('There was an issue creating your payment. Please try again.');
         return $this->redirect('checkout/cart/index');
     }
 }
