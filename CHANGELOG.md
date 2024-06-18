@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.2.0] - 2024-07-29
+
+### Added
+
+- Test validity of private key file when testing credentials.
+- Store transaction ID in sales_order_payment table last_trans_id column.
+
+### Fixed
+
+- Check credentials button will correctly use unsaved values from the form fields.
+- View logs button will show the end of the log file instead of the beginning.
+
 ## [v2.1.0] - 2024-07-17
 
 ### Added

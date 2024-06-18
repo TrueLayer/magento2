@@ -30,6 +30,8 @@ class Stream extends Action implements HttpPostActionInterface
      * Limit stream size to 100 lines
      */
     public const MAX_LINES = 100;
+    private const READ_MAX_CHUNKS = 1024;
+    private const READ_BUFFER_SIZE = 1024;
 
     private JsonFactory $resultJsonFactory;
     private DirectoryList $dir;
@@ -110,25 +112,82 @@ class Stream extends Action implements HttpPostActionInterface
      */
     private function prepareLogText($logFilePath): array
     {
+        $size = $this->file->stat($logFilePath)['size'];
+        if (!$size) {
+            return [];
+        }
         $file = $this->file->fileOpen($logFilePath, 'r');
-        $count = 0;
 
-        $result = [];
-        // phpcs:ignore Magento2.Functions.DiscouragedFunction
-        while (($line = fgets($file)) !== false && $count < self::MAX_LINES) {
-            $data = explode('] ', $line);
-            $date = ltrim(array_shift($data), '[');
-            $data = implode('] ', $data);
-            $data = explode(': ', $data);
-            array_shift($data);
-            $result[] = [
-                'date' => $date,
-                'msg' => implode(': ', $data)
-            ];
-            $count++;
+        // we will start reading the file at the end
+        $position = $size;
+        $bufferSize = self::READ_BUFFER_SIZE;
+
+        $readCounter = 0;
+        $lineCounter = 0;
+
+        $logLines = [];
+        $logLine = '';
+        try {
+            do {
+                $position -= $bufferSize;
+                if ($position < 0) {
+                    $bufferSize = $bufferSize + $position;
+                    $position = 0;
+                }
+                $seek = fseek($file, $position);
+                if ($seek === -1) {
+                    break;
+                }
+                $readBuffer = fread($file, $bufferSize);
+                $readCounter++;
+                $bufferLines = explode("\n", $readBuffer);
+                $lastLineKey = count($bufferLines) -1;
+                foreach (array_reverse($bufferLines) as $key => $bufferLine) {
+                    $bufferLine = str_replace("\r", "", $bufferLine); //remove CR byte if present
+                    $logLine = $bufferLine . $logLine;
+                    if ('' !== $logLine // ignore empty lines
+                        && (
+                            $key !== $lastLineKey // The last line may be incomplete, we need to keep prepending it until we hit another newline
+                            || ($key === $lastLineKey && $position === 0) // Unless we reached the beginning of the file
+                            )
+                    ) {
+                        $logLines[] = $this->formatLine($logLine);
+                        $logLine = '';
+                        $lineCounter++;
+                        if ($lineCounter == self::MAX_LINES) {
+                            break 2;
+                        }
+                    }
+                }
+            }
+            /**
+             * We have not collected MAX_LINES amount of lines yet but
+             * either we reached the beginning of the file
+             * or we have read READ_BUFFER_SIZE * READ_MAX_CHUNKS bytes from the file already.
+             */
+            while ($position > 0 && $readCounter < self::READ_MAX_CHUNKS);
+        } catch (\Exception $e) {}
+        finally {
+            if ($file) {
+                $this->file->fileClose($file);
+            }
         }
 
-        $this->file->fileClose($file);
-        return $result;
+        $logLines = array_reverse($logLines);
+
+        return $logLines;
+    }
+
+    private function formatLine($line) {
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction
+        $data = explode('] ', $line);
+        $date = ltrim(array_shift($data), '[');
+        $data = implode('] ', $data);
+        $data = explode(': ', $data);
+        array_shift($data);
+        return [
+            'date' => $date,
+            'msg' => implode(': ', $data)
+        ];
     }
 }
