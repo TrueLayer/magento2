@@ -1,0 +1,32 @@
+{
+    "truelayer_transaction": {
+        "column": {
+            "entity_id": true,
+            "quote_id": true,
+            "order_id": true,
+            "token": true,
+            "uuid": true,
+            "status": true,
+            "invoice_uuid": true,
+            "payment_url": true,
+            "is_locked": true,
+            "failure_reason": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TRUELAYER_TRANSACTION_QUOTE_ID_QUOTE_ENTITY_ID": true
+        }
+    },
+    "truelayer_user": {
+        "column": {
+            "entity_id": true,
+            "magento_email": true,
+            "truelayer_id": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

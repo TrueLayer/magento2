@@ -3,34 +3,50 @@
  * See COPYING.txt for license details.
  */
 
-define([], function () {
+define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Component) {
     'use strict';
 
-    return function (data) {
-        let success = document.querySelector('[data-success]'),
-            error = document.querySelector('[data-error]'),
-            loader = document.querySelector('[data-loader]'),
-            count = 0,
-            interval = setInterval(() => { getRequest() }, 2500);
+    return Component.extend({
+        defaults: {
+            isLoading: ko.observable(true),
+            isError: ko.observable(false),
+            requestCount: ko.observable(0),
+            maxRequestCount: 15,
+            statusUrl: url.build('/truelayer/checkout/status'),
+            isRedirecting: false,
+        },
 
-        function getRequest() {
-            fetch(data.checkUrl)
-                .then((res) => {
-                    count++;
-                    if (!res.ok) throw new Error();
-                    displayRequstResult(success);
-                    window.location.replace(data.refreshUrl);
-                })
-                .catch(() => {
-                    if (count === 3) displayRequstResult(error);
-                });
-        }
+        initialize() {
+            this._super();
+            this.checkStatus();
+        },
 
-        // Element - HTML element
-        function displayRequstResult(element) {
-            clearInterval(interval);
-            loader.setAttribute('style', 'display: none;');
-            element.removeAttribute('style');
+        checkStatus() {
+            if (this.requestCount() >= this.maxRequestCount) {
+                this.isError(true);
+                this.isLoading(false);
+                return;
+            }
+
+            this.requestCount(this.requestCount() + 1);
+
+            $.ajax({
+                url: this.statusUrl + window.location.search + '&attempt=' + this.requestCount(),
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                success: (data) => {
+                    if (data && data.redirect) {
+                        this.isRedirecting = true;
+                        window.location.replace(data.redirect);
+                    }
+                },
+                complete: () => {
+                    if (!this.isRedirecting) {
+                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 2000);
+                    }
+                }
+            })
         }
-    };
+    });
 });

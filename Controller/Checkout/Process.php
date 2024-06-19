@@ -7,73 +7,39 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Controller\Checkout;
 
-use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\Controller\Result\Redirect;
-use TrueLayer\Connect\Api\Log\RepositoryInterface as LogRepository;
-use TrueLayer\Connect\Service\Order\ProcessReturn;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Controller\Result\JsonFactory;
+use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 
-/**
- * Process Controller
- */
-class Process extends Action implements HttpGetActionInterface
+class Process extends BaseController implements HttpGetActionInterface, HttpPostActionInterface
 {
+    private PageFactory $pageFactory;
 
     /**
-     * @var LogRepository
-     */
-    private $logRepository;
-    /**
-     * @var ProcessReturn
-     */
-    private $processReturn;
-
-    /**
-     * Process constructor.
-     *
      * @param Context $context
-     * @param ProcessReturn $processReturn
-     * @param LogRepository $logRepository
+     * @param JsonFactory $jsonFactory
+     * @param PageFactory $pageFactory
+     * @param LogRepository $logger
      */
     public function __construct(
         Context $context,
-        ProcessReturn $processReturn,
-        LogRepository $logRepository
+        JsonFactory $jsonFactory,
+        PageFactory $pageFactory,
+        LogRepository $logger
     ) {
-        parent::__construct($context);
-        $this->processReturn = $processReturn;
-        $this->logRepository = $logRepository;
+        $this->pageFactory = $pageFactory;
+        parent::__construct($context, $jsonFactory, $logger);
     }
 
     /**
-     * @return Redirect
+     * @return ResultInterface
      */
-    public function execute(): Redirect
+    public function executeAction(): ResultInterface
     {
-        $resultRedirect = $this->resultRedirectFactory->create();
-        if (!$transactionId = $this->getRequest()->getParam('payment_id')) {
-            $this->messageManager->addErrorMessage(__('Error in return data from TrueLayer'));
-            $resultRedirect->setPath('checkout/cart/index');
-            return $resultRedirect;
-        }
-
-        try {
-            $result = $this->processReturn->execute((string)$transactionId);
-            if ($result['success']) {
-                $resultRedirect->setPath('checkout/onepage/success');
-            } elseif (in_array($result['status'], ['settled', 'executed', 'authorized'])) {
-                $resultRedirect->setPath('truelayer/checkout/pending', ['payment_id' => $transactionId]);
-            } else {
-                $this->messageManager->addErrorMessage('Something went wrong');
-                $resultRedirect->setPath('checkout/cart/index');
-            }
-        } catch (\Exception $exception) {
-            $this->logRepository->addErrorLog('Checkout Process', $exception->getMessage());
-            $this->messageManager->addErrorMessage('Error processing payment');
-            $resultRedirect->setPath('checkout/cart/index');
-        }
-
-        return $resultRedirect;
+        return $this->pageFactory->create();
     }
 }
