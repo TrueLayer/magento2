@@ -17,7 +17,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Base Repository provider class
+ * Base PaymentTransactionRepository provider class
  */
 class BaseRepository
 {

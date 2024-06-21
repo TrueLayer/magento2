@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.0] - 2024-06-19
+
+### Added
+
+- Payment metadata including store and order ID
+- Support for handling failing refunds
+
+### Changed
+
+- Place orders upfront and update them throughout the payment lifecycle
+- Improved logging
+
+### Fixed
+
+- Minicart cache busting
+- Refund metadata being set to NULL
+- Improved database indexes
+- Improved idempotency for webhooks
+- Payment creation failing when shipping address not required
+- Issues duplicating Quotes
+
 ## [v1.0.10] - 2024-05-07
 
 ### Fixed
@@ -37,7 +58,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [v1.0.6] - 2023-09-13
 
-### Changed:
+### Changed
 
 - Wait for payment status updates on customer checkout
 - Admin panel improvements and fixes

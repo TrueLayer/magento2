@@ -1,0 +1,26 @@
+<?php
+
+use Magento\Framework\Escaper;
+
+/**
+ * @var Escaper $escaper
+ */
+?>
+
+<span class="truelayer-payment-error">
+    <?=$escaper->escapeHtml(__($block->getData('text')));?>
+</span>
+
+<script type="text/x-magento-init">
+    {
+        ".truelayer-payment-error": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "truelayer-pending": {
+                        "component": "TrueLayer_Connect/js/cart_refresh"
+                    }
+                }
+            }
+        }
+    }
+</script>

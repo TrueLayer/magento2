@@ -10,7 +10,7 @@ namespace TrueLayer\Connect\Model\User;
 use TrueLayer\Connect\Api\User\RepositoryInterface;
 
 /**
- * User Repository class
+ * User PaymentTransactionRepository class
  */
 class Repository implements RepositoryInterface
 {
@@ -20,7 +20,7 @@ class Repository implements RepositoryInterface
     private $resource;
 
     /**
-     * Repository constructor.
+     * PaymentTransactionRepository constructor.
      *
      * @param ResourceModel $resource
      */

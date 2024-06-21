@@ -14,9 +14,7 @@ namespace TrueLayer\Connect\Api\Webapi;
 interface CheckoutInterface
 {
     /**
-     * @param bool $isLoggedIn
-     * @param string $cartId
      * @return mixed
      */
-    public function orderRequest(bool $isLoggedIn, string $cartId);
+    public function orderRequest();
 }

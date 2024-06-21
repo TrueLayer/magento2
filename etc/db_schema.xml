@@ -15,6 +15,7 @@
         <column name="invoice_uuid" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Invoice Uuid"/>
         <column name="payment_url" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Payment Url"/>
         <column name="is_locked" xsi:type="smallint" unsigned="true" nullable="true" identity="false" comment="Is Used For Create Order"/>
+        <column name="failure_reason" xsi:type="varchar" nullable="true" length="128" comment="Payment Failure Reason" />
         <column name="created_at" xsi:type="timestamp" default="CURRENT_TIMESTAMP" nullable="false" comment="Created At"/>
         <column name="updated_at" xsi:type="timestamp" on_update="true" default="CURRENT_TIMESTAMP" nullable="false" comment="Updated At"/>
         <constraint referenceId="PRIMARY" xsi:type="primary">
@@ -26,6 +27,12 @@
                 referenceTable="quote" referenceColumn="entity_id"
                 onDelete="CASCADE"
         />
+        <index referenceId="TRUELAYER_TRANSACTION_PAYMENT_UUID" indexType="btree">
+            <column name="uuid"/>
+        </index>
+        <index referenceId="TRUELAYER_TRANSACTION_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
     </table>
 
     <table name="truelayer_user" engine="innodb" resource="default" comment="TrueLayer Users Table">
@@ -35,5 +42,34 @@
         <constraint referenceId="PRIMARY" xsi:type="primary">
             <column name="entity_id"/>
         </constraint>
+    </table>
+
+    <table name="truelayer_refund_transaction" engine="innodb" resource="default" comment="TrueLayer Refund Transaction Table">
+        <column name="entity_id" xsi:type="int" identity="true" nullable="false" unsigned="true" comment="Entity ID"/>
+        <column name="order_id" xsi:type="int" nullable="true" unsigned="true" comment="Order Id"/>
+        <column name="creditmemo_id" xsi:type="int" nullable="true" unsigned="true" comment="Order Id"/>
+        <column name="refund_uuid" xsi:type="varchar" length="128" nullable="true" comment="TL Refund UUID"/>
+        <column name="payment_uuid" xsi:type="varchar" length="128" nullable="true" comment="TL Payment UUID"/>
+        <column name="amount" xsi:type="int" nullable="true" unsigned="true" comment="Refund Amount"/>
+        <column name="status" xsi:type="varchar" length="128" nullable="true" comment="Status"/>
+        <column name="is_locked" xsi:type="smallint" unsigned="true" nullable="true" identity="false" comment="Is Transaction Locked"/>
+        <column name="failure_reason" xsi:type="varchar" nullable="true" length="128" comment="Payment Failure Reason" />
+        <column name="created_at" xsi:type="timestamp" default="CURRENT_TIMESTAMP" nullable="false" comment="Created At"/>
+        <column name="updated_at" xsi:type="timestamp" on_update="true" default="CURRENT_TIMESTAMP" nullable="false" comment="Updated At"/>
+        <constraint referenceId="PRIMARY" xsi:type="primary">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="TRUELAYER_REFUND_TRANSACTION_PAYMENT_UUID" indexType="btree">
+            <column name="payment_uuid"/>
+        </index>
+        <index referenceId="TRUELAYER_REFUND_TRANSACTION_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="TRUELAYER_REFUND_TRANSACTION_REFUND_UUID" indexType="btree">
+            <column name="refund_uuid"/>
+        </index>
+        <index referenceId="TRUELAYER_REFUND_TRANSACTION_CREDITMEMO_ID" indexType="btree">
+            <column name="creditmemo_id"/>
+        </index>
     </table>
 </schema>
