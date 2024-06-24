@@ -15,7 +15,7 @@
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
-                <item name="TruelayerConfigProvider" xsi:type="object">TrueLayer\Connect\Model\Ui\ConfigProvider</item>
+                <item name="truelayer_payment_config_provider" xsi:type="object">TrueLayer\Connect\Model\Ui\ConfigProvider</item>
             </argument>
         </arguments>
     </type>
