@@ -26,7 +26,6 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
                 return;
             }
             this.renderAttemptsCount(this.renderAttemptsCount() + 1);
-            console.log('attempt', this.renderAttemptsCount());
             let element = $('#truelayer-payment-error-message');
             if (element.length) {
                 $('#truelayer-payment-error-message').text(this.errorMessage);
