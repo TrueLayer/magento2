@@ -118,13 +118,13 @@ class Status extends BaseController implements HttpPostActionInterface
             return $this->urlResponse('checkout/onepage/success');
         }
 
-        if ($transaction->isPaymentFailed()) {
+        if ($transaction->isPaymentFailed() || true) {
             $this->session->restoreQuote();
 
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
             $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 
-            return $this->urlResponse('checkout/cart');
+            return $this->urlResponse('checkout/#payment');
         }
 
         return null;

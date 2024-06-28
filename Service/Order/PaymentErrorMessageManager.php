@@ -14,6 +14,9 @@ class PaymentErrorMessageManager
 {
     private ManagerInterface $messageManager;
 
+    public const MESSAGE_GROUP = 'truelayer_payment';
+    public const MESSAGE_ID = 'truelayer_payment_error';
+
     /**
      * @param ManagerInterface $messageManager
      */
@@ -30,9 +33,32 @@ class PaymentErrorMessageManager
     public function addMessage(string $text): void
     {
         $message = $this->messageManager
-            ->createMessage(MessageInterface::TYPE_ERROR, 'truelayer_payment_error')
+            ->createMessage(MessageInterface::TYPE_ERROR, self::MESSAGE_ID)
             ->setData(['text' => $text]);
 
-        $this->messageManager->addUniqueMessages([ $message ]);
+        // $this->messageManager->addUniqueMessages([ $message ]);
+        $this->messageManager->addUniqueMessages([ $message ], self::MESSAGE_GROUP);
+    }
+
+    public function hasMessage()
+    {
+        return !empty($this->getMessage());
+    }
+
+    public function getMessage()
+    {
+        return $this->messageManager
+            ->getMessages(false, self::MESSAGE_GROUP)
+            ->getMessageByIdentifier(self::MESSAGE_ID);
+    }
+
+    public function clearMessage()
+    {
+        $messages = $this->messageManager
+            ->getMessages(true, self::MESSAGE_GROUP);
+        $messages->deleteMessageByIdentifier(self::MESSAGE_ID);
+        if ($messages->getCount()) {
+            $this->messageManager->addMessages($messages->getItems(), self::MESSAGE_GROUP);
+        }
     }
 }
