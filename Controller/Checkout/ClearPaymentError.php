@@ -15,7 +15,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use TrueLayer\Connect\Service\Order\PaymentErrorMessageManager;
 use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 
-class ClearPaymentError extends BaseController implements HttpGetActionInterface, HttpPostActionInterface
+class ClearPaymentError extends BaseController implements HttpPostActionInterface
 {
     private PaymentErrorMessageManager $manager;
 
