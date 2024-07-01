@@ -85,8 +85,10 @@ interface SettingInterface
 
     /**
      * Get payment method description
+     *
+     * @return string|null
      */
-    public function getDescription(): string;
+    public function getDescription(): ?string;
 
     /**
      * Get show description of payment method during checkout flag

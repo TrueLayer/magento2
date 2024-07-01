@@ -86,7 +86,7 @@ class SettingsRepository extends BaseRepository implements SettingInterface
     /**
      * @inheritDoc
      */
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->getStoreValue(self::XML_PATH_DESCRIPTION);
     }

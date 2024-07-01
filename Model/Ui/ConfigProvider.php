@@ -34,17 +34,15 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig(): array
     {
-        $showDescription = $this->settingsRepository->getShowDescription();
-        $description = $this->settingsRepository->getDescription();
-
-        $config = [
-            'description' => $description,
-            'showDescription' => $showDescription
-        ];
+        $description = $this->settingsRepository->getShowDescription()
+            ? $this->settingsRepository->getDescription()
+            : null;
 
         return [
             'payment' => [
-                self::CODE => $config
+                self::CODE => [
+                    'description' => $description
+                ]
             ]
         ];
     }
