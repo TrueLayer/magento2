@@ -9,10 +9,14 @@ namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Math\Random;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
+use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
@@ -62,30 +66,65 @@ class PaymentCreationService
     /**
      * @param OrderInterface $order
      * @return PaymentCreatedInterface
-     * @throws AuthenticationException
      * @throws ApiRequestJsonSerializationException
      * @throws ApiResponseUnsuccessfulException
      * @throws InvalidArgumentException
-     * @throws SignerException
      * @throws LocalizedException
+     * @throws SignerException
      */
-    public function createPayment(OrderInterface $order): PaymentCreatedInterface
+    public function createPaymentForOrder(OrderInterface $order): PaymentCreatedInterface
+    {
+        return $this->createPayment($order, $this->getTransactionByOrder($order), [
+            "Magento Order ID" => $order->getEntityId(),
+            "Magento Store ID" => $order->getStoreId(),
+        ]);
+    }
+
+    /**
+     * @param CartInterface $quote
+     * @return PaymentCreatedInterface
+     * @throws ApiRequestJsonSerializationException
+     * @throws ApiResponseUnsuccessfulException
+     * @throws InvalidArgumentException
+     * @throws LocalizedException
+     * @throws SignerException
+     */
+    public function createPaymentForQuote(CartInterface $quote): PaymentCreatedInterface
+    {
+        return $this->createPayment($quote, $this->getTransactionByQuote($quote), [
+            "Magento Quote ID" => $quote->getId(),
+            "Magento Store ID" => $quote->getStoreId(),
+        ]);
+    }
+
+    /**
+     * @param OrderInterface|CartInterface $payable
+     * @param PaymentTransactionDataInterface $transaction
+     * @param array $metadata
+     * @return PaymentCreatedInterface
+     * @throws ApiRequestJsonSerializationException
+     * @throws ApiResponseUnsuccessfulException
+     * @throws InvalidArgumentException
+     * @throws LocalizedException
+     * @throws SignerException
+     */
+    private function createPayment(OrderInterface|CartInterface $payable, PaymentTransactionDataInterface $transaction, array $metadata): PaymentCreatedInterface
     {
         $this->logger->addPrefix('PaymentCreationService')->debug('Start');
 
         // Get the TL user id if we recognise the email address
-        $customerEmail = $order->getBillingAddress()->getEmail() ?: $order->getCustomerEmail();
+        $customerEmail = $payable->getBillingAddress()->getEmail() ?: $payable->getCustomerEmail();
         $existingUser = $this->userRepository->get($customerEmail);
         $existingUserId = $existingUser["truelayer_id"] ?? null;
 
         // Create the TL payment
-        $client = $this->clientFactory->create((int) $order->getStoreId());
+        $client = $this->clientFactory->create((int) $payable->getStoreId());
         $this->logger->debug('Create client');
 
-        $merchantAccountId = $this->getMerchantAccountId($client, $order);
+        $merchantAccountId = $this->getMerchantAccountId($client, $payable->getBaseCurrencyCode());
         $this->logger->debug('Merchant account', $merchantAccountId);
 
-        $paymentConfig = $this->createPaymentConfig($order, $merchantAccountId, $customerEmail, $existingUserId);
+        $paymentConfig = $this->createPaymentConfig($payable, $merchantAccountId, $customerEmail, $metadata, $existingUserId);
         $payment = $client->payment()->fill($paymentConfig)->create();
         $this->logger->debug('Created payment', $payment->getId());
 
@@ -96,7 +135,7 @@ class PaymentCreationService
         }
 
         // Link the quote id to the payment id in the transaction table
-        $transaction = $this->getTransaction($order)->setPaymentUuid($payment->getId());
+        $transaction = $transaction->setPaymentUuid($payment->getId());
         $this->transactionRepository->save($transaction);
         $this->logger->debug('Payment transaction created', $transaction->getEntityId());
 
@@ -105,15 +144,17 @@ class PaymentCreationService
 
     /**
      * @param OrderInterface $order
-     * @param string $merchantAccId
+     * @param string $merchantAccountId
      * @param string $customerEmail
+     * @param array $metadata
      * @param string|null $existingUserId
      * @return array
      */
     private function createPaymentConfig(
         OrderInterface $order,
-        string $merchantAccId,
+        string $merchantAccountId,
         string $customerEmail,
+        array $metadata,
         string $existingUserId = null
     ): array {
         $config = [
@@ -139,7 +180,7 @@ class PaymentCreationService
                 "beneficiary" => [
                     "type" => "merchant_account",
                     "name" => $this->configRepository->getMerchantAccountName(),
-                    "merchant_account_id" => $merchantAccId
+                    "merchant_account_id" => $merchantAccountId
                 ]
             ],
             "user" => [
@@ -149,10 +190,7 @@ class PaymentCreationService
                     trim($order->getBillingAddress()->getLastname()),
                 "email" => $customerEmail
             ],
-            "metadata" => [
-                "Magento Order ID" => $order->getEntityId(),
-                "Magento Store ID" => $order->getStoreId(),
-            ]
+            "metadata" => $metadata,
         ];
 
         $this->logger->debug('Payment config', $config);
@@ -162,18 +200,17 @@ class PaymentCreationService
 
     /**
      * @param ClientInterface $client
-     * @param OrderInterface $order
+     * @param string $currencyCode
      * @return string
      * @throws ApiRequestJsonSerializationException
      * @throws ApiResponseUnsuccessfulException
      * @throws InvalidArgumentException
      * @throws SignerException
-     * @throws Exception
      */
-    private function getMerchantAccountId(ClientInterface $client, OrderInterface $order): string
+    private function getMerchantAccountId(ClientInterface $client, string $currencyCode): string
     {
         foreach ($client->getMerchantAccounts() as $merchantAccount) {
-            if ($merchantAccount->getCurrency() == $order->getBaseCurrencyCode()) {
+            if ($merchantAccount->getCurrency() == $currencyCode) {
                 return $merchantAccount->getId();
             }
         }
@@ -186,14 +223,32 @@ class PaymentCreationService
      * @return PaymentTransactionDataInterface
      * @throws LocalizedException
      */
-    private function getTransaction(OrderInterface $order): PaymentTransactionDataInterface
+    private function getTransactionByOrder(OrderInterface $order): PaymentTransactionDataInterface
     {
         try {
             return $this->transactionRepository->getByOrderId((int) $order->getEntityId());
-        } catch (Exception $exception) {
+        } catch (NoSuchEntityException $exception) {
             $transaction = $this->transactionRepository->create()
                 ->setOrderId((int) $order->getEntityId())
                 ->setQuoteId((int) $order->getQuoteId())
+                ->setToken($this->mathRandom->getUniqueHash('trl'));
+
+            return $this->transactionRepository->save($transaction);
+        }
+    }
+
+    /**
+     * @param CartInterface $quote
+     * @return PaymentTransactionDataInterface
+     * @throws LocalizedException
+     */
+    private function getTransactionByQuote(CartInterface $quote): PaymentTransactionDataInterface
+    {
+        try {
+            return $this->transactionRepository->getByQuoteId((int) $quote->getId());
+        } catch (NoSuchEntityException $exception) {
+            $transaction = $this->transactionRepository->create()
+                ->setQuoteId((int) $quote->getId())
                 ->setToken($this->mathRandom->getUniqueHash('trl'));
 
             return $this->transactionRepository->save($transaction);

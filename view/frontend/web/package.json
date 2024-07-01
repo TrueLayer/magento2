@@ -1,0 +1,13 @@
+{
+  "name": "truelayer-magento2",
+  "version": "2.0.0",
+  "description": "TrueLayer extension for Magento 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "truelayer-web-sdk": "^0.6.0"
+  }
+}

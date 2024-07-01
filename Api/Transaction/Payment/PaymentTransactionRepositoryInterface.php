@@ -62,6 +62,15 @@ interface PaymentTransactionRepositoryInterface
     public function getByOrderId(int $orderId): PaymentTransactionDataInterface;
 
     /**
+     * @param int $quoteId
+     *
+     * @return PaymentTransactionDataInterface
+     * @throws InputException
+     * @throws NoSuchEntityException
+     */
+    public function getByQuoteId(int $quoteId): PaymentTransactionDataInterface;
+
+    /**
      * @param string $uuid
      *
      * @return PaymentTransactionDataInterface

@@ -16,6 +16,9 @@
                     <item name="components" xsi:type="array">
                         <item name="checkout" xsi:type="array">
                             <item name="children" xsi:type="array">
+                                <item name="tl-checkout-widget" xsi:type="array">
+                                    <item name="component" xsi:type="string">TrueLayer_Connect/js/checkout-widget</item>
+                                </item>
                                 <item name="steps" xsi:type="array">
                                     <item name="children" xsi:type="array">
                                         <item name="billing-step" xsi:type="array">

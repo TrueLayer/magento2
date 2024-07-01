@@ -14,6 +14,7 @@ use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterfaceFactory;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
+use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 
 /**
  * Transaction PaymentTransactionRepository class
@@ -57,15 +58,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     public function get(int $entityId): PaymentTransactionDataInterface
     {
-        if (!$entityId) {
-            $errorMsg = static::INPUT_EXCEPTION;
-            throw new InputException(__($errorMsg, 'EntityId'));
-        } elseif (!$this->resource->isExists($entityId)) {
-            $exceptionMsg = self::NO_SUCH_ENTITY_EXCEPTION;
-            throw new NoSuchEntityException(__($exceptionMsg, $entityId));
-        }
-        return $this->dataFactory->create()
-            ->load($entityId);
+        return $this->getByColumn('entity_id', $entityId);
     }
 
     /**
@@ -73,14 +66,15 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     public function getByOrderId(int $orderId): PaymentTransactionDataInterface
     {
-        if (!$orderId) {
-            $errorMsg = static::INPUT_EXCEPTION;
-            throw new InputException(__($errorMsg, 'OrderID'));
-        } elseif (!$this->resource->isOrderIdExists($orderId)) {
-            throw new NoSuchEntityException(__('No record found for OrderID: %1.', $orderId));
-        }
-        return $this->dataFactory->create()
-            ->load($orderId, 'order_id');
+        return $this->getByColumn('order_id', $orderId);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getByQuoteId(int $quoteId): PaymentTransactionDataInterface
+    {
+        return $this->getByColumn('quote_id', $quoteId);
     }
 
     /**
@@ -88,15 +82,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     public function getByPaymentUuid(string $uuid): PaymentTransactionDataInterface
     {
-        if (!$uuid) {
-            $errorMsg = static::INPUT_EXCEPTION;
-            throw new InputException(__($errorMsg, 'Uuid'));
-        } elseif (!$this->resource->isUuidExists($uuid)) {
-            throw new NoSuchEntityException(__('No record found for uuid: %1.', $uuid));
-        }
-
-        return $this->dataFactory->create()
-            ->load($uuid, 'uuid');
+        return $this->getByColumn('uuid', $uuid);
     }
 
     /**
@@ -107,7 +93,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
         try {
             $this->resource->save($entity);
         } catch (\Exception $exception) {
-            $this->logger->error('Quote repository', $exception->getMessage());
+            $this->logger->error('Save payment transaction', $exception);
             $exceptionMsg = self::COULD_NOT_SAVE_EXCEPTION;
             throw new CouldNotSaveException(__(
                 $exceptionMsg,
@@ -115,5 +101,25 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
             ));
         }
         return $entity;
+    }
+
+    /**
+     * @param string $col
+     * @param $value
+     * @return PaymentTransactionDataInterface
+     * @throws NoSuchEntityException
+     */
+    private function getByColumn(string $col, $value): PaymentTransactionDataInterface
+    {
+
+        $model = $this->create();
+        $this->resource->load($model, $value, $col);
+
+        if (!$model->getEntityId()) {
+            $this->logger->error('Payment transaction not found', $value);
+            throw new NoSuchEntityException(__('No record found for %1: %2.', $col, $value));
+        }
+
+        return $model;
     }
 }
