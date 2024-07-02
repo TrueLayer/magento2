@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Gateway\Command;
 
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Payment;
