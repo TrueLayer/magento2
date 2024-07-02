@@ -40,14 +40,6 @@ class PaymentErrorMessageManager
     }
 
     /**
-     * @return bool
-     */
-    public function hasMessage(): bool
-    {
-        return !empty($this->getMessage());
-    }
-
-    /**
      * @return MessageInterface|null
      */
     public function getMessage(): ?MessageInterface
@@ -55,7 +47,9 @@ class PaymentErrorMessageManager
         $message = $this->messageManager
             ->getMessages(false, self::MESSAGE_GROUP)
             ->getMessageByIdentifier(self::MESSAGE_ID);
+
         $this->clearMessage();
+
         return $message;
     }
 

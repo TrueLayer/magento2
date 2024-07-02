@@ -35,7 +35,7 @@ class PaymentErrorMessage extends Template
         $message = $this->manager->getMessage();
 
         if ($message) {
-            return $message->getData()['text'] ?? null;
+            return $message->getData()['text'] ?: null;
         }
 
         return null;
