@@ -13,7 +13,7 @@
                 <version>2.0.0</version>
                 <model>TrueLayerFacade</model>
                 <title>TrueLayer</title>
-                <description>Pay using TrueLayer</description>
+                <description>Make a direct payment securely from your bank app - no card needed</description>
                 <show_description>0</show_description>
                 <active>0</active>
                 <payment_action>authorize</payment_action>
