@@ -17,6 +17,11 @@
             <label>Description</label>
             <config_path>payment/truelayer/description</config_path>
         </field>
+        <field id="show_description" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+            <label>Show Description During Checkout</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/truelayer/show_description</config_path>
+        </field>
         <field id="heading_limits" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Limits and Sort Order</label>
             <comment><![CDATA[TrueLayer will only work in the countries that you have originally signed up to with us. If you would like to know more about country availability, please reach out to your Sales rep.]]></comment>

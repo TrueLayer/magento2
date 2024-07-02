@@ -16,6 +16,8 @@
     </div>
 
     <div class="payment-method-content">
+        <span id="truelayer-description" data-bind="visible: !!getDescription(), text: getDescription()"></span>
+
         <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
@@ -43,4 +45,3 @@
         <!--/ko-->
     </div>
 </div>
-

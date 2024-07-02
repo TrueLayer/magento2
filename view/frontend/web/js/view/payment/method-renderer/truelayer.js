@@ -27,6 +27,13 @@ define(
             afterPlaceOrder: function() {
                 redirectOnSuccess.redirectUrl = url.build('truelayer/checkout/redirect');
             },
+
+            /**
+             * Get payment method description.
+             */
+            getDescription: function () {
+                return window.checkoutConfig.payment[this.getCode()]?.description;
+            },
         });
     }
 );
