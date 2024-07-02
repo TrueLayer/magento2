@@ -52,9 +52,11 @@ class PaymentErrorMessageManager
      */
     public function getMessage(): ?MessageInterface
     {
-        return $this->messageManager
+        $message = $this->messageManager
             ->getMessages(false, self::MESSAGE_GROUP)
             ->getMessageByIdentifier(self::MESSAGE_ID);
+        $this->clearMessage();
+        return $message;
     }
 
     public function clearMessage(): void

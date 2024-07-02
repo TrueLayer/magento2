@@ -9,6 +9,11 @@ use TrueLayer\Connect\Block\Checkout\PaymentErrorMessage;
  */
 ?>
 
+<?php
+$message = $block->getMessage();
+$errorMessage = is_null($message) ? 'null' : ('"'.$escaper->escapeHtml(__($message)).'"');
+$hasError = is_null($message) ? 'false' : 'true';
+?>
 <script type="text/x-magento-init">
     {
         "*": {
@@ -16,8 +21,8 @@ use TrueLayer\Connect\Block\Checkout\PaymentErrorMessage;
                 "components": {
                     "truelayer-error-message": {
                         "component": "TrueLayer_Connect/js/payment_error_message",
-                        "hasError": <?= $block->hasMessage() ? 'true' : 'false' ?>,
-                        "errorMessage": "<?= $escaper->escapeHtml(__($block->getMessage())) ?>"
+                        "hasError": <?= $hasError ?>,
+                        "errorMessage": <?= $errorMessage ?>
                     }
                 }
             }

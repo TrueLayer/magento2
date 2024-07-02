@@ -30,7 +30,7 @@ define([
             observer.get('#truelayer-payment-method', () => {
                 this.showError();
                 selectPaymentAction({'method': 'truelayer'});
-                this.clear();
+                // this.clear();
             });
         },
 

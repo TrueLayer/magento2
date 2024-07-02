@@ -28,14 +28,6 @@ class PaymentErrorMessage extends Template
     }
 
     /**
-     * @return bool
-     */
-    public function hasMessage(): bool
-    {
-        return $this->manager->hasMessage();
-    }
-
-    /**
      * @return string|null
      */
     public function getMessage(): ?string
