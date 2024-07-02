@@ -36,27 +36,32 @@ class PaymentErrorMessageManager
             ->createMessage(MessageInterface::TYPE_ERROR, self::MESSAGE_ID)
             ->setData(['text' => $text]);
 
-        // $this->messageManager->addUniqueMessages([ $message ]);
         $this->messageManager->addUniqueMessages([ $message ], self::MESSAGE_GROUP);
     }
 
-    public function hasMessage()
+    /**
+     * @return bool
+     */
+    public function hasMessage(): bool
     {
         return !empty($this->getMessage());
     }
 
-    public function getMessage()
+    /**
+     * @return MessageInterface|null
+     */
+    public function getMessage(): ?MessageInterface
     {
         return $this->messageManager
             ->getMessages(false, self::MESSAGE_GROUP)
             ->getMessageByIdentifier(self::MESSAGE_ID);
     }
 
-    public function clearMessage()
+    public function clearMessage(): void
     {
-        $messages = $this->messageManager
-            ->getMessages(true, self::MESSAGE_GROUP);
+        $messages = $this->messageManager->getMessages(true, self::MESSAGE_GROUP);
         $messages->deleteMessageByIdentifier(self::MESSAGE_ID);
+
         if ($messages->getCount()) {
             $this->messageManager->addMessages($messages->getItems(), self::MESSAGE_GROUP);
         }

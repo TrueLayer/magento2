@@ -9,33 +9,43 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Block\Checkout;
 
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
 use TrueLayer\Connect\Service\Order\PaymentErrorMessageManager;
 
-/**
- * System Configuration Heading Block
- */
-class PaymentErrorMessage extends \Magento\Framework\View\Element\Template
+class PaymentErrorMessage extends Template
 {
-    private $manager;
-    public function __construct(\Magento\Framework\View\Element\Template\Context $context, PaymentErrorMessageManager $manager)
+    private PaymentErrorMessageManager $manager;
+
+    /**
+     * @param Context $context
+     * @param PaymentErrorMessageManager $manager
+     */
+    public function __construct(Context $context, PaymentErrorMessageManager $manager)
     {
         parent::__construct($context);
         $this->manager = $manager;
     }
 
-    public function hasMessage()
+    /**
+     * @return bool
+     */
+    public function hasMessage(): bool
     {
-        // return true;
-        $hasMessage = $this->manager->hasMessage();
-        return $hasMessage;
+        return $this->manager->hasMessage();
     }
 
-    public function getMessage()
+    /**
+     * @return string|null
+     */
+    public function getMessage(): ?string
     {
-        // return 'there\'s always a message';
         $message = $this->manager->getMessage();
+
         if ($message) {
             return $message->getData()['text'] ?? null;
         }
+
+        return null;
     }
 }

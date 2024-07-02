@@ -184,8 +184,8 @@ class Status extends BaseController implements HttpPostActionInterface
     private function noPaymentFoundResponse(): ResultInterface
     {
         $this->logger->error('Could not load TL payment');
-        $this->context->getMessageManager()->addErrorMessage(__('No payment found'));
-        return $this->urlResponse('checkout/cart');
+        $this->paymentErrorMessageManager->addMessage((string) __('No payment found'));
+        return $this->urlResponse('checkout/#payment');
     }
 
     /**
