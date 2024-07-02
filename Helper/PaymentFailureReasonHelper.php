@@ -14,14 +14,18 @@ class PaymentFailureReasonHelper
     public static function getHumanReadableLabel(string $reason = null): Phrase
     {
         switch ($reason) {
-            case 'cancelled':
+            case 'canceled':
                 return __('You cancelled the payment.');
             case 'expired':
                 return __('Payment has expired.');
             case 'not_authorized':
                 return __('Payment was not authorized.');
+            case 'authorization_failed':
+                return __('Payment authorisation failed.');
             case 'provider_error':
                 return __('Your provider has encountered an error.');
+            case 'provider_rejected':
+                return __('Your provider rejected the payment.');
             default:
                 return __("Payment failed.");
         }

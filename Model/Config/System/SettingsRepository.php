@@ -82,4 +82,20 @@ class SettingsRepository extends BaseRepository implements SettingInterface
     {
         return $this->isSetFlag(self::XML_PATH_SEND_ORDER_EMAIL);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDescription(): ?string
+    {
+        return $this->getStoreValue(self::XML_PATH_DESCRIPTION);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getShowDescription(): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_SHOW_DESCRIPTION);
+    }
 }
