@@ -16,6 +16,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Io\File;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
+use TrueLayer\Connect\Model\Config\Source\Mode;
 use TrueLayer\Connect\Service\Client\ClientFactory;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
@@ -81,6 +82,7 @@ class Check extends Action implements HttpPostActionInterface
     private function testCredentials(): ?ClientInterface
     {
         $config = $this->getCredentials();
+        $mode = $this->getRequest()->getParam('mode');
 
         if (!$config['credentials']['client_id']) {
             throw new LocalizedException(__('No Client ID set!'));
@@ -92,7 +94,10 @@ class Check extends Action implements HttpPostActionInterface
 
         $result = $this->clientFactory->create(
             (int)$config['store_id'],
-            ['credentials' => $config['credentials']]
+            [
+                'credentials' => $config['credentials'],
+                'force_sandbox' => !!$mode ? $mode === Mode::SANDBOX : null,
+            ]
         );
 
         $this->cleanSavedTemporaryPrivateKey();
@@ -122,7 +127,7 @@ class Check extends Action implements HttpPostActionInterface
             $keyId = $this->getRequest()->getParam('production_key_id');
         }
 
-        $configCredentials = $this->configProvider->getCredentials($storeId);
+        $configCredentials = $this->configProvider->getCredentials($storeId, !! $mode ? $mode === Mode::SANDBOX : null);
         if ($clientSecret == '******') {
             $clientSecret = $configCredentials['client_secret'];
         }

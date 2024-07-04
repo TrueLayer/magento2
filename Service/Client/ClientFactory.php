@@ -41,10 +41,11 @@ class ClientFactory
      */
     public function create(int $storeId = 0, ?array $data = []): ?ClientInterface
     {
-        $credentials = $data['credentials'] ?? $this->configProvider->getCredentials($storeId);
+        $forceSandbox = $data['force_sandbox'] ?? null;
+        $credentials = $data['credentials'] ?? $this->configProvider->getCredentials($storeId, $forceSandbox);
 
         try {
-            return $this->createClient($credentials);
+            return $this->createClient($credentials, $forceSandbox);
         } catch (Exception $e) {
             $this->logger->debug('Client Creation Failed', $e->getMessage());
             throw $e;
@@ -56,7 +57,7 @@ class ClientFactory
      * @return ClientInterface|null
      * @throws SignerException
      */
-    private function createClient(array $credentials): ?ClientInterface
+    private function createClient(array $credentials, ?bool $forceSandbox = null): ?ClientInterface
     {
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
         return Client::configure()
@@ -64,7 +65,7 @@ class ClientFactory
             ->clientSecret($credentials['client_secret'])
             ->keyId($credentials['key_id'])
             ->pemFile($credentials['private_key'])
-            ->useProduction(!$this->configProvider->isSandbox())
+            ->useProduction(is_null($forceSandbox) ? !$this->configProvider->isSandbox() : !$forceSandbox)
             ->create();
     }
 }
