@@ -31,8 +31,6 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     private LogServiceInterface $logger;
 
     /**
-     * PaymentTransactionRepository constructor.
-     *
      * @param RefundTransactionResourceModel $resource
      * @param RefundTransactionDataInterfaceFactory $dataFactory
      * @param RefundCollectionFactory $collectionFactory

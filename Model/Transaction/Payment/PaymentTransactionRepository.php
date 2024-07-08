@@ -8,13 +8,11 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Model\Transaction\Payment;
 
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterfaceFactory;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
-use TrueLayer\Connect\Api\Transaction\Refund\RefundTransactionDataInterface;
 
 /**
  * Transaction PaymentTransactionRepository class
@@ -25,23 +23,28 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      * @var PaymentTransactionDataInterfaceFactory
      */
     private $dataFactory;
+    /**
+     * @var PaymentTransactionCollectionFactory
+     */
+    private $collectionFactory;
     private PaymentTransactionResourceModel $resource;
     private LogServiceInterface $logger;
 
     /**
-     * PaymentTransactionRepository constructor.
-     *
      * @param PaymentTransactionResourceModel $resource
      * @param PaymentTransactionDataInterfaceFactory $dataFactory
+     * @param PaymentTransactionCollectionFactory $collectionFactory
      * @param LogServiceInterface $logger
      */
     public function __construct(
         PaymentTransactionResourceModel $resource,
         PaymentTransactionDataInterfaceFactory $dataFactory,
+        PaymentTransactionCollectionFactory $collectionFactory,
         LogServiceInterface $logger
     ) {
         $this->resource = $resource;
         $this->dataFactory = $dataFactory;
+        $this->collectionFactory = $collectionFactory;
         $this->logger = $logger;
     }
 
@@ -111,7 +114,6 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
      */
     private function getByColumn(string $col, $value): PaymentTransactionDataInterface
     {
-
         $model = $this->create();
         $this->resource->load($model, $value, $col);
 
@@ -121,5 +123,25 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
         }
 
         return $model;
+    }
+
+    /**
+     * @param array $cols
+     * @param array $sort
+     * @return PaymentTransactionDataInterface
+     */
+    public function getOneByColumns(array $cols, array $sort = []): PaymentTransactionDataInterface
+    {
+        $collection = $this->collectionFactory->create();
+
+        foreach ($cols as $col => $value) {
+            $collection->addFieldToFilter($col, $value);
+        }
+
+        foreach ($sort as $col => $dir) {
+            $collection->setOrder($col, $dir);
+        }
+
+        return $collection->getFirstItem();
     }
 }

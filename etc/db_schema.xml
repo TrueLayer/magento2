@@ -21,12 +21,6 @@
         <constraint referenceId="PRIMARY" xsi:type="primary">
             <column name="entity_id"/>
         </constraint>
-        <constraint
-                xsi:type="foreign" referenceId="TRUELAYER_TRANSACTION_QUOTE_ID"
-                table="truelayer_transaction" column="quote_id"
-                referenceTable="quote" referenceColumn="entity_id"
-                onDelete="CASCADE"
-        />
         <index referenceId="TRUELAYER_TRANSACTION_PAYMENT_UUID" indexType="btree">
             <column name="uuid"/>
         </index>

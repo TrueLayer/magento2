@@ -11,7 +11,7 @@ namespace TrueLayer\Connect\Api\Config\System;
  * Debug group config repository interface
  * @api
  */
-interface DebugInterface extends SettingInterface
+interface DebugInterface extends SettingsRepositoryInterface
 {
 
     /** Debug Group */

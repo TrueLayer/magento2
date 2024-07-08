@@ -1,0 +1,43 @@
+<!--
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div id="tl-payment-method" class="payment-method checkout-widget" data-bind="css: {'is-seamless': isSeamless(), '_active': getCode() == isChecked()}">
+
+    <span data-bind="if: !isSeamless()">
+        <div class="payment-method-title field choice" >
+            <input type="radio"
+                   name="payment[method]"
+                   class="radio"
+                   data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+
+            <label class="label" data-bind="attr: {'for': getCode()}">Pay by bank app</label>
+        </div>
+    </span>
+
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+
+        <span id="checkout-widget-target" data-bind="visible: !isWidgetDone() && createWidget($element)"></span>
+
+        <span style="background: rgb(31 31 37/0.7); position: absolute; left: 0; top: 0; bottom: 0; right: 0; z-index: 99999999"  data-bind="visible: isWidgetDone()">
+            <span style="position: absolute; top: 49%; width: 100%; text-align: center; font-weight: bold; color: white">Please wait....</span>
+        </span>
+
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+    </div>
+    <div class="checkout-agreements-block">
+        <!-- ko foreach: $parent.getRegion('before-place-order') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+    </div>
+</div>
+

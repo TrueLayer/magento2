@@ -75,8 +75,8 @@ class PaymentCreationService
     public function createPaymentForOrder(OrderInterface $order): PaymentCreatedInterface
     {
         return $this->createPayment($order, $this->getTransactionByOrder($order), [
-            "Magento Order ID" => $order->getEntityId(),
-            "Magento Store ID" => $order->getStoreId(),
+            "Magento Order ID" => (string) $order->getEntityId(),
+            "Magento Store ID" => (string) $order->getStoreId(),
         ]);
     }
 
@@ -92,8 +92,8 @@ class PaymentCreationService
     public function createPaymentForQuote(CartInterface $quote): PaymentCreatedInterface
     {
         return $this->createPayment($quote, $this->getTransactionByQuote($quote), [
-            "Magento Quote ID" => $quote->getId(),
-            "Magento Store ID" => $quote->getStoreId(),
+            "Magento Quote ID" => (string) $quote->getId(),
+            "Magento Store ID" => (string) $quote->getStoreId(),
         ]);
     }
 
@@ -125,7 +125,16 @@ class PaymentCreationService
         $this->logger->debug('Merchant account', $merchantAccountId);
 
         $paymentConfig = $this->createPaymentConfig($payable, $merchantAccountId, $customerEmail, $metadata, $existingUserId);
-        $payment = $client->payment()->fill($paymentConfig)->create();
+
+        try {
+            $payment = $client->payment()->fill($paymentConfig)->create();
+        } catch (ApiResponseUnsuccessfulException $e) {
+            $this->logger->error('API validation errors', $e->getErrors());
+            throw $e;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed creating payment', $e);
+        }
+
         $this->logger->debug('Created payment', $payment->getId());
 
         // If new user, we save it
@@ -143,7 +152,7 @@ class PaymentCreationService
     }
 
     /**
-     * @param OrderInterface $order
+     * @param OrderInterface|CartInterface $order
      * @param string $merchantAccountId
      * @param string $customerEmail
      * @param array $metadata
@@ -151,7 +160,7 @@ class PaymentCreationService
      * @return array
      */
     private function createPaymentConfig(
-        OrderInterface $order,
+        OrderInterface|CartInterface $order,
         string $merchantAccountId,
         string $customerEmail,
         array $metadata,
@@ -161,6 +170,7 @@ class PaymentCreationService
             "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
+                "retry" => new \ArrayObject(),
                 "provider_selection" => [
                     "filter" => [
                         "countries" =>  [
@@ -174,7 +184,7 @@ class PaymentCreationService
                             ]
                         ]
                     ],
-                    "type" => "user_selected"
+                    "type" => "user_selected",
                 ],
                 "type" => "bank_transfer",
                 "beneficiary" => [
@@ -247,11 +257,9 @@ class PaymentCreationService
         try {
             return $this->transactionRepository->getByQuoteId((int) $quote->getId());
         } catch (NoSuchEntityException $exception) {
-            $transaction = $this->transactionRepository->create()
+            return $this->transactionRepository->create()
                 ->setQuoteId((int) $quote->getId())
                 ->setToken($this->mathRandom->getUniqueHash('trl'));
-
-            return $this->transactionRepository->save($transaction);
         }
     }
 }

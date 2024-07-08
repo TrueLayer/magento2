@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace TrueLayer\Connect\Model\Config\System;
 
-use TrueLayer\Connect\Api\Config\System\SettingInterface;
+use TrueLayer\Connect\Api\Config\System\SettingsRepositoryInterface;
 
 /**
  * Debug provider class
  */
-class SettingsRepository extends BaseRepository implements SettingInterface
+class SettingsRepository extends BaseRepository implements SettingsRepositoryInterface
 {
     /**
      * @inheritDoc
@@ -81,5 +81,37 @@ class SettingsRepository extends BaseRepository implements SettingInterface
     public function sendOrderEmail(): bool
     {
         return $this->isSetFlag(self::XML_PATH_SEND_ORDER_EMAIL);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPreselected(): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_PRESELECTED);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isCheckoutWidgetEnabled(): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_CHECKOUT_WIDGET_ENABLED);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isCheckoutWidgetSeamless(): bool
+    {
+        return $this->isCheckoutWidgetEnabled() && $this->isSetFlag(self::XML_PATH_CHECKOUT_WIDGET_SEAMLESS);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isCheckoutWidgetRecommended(): bool
+    {
+        return $this->isCheckoutWidgetEnabled() && $this->isSetFlag(self::XML_PATH_CHECKOUT_WIDGET_RECOMMENDED);
     }
 }

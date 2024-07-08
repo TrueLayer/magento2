@@ -17,7 +17,7 @@ define(
             redirectAfterPlaceOrder: true,
 
             defaults: {
-                template: 'TrueLayer_Connect/payment/truelayer'
+                template: 'TrueLayer_Connect/payment/hpp'
             },
 
             getCode: function() {

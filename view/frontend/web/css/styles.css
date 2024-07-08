@@ -15,3 +15,44 @@ input#truelayer:before {
     margin-top: -15px;
     margin-left: 25px;
 }
+
+
+.checkout-payment-method #tl-payment-method.checkout-widget.is_seamless .payment-method-content {
+    display: block;
+    padding-left: 0;
+}
+
+#tl-payment-method.checkout-widget input#truelayer:before {
+    background-image: url("../images/providers.svg");
+    background-position: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 94px;
+    height: 24px;
+    margin-left: 20px;
+    margin-top: -5px;
+}
+
+#tl-payment-method.checkout-widget input#truelayer {
+    margin-right: 110px;
+}
+
+#tl-payment-method.checkout-widget.is-seamless .checkout-billing-address,
+#tl-payment-method.checkout-widget.is-seamless .billing-address-same-as-shipping-block {
+    margin-bottom: 0;
+}
+
+#tl-payment-method.checkout-widget.is-seamless .billing-address-details {
+    display: none;
+}
+
+#checkout-widget-target {
+    height: 216px;
+    display: block;
+    position: relative;
+    z-index: 99999;
+}
+
+#checkout-widget-target iframe {
+    border: none;
+}

@@ -11,7 +11,7 @@ namespace TrueLayer\Connect\Api\Config\System;
  * Settings group config repository interface
  * @api
  */
-interface SettingInterface
+interface SettingsRepositoryInterface
 {
 
     /** Settings Group */
@@ -23,6 +23,11 @@ interface SettingInterface
     public const XML_PATH_PAYMENT_PAGE_PRIMARY_COLOR = 'payment/truelayer/payment_page_primary_color';
     public const XML_PATH_PAYMENT_PAGE_SECONDARY_COLOR = 'payment/truelayer/payment_page_secondary_color';
     public const XML_PATH_PAYMENT_PAGE_TERTIARY_COLOR = 'payment/truelayer/payment_page_tertiary_color';
+
+    public const XML_PATH_PRESELECTED = 'payment/truelayer/preselected';
+    public const XML_PATH_CHECKOUT_WIDGET_ENABLED = 'payment/truelayer/checkout_widget_enabled';
+    public const XML_PATH_CHECKOUT_WIDGET_SEAMLESS = 'payment/truelayer/checkout_widget_seamless';
+    public const XML_PATH_CHECKOUT_WIDGET_RECOMMENDED = 'payment/truelayer/checkout_widget_recommended';
 
     /**
      * Get minimum allowed order total
@@ -80,4 +85,24 @@ interface SettingInterface
      * @return bool
      */
     public function sendOrderEmail(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isPreselected(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isCheckoutWidgetEnabled(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isCheckoutWidgetSeamless(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isCheckoutWidgetRecommended(): bool;
 }

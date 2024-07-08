@@ -43,7 +43,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
                 },
                 complete: () => {
                     if (!this.isRedirecting) {
-                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 2000);
+                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 1500);
                     }
                 }
             })
