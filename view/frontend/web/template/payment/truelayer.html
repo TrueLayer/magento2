@@ -14,10 +14,10 @@
         <label class="label" data-bind="attr: {'for': getCode()}">
             <span data-bind="text: getTitle()"></span>
         </label>
+        <span id="truelayer-description" data-bind="visible: !!getDescription(), text: getDescription()"></span>
     </div>
 
     <div class="payment-method-content">
-        <span id="truelayer-description" data-bind="visible: !!getDescription(), text: getDescription()"></span>
         <span id="truelayer-payment-error-message" class="truelayer-payment-error message error" data-bind="visible:false"></span>
 
         <!-- ko foreach: getRegion('messages') -->

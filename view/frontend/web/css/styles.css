@@ -18,5 +18,8 @@ input#truelayer:before {
 
 #truelayer-description {
     display: block;
-    margin-bottom: 20px;
+    padding-left: 22px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
 }
