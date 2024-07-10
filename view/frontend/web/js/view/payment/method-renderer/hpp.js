@@ -21,7 +21,7 @@ define(
             },
 
             getCode: function() {
-                return 'truelayer';
+                return this.item.method;
             },
 
             afterPlaceOrder: function() {

@@ -1,8 +1,7 @@
 input#truelayer {
-    margin-right: 40px;
-}
+  margin-right: 40px;
 
-input#truelayer:before {
+  &:before {
     content: '';
     display: block;
     background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI0LjEuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNTAgMjUwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzA5MzU1NDt9Cgkuc3Qxe2ZpbGw6IzA5MzU1NDt9Cjwvc3R5bGU+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNzcuNCwxMDMuN0g0Ny45Yy0yLjQsMC00LjMsMS45LTQuMyw0LjNjMCwyLjQsMS45LDQuMyw0LjMsNC4zSDUwdjc2LjdoLTIuMXYwYy00LjcsMC04LjUsMy44LTguNSw4LjUKCWMwLDQuNywzLjgsOC41LDguNSw4LjVoMTQ5LjJjNC43LDAsOC41LTMuOCw4LjUtOC41YzAtNC43LTMuOC04LjUtOC41LTguNUgxOTV2LTUzLjVsLTE3LjEsMTYuOHYzNi43aC0yNS42di03Ni43aDIyTDE3Ny40LDEwMy43egoJIE0xMzUuMywxMTIuMnY3Ni43aC0yNS42di03Ni43SDEzNS4zeiBNNjcuMSwxMTIuMmgyNS42djc2LjdINjcuMVYxMTIuMnoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTE1OC4xLDU1LjhsLTIwLjMsMjBjLTEuMywxLjMtMS44LDMuMi0xLjMsNWMwLjUsMS44LDEuOSwzLjQsMy44LDRMMTcxLjIsOTZoLTEzNGMtNCwwLTcuNS0yLjgtOC4zLTYuNwoJYy0wLjgtMy45LDEuMi03LjksNC44LTkuNkwxMTksNDEuM2MyLjItMSw0LjgtMSw3LDBMMTU4LjEsNTUuOHoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTIwNy43LDIxMS4xSDM3LjJjLTQuNywwLTguNSwzLjgtOC41LDguNWMwLDQuNywzLjgsOC41LDguNSw4LjVoMTcwLjVjNC43LDAsOC41LTMuOCw4LjUtOC41CglDMjE2LjMsMjE0LjksMjEyLjQsMjExLjEsMjA3LjcsMjExLjF6Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yNDIuNyw3Ny43Yy0wLjYtMS40LTEuOS0yLjUtMy42LTIuOWwtMzQuMi0xMGwxMi4zLTQxLjljMC41LTEuOC0wLjYtMy44LTIuOC00LjljLTIuMi0xLjEtNC43LTAuOC02LjEsMC42CglsLTU5LjIsNTcuMWMtMSwxLTEuMywyLjQtMC43LDMuN2MwLjYsMS4zLDEuOSwyLjUsMy42LDIuOWwzNC4yLDEwbC0xMi4zLDQxLjljLTAuNSwxLjgsMC42LDMuOCwyLjgsNC45YzAuMywwLjIsMC43LDAuMywxLDAuNAoJYzEuOSwwLjYsMy45LDAuMiw1LjEtMUwyNDIsODEuNUMyNDMsODAuNSwyNDMuMyw3OS4xLDI0Mi43LDc3Ljd6Ii8+Cjwvc3ZnPgo=");
@@ -14,45 +13,5 @@ input#truelayer:before {
     float: left;
     margin-top: -15px;
     margin-left: 25px;
-}
-
-
-.checkout-payment-method #tl-payment-method.checkout-widget.is_seamless .payment-method-content {
-    display: block;
-    padding-left: 0;
-}
-
-#tl-payment-method.checkout-widget input#truelayer:before {
-    background-image: url("../images/providers.svg");
-    background-position: 0;
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 94px;
-    height: 24px;
-    margin-left: 20px;
-    margin-top: -5px;
-}
-
-#tl-payment-method.checkout-widget input#truelayer {
-    margin-right: 110px;
-}
-
-#tl-payment-method.checkout-widget.is-seamless .checkout-billing-address,
-#tl-payment-method.checkout-widget.is-seamless .billing-address-same-as-shipping-block {
-    margin-bottom: 0;
-}
-
-#tl-payment-method.checkout-widget.is-seamless .billing-address-details {
-    display: none;
-}
-
-#checkout-widget-target {
-    height: 216px;
-    display: block;
-    position: relative;
-    z-index: 99999;
-}
-
-#checkout-widget-target iframe {
-    border: none;
+  }
 }

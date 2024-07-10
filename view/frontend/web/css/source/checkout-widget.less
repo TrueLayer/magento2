@@ -1,0 +1,46 @@
+.label {
+  position: relative;
+  padding-left: 104px;
+
+  &:before {
+    background: url("../TrueLayer_Connect/images/providers.svg") no-repeat 0 0;
+    background-size: contain;
+    width: 94px;
+    height: 24px;
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    margin-top: -12px;
+  }
+}
+
+&.is-seamless {
+  .payment-method-content {
+    padding-left: 0;
+    display: block !important;
+  }
+
+  .checkout-billing-address, .billing-address-same-as-shipping-block {
+    margin-bottom: 0;
+  }
+
+  .billing-address-details {
+    display: none;
+  }
+}
+
+.widget-target {
+  height: 216px;
+  display: block;
+
+  iframe {
+    z-index: 99999;
+    border: none;
+
+    &#tl-checkout-widget {
+      z-index: 1;
+    }
+  }
+}
+

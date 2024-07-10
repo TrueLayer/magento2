@@ -4,9 +4,9 @@
  * See COPYING.txt for license details.
  */
 -->
-<div id="tl-payment-method" class="payment-method checkout-widget" data-bind="css: {'is-seamless': isSeamless(), '_active': getCode() == isChecked()}">
+<div id="tl-payment-method" class="payment-method checkout-widget" data-bind="css: {'is-seamless': config.isSeamless, '_active': isActive()}">
 
-    <span data-bind="if: !isSeamless()">
+    <span data-bind="if: !config.isSeamless || shouldRedirect()">
         <div class="payment-method-title field choice" >
             <input type="radio"
                    name="payment[method]"
@@ -22,11 +22,7 @@
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
 
-        <span id="checkout-widget-target" data-bind="visible: !isWidgetDone() && createWidget($element)"></span>
-
-        <span style="background: rgb(31 31 37/0.7); position: absolute; left: 0; top: 0; bottom: 0; right: 0; z-index: 99999999"  data-bind="visible: isWidgetDone()">
-            <span style="position: absolute; top: 49%; width: 100%; text-align: center; font-weight: bold; color: white">Please wait....</span>
-        </span>
+        <span class="widget-target" data-bind="visible: !shouldRedirect()" afterRender="setup($element)"></span>
 
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->

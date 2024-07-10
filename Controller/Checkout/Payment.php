@@ -57,8 +57,6 @@ class Payment extends BaseController implements HttpPostActionInterface
      */
     public function executeAction(): ResultInterface
     {
-        // TODO: handle errors
-
         $payment = $this->paymentCreationService->createPaymentForQuote(
             $this->checkoutSession->getQuote()
         );

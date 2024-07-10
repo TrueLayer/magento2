@@ -13,69 +13,90 @@ define(
         'Magento_Checkout/js/action/set-payment-information',
         'Magento_Checkout/js/action/select-payment-method',
         'TrueLayer_Connect/js/action/cart-refresh',
+        'Magento_Checkout/js/model/full-screen-loader',
+        'mage/translate',
         'truelayer/web-sdk',
     ],
-    function ($, ko, url, Component, setPaymentInformation, selectPaymentMethod, cartRefresh, webSdk) {
+    function ($, ko, url, Component, setPaymentInformation, selectPaymentMethod, cartRefresh, loader, translate, webSdk) {
         'use strict';
 
-        // TODO: pending state => hide UI and show spinner
-        // TODO: on mobile perhaps use 'consent' not waiting bank
+        // TODO: retries, error handling
 
         return Component.extend({
             redirectAfterPlaceOrder: false,
 
             defaults: {
                 template: 'TrueLayer_Connect/payment/checkout-widget',
-                isError: ko.observable(false),
                 getPaymentUrl: url.build('/truelayer/checkout/payment'),
                 processUrl: url.build('/truelayer/checkout/process?force_api_fallback=1'),
                 isOrderPlaced: ko.observable(false),
-                isWidgetDone: ko.observable(false),
+                shouldRedirect: ko.observable(false),
+                isRedirecting: ko.observable(false),
                 paymentId: null,
+                widget: null,
+                widgetContainer: null,
+                config: {
+                    isSeamless: window.checkoutConfig.payment.truelayer.isCheckoutWidgetSeamless,
+                    isRecommended: window.checkoutConfig.payment.truelayer.isCheckoutWidgetRecommended,
+                    isPreselected: window.checkoutConfig.payment.truelayer.isPreselected,
+                },
+
             },
 
-            createWidget: function (container) {
-                var self = this;
+            // Setup method is invoked when the widget container is rendered
+            setup: function(container) {
+                window.messageContainer = this.messageContainer;
 
-                if (this.shouldPreselect()) {
-                    selectPaymentMethod(this.getData())
+                if (this.config.isPreselected) {
+                    this.selectPaymentMethod();
                 }
 
-                var widget = this.initWidget(container);
+                this.initWidget(container);
 
-                this.getPayment().done(function(payment) {
-                    widget.start(payment)
-                    self.paymentId = payment.paymentId;
-                });
+                if (this.config.isSeamless || this.isActive()) {
+                    this.startWidget();
+                }
 
-                return true;
+                ko.computed(this.redirectWhenReady, this);
+                ko.computed(this.showFullScreenLoader, this);
             },
 
-            initWidget: function (container) {
-                var self = this;
+            selectPaymentMethod: function() {
+                if (!this.config.isSeamless) {
+                    this.startWidget();
+                }
 
-                return webSdk
+                return this._super();
+            },
+
+            initWidget: function(container) {
+                this.widgetContainer = container;
+
+                this.widget = webSdk
                     .initWebSdk({
                         uiSettings: {
                             size: 'large',
-                            recommendedPaymentMethod: this.isRecommended(),
+                            recommendedPaymentMethod: this.config.isRecommended,
                         },
-                        onNavigation: function (page) {
-                            console.log('navigation', page);
-                            if (['waiting-bank', 'qr-code-loader'].includes(page)) {
-                                self.handlePlaceOrder();
-                            }
-                            if (page === 'cancel') {
-                                self.handleWidgetClose();
-                            }
-                        },
-                        onDone: this.handleWidgetDone.bind(self),
+                        onPayButtonClicked: this.handlePlaceOrder.bind(this),
+                        onDone: this.handleWidgetDone.bind(this),
+                        onCancel: function () {
+                            this.resetWidget('You cancelled your payment. Please try again.')
+                        }.bind(this),
                     })
-                    .mount(container);
+                    .mount(this.widgetContainer);
             },
 
-            // TODO: retries, error handling
-            getPayment: function () {
+            startWidget: function() {
+                var self = this;
+
+                this.getPayment().done(function(payment) {
+                    self.widget.start(payment)
+                    self.paymentId = payment.paymentId;
+                });
+            },
+
+            getPayment: function() {
                 return $.ajax({
                     url: this.getPaymentUrl,
                     type: 'POST',
@@ -89,54 +110,70 @@ define(
                 })
             },
 
-            // TODO: handle failure;
-            handlePlaceOrder: function() {
-                console.log('handle placed order');
-                var self = this;
+            resetWidget: function(errorMessage) {
+                this.isOrderPlaced(false);
+                this.shouldRedirect(false);
+                this.paymentId = null;
 
-                var paymentInformationSet =
-                    this.isChecked() === this.getCode() ||
-                    setPaymentInformation(this.messageContainer, this.getData());
+                if (errorMessage) {
+                    this.messageContainer.addErrorMessage({
+                        message: translate(errorMessage)
+                    });
+                }
 
-                console.log(paymentInformationSet);
-
-                $.when(paymentInformationSet).done(function () {
-                    console.log('parent place order');
-                    self.placeOrder();
-                })
-            },
-
-            handleWidgetClose: function () {
-
+                this.initWidget(this.widgetContainer);
+                this.startWidget();
             },
 
             handleWidgetDone: function(info) {
-                console.log('onDone', info.resultStatus);
-                this.isWidgetDone(true);
-                window.location.replace(this.processUrl + '&payment_id=' + this.paymentId);
+                if (info.resultStatus === 'failed') {
+                    this.resetWidget('Your payment failed. Please try again');
+                    return;
+                }
+
+                this.shouldRedirect(true);
+                loader.startLoader();
+                this.messageContainer.addSuccessMessage({
+                    message: translate('We are placing your order and will redirect you shortly.')
+                });
             },
 
-            getCode: function() {
-                return 'truelayer';
+            handlePlaceOrder: function() {
+                var self = this;
+
+                var paymentInformationSet = this.isActive() || setPaymentInformation(this.messageContainer, this.getData());
+
+                $.when(paymentInformationSet).done(function () {
+                    self.placeOrder();
+                    loader.stopLoader();
+                })
             },
 
             afterPlaceOrder: function() {
-                console.log('cart refresh')
-                cartRefresh();
+                // cartRefresh();
                 this.isOrderPlaced(true);
             },
 
-            shouldPreselect: function () {
-                return window.checkoutConfig.payment.truelayer.isPreselected;
+            redirectWhenReady: function() {
+                if (this.isOrderPlaced() && this.shouldRedirect()) {
+                    this.isRedirecting(true);
+                    $.mage.redirect(this.processUrl + '&payment_id=' + this.paymentId)
+                }
             },
 
-            isSeamless: function () {
-                return window.checkoutConfig.payment.truelayer.isCheckoutWidgetSeamless;
+            showFullScreenLoader: function() {
+                if (this.shouldRedirect() || this.isRedirecting()) {
+                    loader.startLoader();
+                }
             },
 
-            isRecommended: function () {
-                return window.checkoutConfig.payment.truelayer.isCheckoutWidgetRecommended;
-            }
+            getCode: function() {
+                return this.item.method;
+            },
+
+            isActive: function() {
+                return this.getCode() === this.isChecked();
+            },
         });
     }
 );
