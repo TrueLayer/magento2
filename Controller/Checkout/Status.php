@@ -32,7 +32,7 @@ use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
 
 class Status extends BaseController implements HttpPostActionInterface
 {
-    private const CHECK_API_AFTER_ATTEMPTS = 7;
+    private const CHECK_API_AFTER_ATTEMPTS = 25;
 
     private Session $session;
     private OrderRepositoryInterface $orderRepository;
