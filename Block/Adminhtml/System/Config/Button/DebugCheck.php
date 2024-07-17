@@ -58,12 +58,13 @@ class DebugCheck extends Field
     public function getButtonHtml(): string
     {
         try {
-            return $this->getLayout()
-                ->createBlock(Button::class)
-                ->setData([
-                    'id' => 'truelayer-button_debug',
-                    'label' => __('Check last 100 debug log records')
-                ])->toHtml();
+            /** @var \Magento\Framework\View\Element\AbstractBlock $block */
+            $block = $this->getLayout()->createBlock(Button::class);
+            $block->setData([
+                'id' => 'truelayer-button_debug',
+                'label' => __('Check last 100 debug log records')
+            ]);
+            return $block->toHtml();
         } catch (Exception $e) {
             return '';
         }
