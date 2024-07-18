@@ -2,3 +2,5 @@
 .idea
 *.zip
 .DS_Store
+docker
+.vscode

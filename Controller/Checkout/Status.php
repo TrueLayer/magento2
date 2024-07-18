@@ -32,7 +32,7 @@ use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
 
 class Status extends BaseController implements HttpPostActionInterface
 {
-    private const CHECK_API_AFTER_ATTEMPTS = 7;
+    private const CHECK_API_AFTER_ATTEMPTS = 25;
 
     private Session $session;
     private OrderRepositoryInterface $orderRepository;
@@ -124,7 +124,7 @@ class Status extends BaseController implements HttpPostActionInterface
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
             $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 
-            return $this->urlResponse('checkout/cart');
+            return $this->urlResponse('checkout/#payment');
         }
 
         return null;
@@ -184,8 +184,8 @@ class Status extends BaseController implements HttpPostActionInterface
     private function noPaymentFoundResponse(): ResultInterface
     {
         $this->logger->error('Could not load TL payment');
-        $this->context->getMessageManager()->addErrorMessage(__('No payment found'));
-        return $this->urlResponse('checkout/cart');
+        $this->paymentErrorMessageManager->addMessage((string) __('No payment found'));
+        return $this->urlResponse('checkout/#payment');
     }
 
     /**

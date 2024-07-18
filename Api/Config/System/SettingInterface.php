@@ -23,6 +23,8 @@ interface SettingInterface
     public const XML_PATH_PAYMENT_PAGE_PRIMARY_COLOR = 'payment/truelayer/payment_page_primary_color';
     public const XML_PATH_PAYMENT_PAGE_SECONDARY_COLOR = 'payment/truelayer/payment_page_secondary_color';
     public const XML_PATH_PAYMENT_PAGE_TERTIARY_COLOR = 'payment/truelayer/payment_page_tertiary_color';
+    public const XML_PATH_DESCRIPTION = 'payment/truelayer/description';
+    public const XML_PATH_SHOW_DESCRIPTION = 'payment/truelayer/show_description';
 
     /**
      * Get minimum allowed order total
@@ -80,4 +82,18 @@ interface SettingInterface
      * @return bool
      */
     public function sendOrderEmail(): bool;
+
+    /**
+     * Get payment method description
+     *
+     * @return string|null
+     */
+    public function getDescription(): ?string;
+
+    /**
+     * Get show description of payment method during checkout flag
+     *
+     * @return bool
+     */
+    public function getShowDescription(): bool;
 }

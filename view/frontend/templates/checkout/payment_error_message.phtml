@@ -1,23 +1,25 @@
 <?php
 
 use Magento\Framework\Escaper;
+use TrueLayer\Connect\Block\Checkout\PaymentErrorMessage;
 
 /**
  * @var Escaper $escaper
+ * @var PaymentErrorMessage $block
  */
-?>
 
-<span class="truelayer-payment-error">
-    <?=$escaper->escapeHtml(__($block->getData('text')));?>
-</span>
+$message = $block->getMessage();
+$errorMessage = empty($message) ? 'null' : ('"'.$escaper->escapeHtml(__($message)).'"');
+?>
 
 <script type="text/x-magento-init">
     {
-        ".truelayer-payment-error": {
+        "*": {
             "Magento_Ui/js/core/app": {
                 "components": {
-                    "truelayer-pending": {
-                        "component": "TrueLayer_Connect/js/cart_refresh"
+                    "truelayer-error-message": {
+                        "component": "TrueLayer_Connect/js/payment_error_message",
+                        "errorMessage": <?= $errorMessage ?>
                     }
                 }
             }

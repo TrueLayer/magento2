@@ -15,3 +15,11 @@ input#truelayer:before {
     margin-top: -15px;
     margin-left: 25px;
 }
+
+#truelayer-description {
+    display: block;
+    padding-left: 22px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+}

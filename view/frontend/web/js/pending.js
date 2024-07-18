@@ -11,7 +11,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
             isLoading: ko.observable(true),
             isError: ko.observable(false),
             requestCount: ko.observable(0),
-            maxRequestCount: 15,
+            maxRequestCount: 30,
             statusUrl: url.build('/truelayer/checkout/status'),
             isRedirecting: false,
         },
@@ -43,7 +43,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
                 },
                 complete: () => {
                     if (!this.isRedirecting) {
-                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 2000);
+                        setTimeout(this.checkStatus.bind(this), 2000);
                     }
                 }
             })
