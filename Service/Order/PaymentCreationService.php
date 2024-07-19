@@ -176,7 +176,7 @@ class PaymentCreationService
             "amount_in_minor" => $amountInMinor,
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
-                "retry" => new \ArrayObject(),
+                "retry" => new \stdClass(),
                 "provider_selection" => [
                     "filter" => [
                         "countries" =>  [
