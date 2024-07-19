@@ -26,7 +26,6 @@ interface SettingsRepositoryInterface
 
     public const XML_PATH_PRESELECTED = 'payment/truelayer/preselected';
     public const XML_PATH_CHECKOUT_WIDGET_ENABLED = 'payment/truelayer/checkout_widget_enabled';
-    public const XML_PATH_CHECKOUT_WIDGET_SEAMLESS = 'payment/truelayer/checkout_widget_seamless';
     public const XML_PATH_CHECKOUT_WIDGET_RECOMMENDED = 'payment/truelayer/checkout_widget_recommended';
 
     /**
@@ -95,11 +94,6 @@ interface SettingsRepositoryInterface
      * @return bool
      */
     public function isCheckoutWidgetEnabled(): bool;
-
-    /**
-     * @return bool
-     */
-    public function isCheckoutWidgetSeamless(): bool;
 
     /**
      * @return bool

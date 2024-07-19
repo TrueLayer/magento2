@@ -11,6 +11,8 @@
         <column name="order_id" xsi:type="int" nullable="true" unsigned="true" comment="Order Id"/>
         <column name="token" xsi:type="varchar" length="128" nullable="false" comment="Token"/>
         <column name="uuid" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Uuid from Response"/>
+        <column name="amount" xsi:type="int" unsigned="true" nullable="true" comment="Amount"/>
+        <column name="amount_requires_validation" xsi:type="tinyint" unsigned="true" nullable="true" identity="false" comment="Requires Amount Validation"/>
         <column name="status" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Status"/>
         <column name="invoice_uuid" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Invoice Uuid"/>
         <column name="payment_url" xsi:type="varchar" length="128" nullable="true" default="NULL" comment="Payment Url"/>

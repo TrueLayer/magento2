@@ -85,12 +85,6 @@
             <config_path>payment/truelayer/preselected</config_path>
         </field>
 
-        <field id="checkout_widget_seamless" translate="label" type="select" sortOrder="63" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Enable Seamless Mode</label>
-            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-            <config_path>payment/truelayer/checkout_widget_seamless</config_path>
-        </field>
-
         <field id="checkout_widget_recommended" translate="label" type="select" sortOrder="63" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Show "Recommended" badge</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

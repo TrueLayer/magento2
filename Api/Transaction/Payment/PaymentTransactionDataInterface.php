@@ -21,7 +21,8 @@ interface PaymentTransactionDataInterface extends BaseTransactionDataInterface
     public const QUOTE_ID = 'quote_id';
     public const UUID = 'uuid';
     public const TOKEN = 'token';
-
+    public const AMOUNT = 'amount';
+    public const AMOUNT_REQUIRES_VALIDATION = 'amount_requires_validation';
     public const PAYMENT_FAILED = 'payment_failed';
     public const PAYMENT_SETTLED = 'payment_settled';
 
@@ -54,6 +55,28 @@ interface PaymentTransactionDataInterface extends BaseTransactionDataInterface
      * @return $this
      */
     public function setToken(string $value): self;
+
+    /**
+     * @return int|null
+     */
+    public function getAmount(): ?int;
+
+    /**
+     * @param int $amount
+     * @return $this
+     */
+    public function setAmount(int $amount): self;
+
+    /**
+     * @return bool
+     */
+    public function amountRequiresValidation(): bool;
+
+    /**
+     * @param bool $bool
+     * @return $this
+     */
+    public function setAmountRequiresValidation(bool $bool): self;
 
     /**
      * @return $this

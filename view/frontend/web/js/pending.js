@@ -8,11 +8,10 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
 
     return Component.extend({
         defaults: {
-            isLoading: ko.observable(true),
-            isError: ko.observable(false),
             requestCount: ko.observable(0),
             maxRequestCount: 15,
             statusUrl: url.build('/truelayer/checkout/status'),
+            unknownStatusUrl: url.build('/truelayer/checkout/pending'),
             isRedirecting: false,
         },
 
@@ -23,8 +22,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
 
         checkStatus() {
             if (this.requestCount() >= this.maxRequestCount) {
-                this.isError(true);
-                this.isLoading(false);
+                $.mage.redirect(this.unknownStatusUrl + window.location.search);
                 return;
             }
 
@@ -38,14 +36,14 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
                 success: (data) => {
                     if (data && data.redirect) {
                         this.isRedirecting = true;
-                        window.location.replace(data.redirect);
+                        $.mage.redirect(data.redirect);
                     }
                 },
-                complete: () => {
+                complete: function () {
                     if (!this.isRedirecting) {
                         setTimeout(this.checkStatus.bind(this), this.requestCount() * 1500);
                     }
-                }
+                }.bind(this)
             })
         }
     });

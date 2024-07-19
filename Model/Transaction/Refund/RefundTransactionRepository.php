@@ -133,9 +133,9 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     /**
      * @param array $cols
      * @param array $sort
-     * @return RefundTransactionDataInterface
+     * @return null|RefundTransactionDataInterface
      */
-    public function getOneByColumns(array $cols, array $sort = []): RefundTransactionDataInterface
+    public function getOneByColumns(array $cols, array $sort = []): ?RefundTransactionDataInterface
     {
         $collection = $this->collectionFactory->create();
 
@@ -147,6 +147,8 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
             $collection->setOrder($col, $dir);
         }
 
-        return $collection->getFirstItem();
+        $first = $collection->getFirstItem();;
+
+        return $first->getEntityId() ? $first : null;
     }
 }

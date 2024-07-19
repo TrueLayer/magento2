@@ -3,16 +3,13 @@
  * See COPYING.txt for license details.
  */
 
-define(['Magento_Customer/js/customer-data', 'uiComponent'], function (customerData, Component) {
+define(['uiComponent', 'TrueLayer_Connect/js/action/invalidate-cart'], function (Component, invalidateCart) {
     'use strict';
 
     return Component.extend({
         initialize() {
             this._super();
-
-            var sections = ['cart', 'checkout-data'];
-            customerData.invalidate(sections);
-            customerData.reload(sections, true);
+            invalidateCart.invalidate();
         },
     });
 });

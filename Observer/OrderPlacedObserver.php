@@ -62,6 +62,10 @@ class OrderPlacedObserver implements ObserverInterface
 
         $this->orderRepository->save($order);
 
+        // Restore the quote so users can check out again if they come back
+        // The order success page will clear the quote by default
+        $this->session->restoreQuote();
+
         $this->handleCheckoutWidgetPayment($order);
 
         $this->logger->debug('End');
@@ -69,9 +73,6 @@ class OrderPlacedObserver implements ObserverInterface
 
     private function handleCheckoutWidgetPayment(OrderInterface $order)
     {
-        // TODO: remove
-//        sleep(40);
-
         // Check to see if we have a transaction entry for the quote with no order id set
         // This would exist for checkout widget payments, where the order is placed after payment creation
         $transaction = $this->paymentTransactionRepository->getOneByColumns([
@@ -86,9 +87,5 @@ class OrderPlacedObserver implements ObserverInterface
         // Link the order id to the transaction
         $transaction->setOrderId((int)$order->getEntityId());
         $this->paymentTransactionRepository->save($transaction);
-
-        // Restore the quote so users can check out again if they close the widget or refresh the page
-        // The order success page will clear the quote by default
-        $this->session->restoreQuote();
     }
 }

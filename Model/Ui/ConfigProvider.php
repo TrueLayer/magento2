@@ -9,14 +9,20 @@ namespace TrueLayer\Connect\Model\Ui;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
 use TrueLayer\Connect\Api\Config\System\SettingsRepositoryInterface;
+use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepositoryInterface;
 
 class ConfigProvider implements ConfigProviderInterface
 {
     private SettingsRepositoryInterface $settingsRepository;
+    private ConfigRepositoryInterface $configRepository;
     public const CODE = 'truelayer';
 
-    public function __construct(SettingsRepositoryInterface $settingsRepository) {
+    public function __construct(
+        SettingsRepositoryInterface $settingsRepository,
+        ConfigRepositoryInterface $configRepository
+    ) {
         $this->settingsRepository = $settingsRepository;
+        $this->configRepository = $configRepository;
     }
 
     /**
@@ -29,9 +35,9 @@ class ConfigProvider implements ConfigProviderInterface
         return [
             'payment' => [
                 self::CODE => [
+                    'isProduction' => !$this->configRepository->isSandbox(),
                     'isPreselected' => $this->settingsRepository->isPreselected(),
                     'isCheckoutWidgetEnabled' => $this->settingsRepository->isCheckoutWidgetEnabled(),
-                    'isCheckoutWidgetSeamless' => $this->settingsRepository->isCheckoutWidgetSeamless(),
                     'isCheckoutWidgetRecommended' => $this->settingsRepository->isCheckoutWidgetRecommended(),
                 ]
             ]

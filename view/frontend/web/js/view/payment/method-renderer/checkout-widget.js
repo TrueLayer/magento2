@@ -10,17 +10,15 @@ define(
         'ko',
         'mage/url',
         'Magento_Checkout/js/view/payment/default',
-        'Magento_Checkout/js/action/set-payment-information',
-        'Magento_Checkout/js/action/select-payment-method',
-        'TrueLayer_Connect/js/action/cart-refresh',
         'Magento_Checkout/js/model/full-screen-loader',
         'mage/translate',
-        'truelayer/web-sdk',
+        'TrueLayer_Connect/js/action/invalidate-cart',
+        'TrueLayer_Connect/js/model/tl-payment',
+        'TrueLayer_Connect/js/model/magento-payment-information',
+        'truelayer-web-sdk',
     ],
-    function ($, ko, url, Component, setPaymentInformation, selectPaymentMethod, cartRefresh, loader, translate, webSdk) {
+    function ($, ko, url, Component, loader, translate, invalidateCart, tlPayment, paymentInformation, webSdk) {
         'use strict';
-
-        // TODO: retries, error handling
 
         return Component.extend({
             redirectAfterPlaceOrder: false,
@@ -34,17 +32,13 @@ define(
                 shouldRedirect: ko.observable(false),
                 isRedirecting: ko.observable(false),
 
-                isPaymentFetching: ko.observable(false),
-                paymentQuery: ko.observable(null),
-                paymentId: ko.observable(null),
-
                 errorMessage: ko.observable(null),
 
                 widget: null,
                 widgetContainer: null,
 
                 config: {
-                    isSeamless: window.checkoutConfig.payment.truelayer.isCheckoutWidgetSeamless,
+                    isProduction: window.checkoutConfig.payment.truelayer.isProduction,
                     isRecommended: window.checkoutConfig.payment.truelayer.isCheckoutWidgetRecommended,
                     isPreselected: window.checkoutConfig.payment.truelayer.isPreselected,
                 },
@@ -59,10 +53,7 @@ define(
                     this.selectPaymentMethod();
                 }
 
-                if (this.config.isSeamless || this.isActive()) {
-                    this.fetchPayment();
-                }
-
+                ko.computed(this.loadPayment, this);
                 ko.computed(this.initWidget, this);
                 ko.computed(this.startWidget, this);
                 ko.computed(this.redirectWhenReady, this);
@@ -70,47 +61,20 @@ define(
                 ko.computed(this.showErrorMessage, this);
             },
 
-            selectPaymentMethod: function() {
-                if (!this.config.isSeamless) {
-                    this.fetchPayment();
+            loadPayment: function() {
+                if (this.getCode() !== this.isChecked()) {
+                    return;
                 }
 
-                return this._super();
-            },
-
-            fetchPayment: function() {
-                // Abort any in-flight requests to avoid race conditions
-                if (this.paymentQuery()) {
-                    this.paymentQuery().abort();
+                if (!paymentInformation.isSet() || tlPayment.paymentId()) {
+                    return;
                 }
 
-                // Update payment related state
-                this.isPaymentFetching(true);
-                this.paymentId(null);
-
-                // Make new request
-                var xhr = $.ajax({
-                    url: this.getPaymentUrl,
-                    type: 'POST',
-                    dataType: 'json',
-                    contentType: 'application/json',
-                });
-
-                var self = this;
-
-                // Update payment state
-                this.paymentQuery(xhr);
-                xhr
-                    .then(function (data) {
-                        self.paymentId(data.payment_id);
-                    })
-                    .always(function() {
-                        self.isPaymentFetching(false);
-                    })
+                tlPayment.load();
             },
 
             initWidget: function() {
-                if (!this.isPaymentFetching()) {
+                if (!tlPayment.isLoading()) {
                     return;
                 }
 
@@ -123,32 +87,41 @@ define(
 
                 this.widget = webSdk
                     .initWebSdk({
+                        production: this.config.isProduction,
+                        maxWaitForResult: 10,
                         uiSettings: {
                             size: 'large',
                             recommendedPaymentMethod: this.config.isRecommended,
                         },
-                        onPayButtonClicked: this.handlePlaceOrder.bind(this),
+                        onPayButtonClicked: this.placeOrder.bind(this),
                         onDone: this.handleWidgetDone.bind(this),
                         onCancel: function () {
-                            this.fetchPayment();
+                            tlPayment.load();
                             this.errorMessage('You cancelled your payment. Please try again.');
                         }.bind(this),
+                        onError: function () {
+                            tlPayment.load();
+                            this.errorMessage('Sorry, there was an error. Please try again.');
+                        }
                     })
                     .mount(this.widgetContainer);
             },
 
             startWidget: function() {
-                this.paymentQuery().done(function (payment) {
-                    this.widget.start({
-                        paymentId: payment.payment_id,
-                        resourceToken: payment.resource_token,
-                    })
-                }.bind(this));
+                if (tlPayment.isLoading() || !tlPayment.paymentId() || !tlPayment.resourceToken()) {
+                    return;
+                }
+
+                this.widget.start({
+                    paymentId: tlPayment.paymentId(),
+                    resourceToken: tlPayment.resourceToken(),
+                })
             },
 
             handleWidgetDone: function(info) {
                 if (info.resultStatus === 'failed') {
                     this.errorMessage('Your payment failed. Please try again');
+                    tlPayment.load();
                     return;
                 }
 
@@ -159,23 +132,15 @@ define(
                 });
             },
 
-            handlePlaceOrder: function() {
-                var paymentInformationSet = this.isActive() || setPaymentInformation(this.messageContainer, this.getData());
-
-                $.when(paymentInformationSet).done(function () {
-                    this.placeOrder();
-                }.bind(this))
-            },
-
             afterPlaceOrder: function() {
-                cartRefresh();
                 this.isOrderPlaced(true);
             },
 
             redirectWhenReady: function() {
                 if (this.isOrderPlaced() && this.shouldRedirect()) {
                     this.isRedirecting(true);
-                    $.mage.redirect(this.processUrl + '&payment_id=' + this.paymentId())
+                    invalidateCart.requireInvalidation(true);
+                    $.mage.redirect(this.processUrl + '&payment_id=' + tlPayment.paymentId())
                 }
             },
 
@@ -186,13 +151,18 @@ define(
             },
 
             showErrorMessage: function() {
-                if (this.errorMessage()) {
-                    this.messageContainer.addErrorMessage({
-                        message: translate(this.errorMessage())
-                    });
+                var error = this.errorMessage() || tlPayment.error();
 
-                    this.errorMessage(null);
+                if (!error) {
+                    return;
                 }
+
+                this.messageContainer.addErrorMessage({
+                    message: translate(error)
+                });
+
+                this.errorMessage(null);
+                tlPayment.error(null);
             },
 
             getCode: function() {

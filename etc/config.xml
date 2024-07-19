@@ -33,6 +33,9 @@
                 <payment_page_primary_color>#000000</payment_page_primary_color>
                 <payment_page_secondary_color>#e53935</payment_page_secondary_color>
                 <payment_page_tertiary_color>#32329f</payment_page_tertiary_color>
+                <preselected>0</preselected>
+                <checkout_widget_enabled>0</checkout_widget_enabled>
+                <checkout_widget_recommended>1</checkout_widget_recommended>
             </truelayer>
         </payment>
     </default>

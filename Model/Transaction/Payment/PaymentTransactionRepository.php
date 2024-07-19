@@ -128,9 +128,9 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
     /**
      * @param array $cols
      * @param array $sort
-     * @return PaymentTransactionDataInterface
+     * @return null|PaymentTransactionDataInterface
      */
-    public function getOneByColumns(array $cols, array $sort = []): PaymentTransactionDataInterface
+    public function getOneByColumns(array $cols, array $sort = []): ?PaymentTransactionDataInterface
     {
         $collection = $this->collectionFactory->create();
 
@@ -142,6 +142,8 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
             $collection->setOrder($col, $dir);
         }
 
-        return $collection->getFirstItem();
+        $first = $collection->getFirstItem();
+
+        return $first->getEntityId() ? $first : null;
     }
 }

@@ -1,0 +1,30 @@
+<?php
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var $block Failure */
+
+use Magento\Checkout\Block\Onepage\Failure;
+
+?>
+
+<span class="truelayer-payment-unknown-status" data-bind="scope:'truelayer-payment-unknown-status'">
+    <p><?=$block->escapeHtml(__('Your payment is taking longer than usual to authorize.'))?></p>
+    <p><?=$block->escapeHtml(__('Please wait for an order confirmation email.'))?></p>
+</span>
+
+<script type="text/x-magento-init">
+    {
+        ".truelayer-payment-unknown-status": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "truelayer-unknown-status": {
+                        "component": "TrueLayer_Connect/js/cart_refresh"
+                    }
+                }
+            }
+        }
+    }
+</script>

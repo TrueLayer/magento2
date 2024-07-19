@@ -102,14 +102,6 @@ class SettingsRepository extends BaseRepository implements SettingsRepositoryInt
     /**
      * @inheritDoc
      */
-    public function isCheckoutWidgetSeamless(): bool
-    {
-        return $this->isCheckoutWidgetEnabled() && $this->isSetFlag(self::XML_PATH_CHECKOUT_WIDGET_SEAMLESS);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function isCheckoutWidgetRecommended(): bool
     {
         return $this->isCheckoutWidgetEnabled() && $this->isSetFlag(self::XML_PATH_CHECKOUT_WIDGET_RECOMMENDED);

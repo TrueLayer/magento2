@@ -19,6 +19,8 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
+use TrueLayer\Connect\Helper\AmountHelper;
+use TrueLayer\Connect\Helper\PaymentFailureReasonHelper;
 
 class PaymentSettledService
 {
@@ -68,28 +70,63 @@ class PaymentSettledService
         $this->transactionService
             ->paymentId($paymentId)
             ->execute(function (PaymentTransactionDataInterface $transaction) use ($paymentId) {
-                $order = $this->orderRepository->get($transaction->getOrderId());
-                $this->updateOrder($order, $paymentId);
-                $transaction->setPaymentSettled();
-                $this->sendOrderEmail($order);
-                $this->sendInvoiceEmail($order);
+                $this->handleUpdate($transaction, $paymentId);
             });
 
         $this->logger->removePrefix($prefix);
     }
 
-    private function updateOrder(OrderInterface $order, string $paymentId): void
+    /**
+     * @param PaymentTransactionDataInterface $transaction
+     * @param string $paymentId
+     * @throws Exception
+     */
+    function handleUpdate(PaymentTransactionDataInterface $transaction, string $paymentId): void
     {
-        // Update order payment
+        $order = $this->orderRepository->get($transaction->getOrderId());
+        $this->closeOrderPaymentTransaction($order, $paymentId);
+        $transaction->setPaymentSettled();
+
+        if ($transaction->amountRequiresValidation() && $transaction->getAmount() != AmountHelper::toMinor($order->getBaseGrandTotal())) {
+            $comment = 'Payment amount does not match order total.';
+            $this->logger->debug($comment);
+            $this->updateOrder($order, Order::STATE_PAYMENT_REVIEW, Order::STATE_PAYMENT_REVIEW, $comment);
+            return;
+        }
+
+        $this->updateOrder($order, Order::STATE_PROCESSING, Order::STATE_PROCESSING);
+        $this->sendOrderEmail($order);
+        $this->sendInvoiceEmail($order);
+    }
+
+    /**
+     * @param OrderInterface $order
+     * @param string $state
+     * @param string $status
+     * @param string|null $comment
+     */
+    private function updateOrder(OrderInterface $order, string $state, string $status, string $comment = null): void
+    {
+        $order->setState($state)->setStatus($status);
+
+        if ($comment) {
+            $order->addStatusToHistory($status, $comment, false);
+        }
+
+        $this->orderRepository->save($order);
+        $this->logger->debug('Order state updated', [$state, $status]);
+    }
+
+    /**
+     * @param OrderInterface $order
+     * @param string $paymentId
+     */
+    private function closeOrderPaymentTransaction(OrderInterface $order, string $paymentId): void
+    {
         $payment = $order->getPayment();
         $payment->setTransactionId($paymentId);
         $payment->setIsTransactionClosed(true);
         $payment->registerCaptureNotification($order->getGrandTotal(), true);
-
-        // Update order state & status
-        $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
-        $this->orderRepository->save($order);
-        $this->logger->debug('Payment and order statuses updated');
     }
 
     /**

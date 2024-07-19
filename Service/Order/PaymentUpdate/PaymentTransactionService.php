@@ -14,6 +14,7 @@ use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface;
 use TrueLayer\Connect\Service\Order\BaseTransactionService;
+use TrueLayer\Connect\Service\Order\PaymentUpdate\Exceptions\OrderNotReadyException;
 
 class PaymentTransactionService extends BaseTransactionService
 {
@@ -43,11 +44,17 @@ class PaymentTransactionService extends BaseTransactionService
     /**
      * @return BaseTransactionDataInterface
      * @throws InputException
-     * @throws NoSuchEntityException
+     * @throws NoSuchEntityException|OrderNotReadyException
      */
     protected function getTransaction(): BaseTransactionDataInterface
     {
-        return $this->transactionRepository->getByPaymentUuid($this->paymentId);
+        $transaction = $this->transactionRepository->getByPaymentUuid($this->paymentId);
+
+        if (!$transaction->getOrderId()) {
+           throw new OrderNotReadyException();
+        }
+
+        return $transaction;
     }
 
     /**

@@ -17,7 +17,6 @@ use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 class PaymentTransactionDataModel extends AbstractModel
     implements ExtensibleDataInterface, PaymentTransactionDataInterface
 {
-
     /**
      * @inheritDoc
      */
@@ -86,6 +85,40 @@ class PaymentTransactionDataModel extends AbstractModel
     public function setToken(string $value): PaymentTransactionDataInterface
     {
         return $this->setData(self::TOKEN, $value);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAmount(): ?int
+    {
+        return $this->getData(self::AMOUNT)
+            ? (int) $this->getData(self::AMOUNT)
+            : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setAmount(int $amount): PaymentTransactionDataInterface
+    {
+        return $this->setData(self::AMOUNT, $amount);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function amountRequiresValidation(): bool
+    {
+        return (bool) $this->getData(self::AMOUNT_REQUIRES_VALIDATION);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setAmountRequiresValidation(bool $bool): PaymentTransactionDataInterface
+    {
+        return $this->setData(self::AMOUNT_REQUIRES_VALIDATION, (int) $bool);
     }
 
     /**

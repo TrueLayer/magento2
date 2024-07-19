@@ -106,12 +106,11 @@ class UserReturnService
         }
 
         if ($transaction->isPaymentSettled()) {
+            $this->session->setQuoteId(null);
             return 'checkout/onepage/success';
         }
 
         if ($transaction->isPaymentFailed()) {
-            $this->session->restoreQuote();
-
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
             $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 

@@ -19,6 +19,7 @@ use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\Webapi\WebhookInterface;
 use TrueLayer\Connect\Helper\ValidationHelper;
+use TrueLayer\Connect\Service\Order\PaymentUpdate\Exceptions\OrderNotReadyException;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentFailedService;
 use TrueLayer\Connect\Service\Order\PaymentUpdate\PaymentSettledService;
 use TrueLayer\Connect\Service\Order\RefundUpdate\RefundFailedService;
@@ -112,10 +113,17 @@ class Webhook implements WebhookInterface
         try {
             $webhook->execute();
         } catch (WebhookVerificationFailedException $e) {
+            $this->logger->error('Invalid signature');
             throw new AuthorizationException(__('Invalid signature')); // 401
         } catch (NoSuchEntityException $e) {
             // We intentionally do not surface a 404 status code
             $this->logger->error('Aborting webhook, payment or refund not found');
+        } catch (OrderNotReadyException $e) {
+            $this->logger->error('Order not ready, webhook will be retried.');
+            throw $e;
+        } catch (\Exception $e) {
+            $this->logger->error('Webhook error', $e);
+            throw $e;
         }
     }
 

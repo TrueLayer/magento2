@@ -124,7 +124,8 @@ class PaymentCreationService
         $merchantAccountId = $this->getMerchantAccountId($client, $payable->getBaseCurrencyCode());
         $this->logger->debug('Merchant account', $merchantAccountId);
 
-        $paymentConfig = $this->createPaymentConfig($payable, $merchantAccountId, $customerEmail, $metadata, $existingUserId);
+        $amountInMinor = AmountHelper::toMinor($payable->getBaseGrandTotal());
+        $paymentConfig = $this->createPaymentConfig($payable, $amountInMinor, $merchantAccountId, $customerEmail, $metadata, $existingUserId);
 
         try {
             $payment = $client->payment()->fill($paymentConfig)->create();
@@ -144,7 +145,10 @@ class PaymentCreationService
         }
 
         // Link the quote id to the payment id in the transaction table
-        $transaction = $transaction->setPaymentUuid($payment->getId());
+        $transaction
+            ->setPaymentUuid($payment->getId())
+            ->setAmount($amountInMinor)
+            ->setAmountRequiresValidation(true);
         $this->transactionRepository->save($transaction);
         $this->logger->debug('Payment transaction created', $transaction->getEntityId());
 
@@ -153,6 +157,7 @@ class PaymentCreationService
 
     /**
      * @param OrderInterface|CartInterface $order
+     * @param int $amountInMinor
      * @param string $merchantAccountId
      * @param string $customerEmail
      * @param array $metadata
@@ -161,13 +166,14 @@ class PaymentCreationService
      */
     private function createPaymentConfig(
         OrderInterface|CartInterface $order,
+        int $amountInMinor,
         string $merchantAccountId,
         string $customerEmail,
         array $metadata,
         string $existingUserId = null
     ): array {
         $config = [
-            "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),
+            "amount_in_minor" => $amountInMinor,
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
                 "retry" => new \ArrayObject(),
@@ -254,12 +260,17 @@ class PaymentCreationService
      */
     private function getTransactionByQuote(CartInterface $quote): PaymentTransactionDataInterface
     {
-        try {
-            return $this->transactionRepository->getByQuoteId((int) $quote->getId());
-        } catch (NoSuchEntityException $exception) {
-            return $this->transactionRepository->create()
-                ->setQuoteId((int) $quote->getId())
-                ->setToken($this->mathRandom->getUniqueHash('trl'));
+        $transaction = $this->transactionRepository->getOneByColumns([
+            PaymentTransactionDataInterface::QUOTE_ID => (int) $quote->getId(),
+            PaymentTransactionDataInterface::ORDER_ID => ['null' => true],
+        ], [PaymentTransactionDataInterface::ENTITY_ID => 'DESC']);
+
+        if ($transaction) {
+            return $transaction;
         }
+
+        return $this->transactionRepository->create()
+            ->setQuoteId((int) $quote->getId())
+            ->setToken($this->mathRandom->getUniqueHash('trl'));
     }
 }

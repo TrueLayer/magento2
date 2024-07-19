@@ -90,7 +90,7 @@ interface RefundTransactionRepositoryInterface
     /**
      * @param array $cols
      * @param array $sort
-     * @return RefundTransactionDataInterface
+     * @return null|RefundTransactionDataInterface
      */
-    public function getOneByColumns(array $cols, array $sort = []): RefundTransactionDataInterface;
+    public function getOneByColumns(array $cols, array $sort = []): ?RefundTransactionDataInterface;
 }
