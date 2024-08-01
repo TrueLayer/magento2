@@ -96,11 +96,11 @@ define(
                         onPayButtonClicked: this.placeOrder.bind(this),
                         onDone: this.handleWidgetDone.bind(this),
                         onCancel: function () {
-                            tlPayment.load();
+                            tlPayment.clear();
                             this.errorMessage('You cancelled your payment. Please try again.');
                         }.bind(this),
                         onError: function () {
-                            tlPayment.load();
+                            tlPayment.clear();
                             this.errorMessage('Sorry, there was an error. Please try again.');
                         }
                     })
@@ -121,7 +121,7 @@ define(
             handleWidgetDone: function(info) {
                 if (info.resultStatus === 'failed') {
                     this.errorMessage('Your payment failed. Please try again');
-                    tlPayment.load();
+                    tlPayment.clear();
                     return;
                 }
 

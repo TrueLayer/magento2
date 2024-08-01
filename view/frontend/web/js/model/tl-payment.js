@@ -49,5 +49,11 @@ define(['jquery', 'ko', 'mage/url'], function ($, ko, url) {
                 }
             }));
         },
+        clear: function () {
+            isLoading(false);
+            error(null);
+            paymentId(null);
+            resourceToken(null);
+        }
     }
 });
