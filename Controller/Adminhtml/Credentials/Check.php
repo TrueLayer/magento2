@@ -129,7 +129,7 @@ class Check extends Action implements HttpPostActionInterface
             (int)$config['store_id'],
             [
                 'credentials' => $config['credentials'],
-                'force_sandbox' => !!$mode ? $mode === Mode::SANDBOX : null,
+                'force_sandbox' => $mode === Mode::SANDBOX,
             ]
         );
 
@@ -160,7 +160,7 @@ class Check extends Action implements HttpPostActionInterface
             $keyId = $this->getRequest()->getParam('production_key_id');
         }
 
-        $configCredentials = $this->configProvider->getCredentials($storeId, !! $mode ? $mode === Mode::SANDBOX : null);
+        $configCredentials = $this->configProvider->getCredentials($storeId, $mode === Mode::SANDBOX);
         if ($clientSecret == '******') {
             $clientSecret = $configCredentials['client_secret'];
         }
