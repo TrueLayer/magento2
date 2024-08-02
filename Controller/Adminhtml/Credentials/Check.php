@@ -16,7 +16,10 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Io\File;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
+use TrueLayer\Connect\Model\Config\Source\Mode;
 use TrueLayer\Connect\Service\Client\ClientFactory;
+use TrueLayer\Exceptions\ApiResponseUnsuccessfulException;
+use TrueLayer\Exceptions\SignerException;
 use TrueLayer\Interfaces\Client\ClientInterface;
 
 /**
@@ -62,16 +65,43 @@ class Check extends Action implements HttpPostActionInterface
      */
     public function execute(): Json
     {
+        $message = '';
         try {
-            $this->testCredentials()->getMerchantAccounts();
+            $client = $this->testCredentials();
+            $client->getMerchantAccounts();
+            $client->getApiClient()->request()->uri('/test-signature')->post();
+
             return $this->resultJson->setData(
                 ['success' => true, 'msg' => __('Credentials correct!')->render()]
             );
-        } catch (\Exception $exception) {
-            return $this->resultJson->setData(
-                ['success' => false, 'msg' => 'Credentials are not correct']
-            );
+        } catch (ApiResponseUnsuccessfulException $e) {
+            if ($e->getMessage() === 'invalid_client') {
+                $message = __('Invalid Client Id or Secret');
+            }
+            elseif ($e->getMessage() === 'Unauthenticated') {
+                $message = __('Incorrect Private Key or KID');
+            }
+        } catch (SignerException $e) {
+            $m = $e->getMessage();
+            if (!!$m) {
+                if (strpos($m, 'is not private') !== false) {
+                    $message = __('Private Key contains Public Key');
+                } elseif (strpos($m, 'Unable to load') !== false) {
+                    $message = __('Malformed Private Key');
+                }
+            }
+            unset($m);
+        } catch (LocalizedException $e) {
+            $message = $e->getMessage();
+        } catch (\Exception $e) {
+            //leave default message
         }
+        if (!$message) {
+            $message = __('Credentials are not correct.');
+        }
+        return $this->resultJson->setData(
+            ['success' => false, 'msg' => $message]
+        );
     }
 
     /**
@@ -81,18 +111,26 @@ class Check extends Action implements HttpPostActionInterface
     private function testCredentials(): ?ClientInterface
     {
         $config = $this->getCredentials();
+        $mode = $this->getRequest()->getParam('mode');
 
         if (!$config['credentials']['client_id']) {
-            throw new LocalizedException(__('No Client ID set!'));
+            throw new LocalizedException(__('Client Id is missing'));
         }
 
         if (!$config['credentials']['client_secret']) {
-            throw new LocalizedException(__('No Client Secret set!'));
+            throw new LocalizedException(__('Client Secret is missing'));
+        }
+
+        if (!$config['credentials']['private_key'] || $this->getRequest()->getParam('delete_private_key') === 'true') {
+            throw new LocalizedException(__('Private Key file is missing'));
         }
 
         $result = $this->clientFactory->create(
             (int)$config['store_id'],
-            ['credentials' => $config['credentials']]
+            [
+                'credentials' => $config['credentials'],
+                'force_sandbox' => $mode === Mode::SANDBOX,
+            ]
         );
 
         $this->cleanSavedTemporaryPrivateKey();
@@ -122,7 +160,7 @@ class Check extends Action implements HttpPostActionInterface
             $keyId = $this->getRequest()->getParam('production_key_id');
         }
 
-        $configCredentials = $this->configProvider->getCredentials($storeId);
+        $configCredentials = $this->configProvider->getCredentials($storeId, $mode === Mode::SANDBOX);
         if ($clientSecret == '******') {
             $clientSecret = $configCredentials['client_secret'];
         }
