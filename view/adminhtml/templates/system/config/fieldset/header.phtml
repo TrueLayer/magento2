@@ -5,20 +5,20 @@
  *
  * @var \TrueLayer\Connect\Block\Adminhtml\Design\Header $block
  */
-$logo = $block->getViewFileUrl('TrueLayer_Connect::images/logo.svg');
+$logo = $block->getViewFileUrl('TrueLayer_Connect::images/logo-expanded.svg');
 ?>
-<div class="mm-truelayer-header">
-    <div class="mm-truelayer-header-icon" style="background-image: url(<?= $block->escapeUrl($logo) ?>)">
-        <p>TrueLayer</p>
-    </div>
-    <div class="mm-truelayer-header-text">
-        Easily integrate next-generation payments and financial data
-        into any app. Build powerful products your customers love.
-    </div>
-    <div class="mm-truelayer-header-actions">
-        <a id="mm-truelayer-button_help" class="helpbutton" href="https://www.magmodules.eu/support-form.html"
-           target="_blank" rel="noopener">
-            <span><?= $block->escapeUrl(__('Get in Touch')); ?></span>
+<div class="tl-header">
+    <img class="tl-logo" src="<?=$block->escapeUrl($logo);?>" width="215" alt="TrueLayer" />
+
+    <div class="tl-header-cols">
+        <div class="tl-header-text">
+            Transform your payment method from a cost center into a growth enabler.
+            <br />
+            Easily integrate our simpler, faster, and seamless payments into your website or app.
+        </div>
+
+        <a class="tl-header-action tl-btn tl-btn-secondary tl-btn-lg" href="https://support.truelayer.com/hc/en-us/requests/new" target="_blank" rel="noopener">
+            <?= $block->escapeUrl(__('Get in touch')); ?>
         </a>
     </div>
 </div>

@@ -50,7 +50,6 @@
             <argument name="infoBlockType" xsi:type="string">TrueLayer\Connect\Block\Info\Base</argument>
             <argument name="valueHandlerPool" xsi:type="object">TrueLayerValueHandlerPool</argument>
             <argument name="commandPool" xsi:type="object">TrueLayerCommandPool</argument>
-            <argument name="validatorPool" xsi:type="object">TrueLayerValidatorPool</argument>
         </arguments>
     </virtualType>
 
@@ -83,26 +82,6 @@
     <virtualType name="TrueLayerConfig" type="Magento\Payment\Gateway\Config\Config">
         <arguments>
             <argument name="methodCode" xsi:type="const">TrueLayer\Connect\Model\Ui\ConfigProvider::CODE</argument>
-        </arguments>
-    </virtualType>
-
-    <!-- TrueLayer validators infrastructure -->
-    <virtualType name="TrueLayerValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
-        <arguments>
-            <argument name="validators" xsi:type="array">
-                <item name="currency" xsi:type="string">TrueLayerCurrencyValidator</item>
-                <item name="country" xsi:type="string">TrueLayerCountryValidator</item>
-            </argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="TrueLayerCurrencyValidator" type="TrueLayer\Connect\Gateway\Validator\CurrencyValidator">
-        <arguments>
-            <argument name="config" xsi:type="object">TrueLayerConfig</argument>
-        </arguments>
-    </virtualType>
-    <virtualType name="TrueLayerCountryValidator" type="TrueLayer\Connect\Gateway\Validator\CountryValidator">
-        <arguments>
-            <argument name="config" xsi:type="object">TrueLayerConfig</argument>
         </arguments>
     </virtualType>
 

@@ -3,11 +3,11 @@
 //  ---------------------------------------------
 
 .button_base(
-  @bg: @mm-ui-color2,
-  @bg-hover: none,
-  @border: none,
-  @color: @mm-ui-color2,
-  @color-hover: @color,
+  @bg: @btn-bg,
+  @bg-hover: @btn-hover-bg,
+  @border: @btn-border,
+  @color: @btn-color,
+  @color-hover: @btn-hover-color,
   @icon-width: 25px,
   @icon-color: @color,
   @icon-color-hover: @color-hover
@@ -16,18 +16,18 @@
     background-color: @bg;
   }
 
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   gap: 10px;
   font-weight: 600;
-  border-radius: 6px;
-  min-width: 150px;
+  border: 1px solid @border;
+  border-radius: 20px;
+  line-height: 2.5rem;
+  height: 2.5rem;
   padding: 0.5rem 2.2rem;
-
-  border: @border;
-  color: @color;
-  text-decoration: none;
+  color: @color !important;
+  text-decoration: none !important;
   transition: .3s;
 
   &:hover {
@@ -35,7 +35,7 @@
       background-color: @bg-hover;
     }
 
-    color: @color-hover;
+    color: @color-hover !important;
 
     i[class*="icon"] {
       & when not (@icon-color = none) {
@@ -56,13 +56,4 @@
 
     transition: .3s;
   }
-}
-
-.button-as-link(@color: @mm-ui-color3) {
-  display: inline;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: @color;
-  text-decoration: underline;
 }

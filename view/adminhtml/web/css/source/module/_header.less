@@ -1,42 +1,24 @@
-.mm-truelayer-header {
-  background: linear-gradient(312deg, rgba(40, 92, 159, 1) 0%, rgba(21, 133, 207, 1) 100%);
+.tl-header {
+  background: #BBB9FB;
   padding: 3rem 3rem 3rem 5rem;
-  border-radius: 10px;
+  border-radius: 12px;
+  color: #1F1F25;
+
+  &-cols {
+    display: flex;
+  }
 
   &-text {
-    margin-top: 0.7rem;
-    line-height: 3.2rem;
-    padding: 1rem 0rem 1rem 4rem;
-    font-size: 18px;
-    max-width: 660px;
-    color: white;
+    margin-top: 0.5rem;
+    line-height: 3rem;
+    padding: 1rem 2rem 1rem 0;
+    font-size: 1.8rem;
+    flex-grow: 1;
   }
 
-  &-icon {
-    color: #ffffff;
-    background-size: 25px;
-    background-repeat: no-repeat;
-    margin-top: 1em;
-
-    p {
-      margin: 0 1.8em 0.5em;
-      font-size: 21px;
-    }
-  }
-
-
-  &-actions {
-    margin-left: auto;
-    max-width: 200px;
-    text-align: center;
-    float: right;
-    background: #f7ab1b;
-    padding: 20px 50px 20px 50px;
-    margin-top: -60px;
-    border-radius: 12px;
-  }
-
-  span {
-    color: white;
+  &-action {
+    padding-top: 2rem;
+    flex-shrink: 0;
+    align-self: flex-end;
   }
 }

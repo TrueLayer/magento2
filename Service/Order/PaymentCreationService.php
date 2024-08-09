@@ -176,19 +176,11 @@ class PaymentCreationService
             "amount_in_minor" => $amountInMinor,
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
-                "retry" => new \stdClass(),
+                //"retry" => new \stdClass(),
                 "provider_selection" => [
                     "filter" => [
-                        "countries" =>  [
-                            $order->getBillingAddress()->getCountryId()
-                        ],
                         "release_channel" => "general_availability",
                         "customer_segments" => $this->configRepository->getBankingProviders(),
-                        "excludes" => [
-                            "provider_ids" => [
-                                "ob-exclude-this-bank"
-                            ]
-                        ]
                     ],
                     "type" => "user_selected",
                 ],

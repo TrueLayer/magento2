@@ -66,9 +66,14 @@ define(
                     return;
                 }
 
-                if (!paymentInformation.isSet() || tlPayment.paymentId()) {
+                if (!paymentInformation.isSet() || tlPayment.paymentId() || tlPayment.resourceToken()) {
                     return;
                 }
+
+                console.log('reload', {
+                    id: tlPayment.paymentId(),
+                    token: tlPayment.resourceToken(),
+                })
 
                 tlPayment.load();
             },
@@ -78,10 +83,13 @@ define(
                     return;
                 }
 
+                console.log('init widget');
+
                 this.isOrderPlaced(false);
                 this.shouldRedirect(false);
 
                 if (this.widget) {
+                    console.log('cleanup')
                     this.widget.cleanup();
                 }
 
@@ -96,6 +104,7 @@ define(
                         onPayButtonClicked: this.placeOrder.bind(this),
                         onDone: this.handleWidgetDone.bind(this),
                         onCancel: function () {
+                            console.log('on cancel');
                             tlPayment.clear();
                             this.errorMessage('You cancelled your payment. Please try again.');
                         }.bind(this),
@@ -112,6 +121,7 @@ define(
                     return;
                 }
 
+                console.log('start')
                 this.widget.start({
                     paymentId: tlPayment.paymentId(),
                     resourceToken: tlPayment.resourceToken(),

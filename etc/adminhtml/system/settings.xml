@@ -16,16 +16,12 @@
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
         </field>
 
-        <field id="specificcountry" translate="label" type="multiselect" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Payment from Specific Countries</label>
-            <source_model>TrueLayer\Connect\Model\Config\Source\Countries</source_model>
-            <config_path>payment/truelayer/specificcountry</config_path>
-        </field>
         <field id="minimum_order_total" translate="label" type="text" sortOrder="53" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
             <label>Minimum Order Total</label>
             <config_path>payment/truelayer/minimum_order_total</config_path>
             <validate>validate-digits validate-zero-or-greater</validate>
         </field>
+
         <field id="maximum_order_total" translate="label" type="text" sortOrder="54" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
             <label>Maximum Order Total</label>
             <config_path>payment/truelayer/maximum_order_total</config_path>
@@ -70,14 +66,14 @@
         </field>
 
         <field id="checkout_widget_enabled" translate="label" type="select" sortOrder="72" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Enable Checkout Widget</label>
+            <label>Enable Dynamic Payment Button</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/checkout_widget_enabled</config_path>
         </field>
     </group>
 
     <group id="settings_cw" translate="label" sortOrder="200" showInDefault="1" showInWebsite="0" showInStore="1">
-        <label>Checkout Widget Settings</label>
+        <label>UI Settings</label>
 
         <field id="is_preselected" translate="label" type="select" sortOrder="63" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Preselect</label>
@@ -93,7 +89,7 @@
     </group>
 
     <group id="settings_hpp" translate="label" sortOrder="200" showInDefault="1" showInWebsite="0" showInStore="1">
-        <label>HPP Settings</label>
+        <label>UI Settings</label>
 
         <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
             <label>Title</label>

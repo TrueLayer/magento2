@@ -1,23 +1,16 @@
-//
-//  Imports
-//  ---------------------------------------------
-
 @import './variables/_colors.less';
 
-@import './module/helper/_mixin.less';
-@import './module/ui/_modal.less';
+@import 'module/_btn.less';
+@import 'module/_modal.less';
 
 @import './module/_header.less';
 @import './module/_debug.less';
 
-// For new Styles
 @import './_extends.less';
 
 //
 //  Tab styles
 //  ---------------------------------------------
-
-
 .truelayer-section span {
   background-image: url('@{baseDir}TrueLayer_Connect/images/logo.svg');
   padding-left: 25px;
@@ -31,14 +24,22 @@
   padding-top: .2rem;
 }
 
-//
-//  Common styles
-//  ---------------------------------------------
-form[action*="TrueLayer_Connect"] {
-  .mm-ui-recommend {
-    display: block;
-    padding: 3px 0;
-    color: @mm-ui-color1;
-    font-weight: 600;
-  }
+.tl-btn {
+  .button_base();
+}
+
+.tl-btn-secondary {
+  .button_base(@bg: @btn-secondary-bg,
+    @bg-hover: @btn-secondary-hover-bg,
+    @border: @btn-secondary-border,
+    @color: @btn-secondary-color,
+    @color-hover: @btn-secondary-hover-color);
+}
+
+.tl-btn-lg {
+  line-height: 4.6rem;
+  height: 4.6rem;
+  border-radius: 2.8rem;
+  font-size: 2rem;
+  padding: 0.5rem 4rem;
 }

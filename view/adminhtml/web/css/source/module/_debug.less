@@ -29,7 +29,7 @@ form[action*="truelayer"] {
     margin: 8px 0 0 12px;
 
     span {
-      color: @mm-ui-color4;
+      color: @text-danger-color;
       font-size: 1.2rem;
       text-decoration: underline;
       transition: .3s;
@@ -61,44 +61,13 @@ form[action*="truelayer"] {
   }
 
   //
-  //  [ Debug ]: Actions
-  //  ---------------------------------------------
-
-  tr[id*="_debug_button"] .value {
-    padding-top: 2rem;
-  }
-
-  tr[id*="_error_button"] .value {
-    padding-top: .5rem;
-  }
-
-  //
   //  [ Debug ]: Button
   //  ---------------------------------------------
-
-  button[id*="_debug"],
-  button[id*="_error"] {
-    .button-as-link(@color: @mm-ui-color5);
-
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    font: @font-weight__regular 1.3rem @font-family__base;
-    text-decoration: none;
-    transition: .3s;
-
-    &:hover {
-      color: @mm-ui-color4;
-    }
-
+  #truelayer-button_debug,
+  #truelayer-button_error {
     &::before {
       content: @icon-info__content;
       font: 1.5rem @icons-admin__font-name;
-    }
-
-    span {
-      text-decoration: underline;
     }
   }
 }

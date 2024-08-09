@@ -19,6 +19,7 @@ define(['jquery', 'ko', 'mage/url'], function ($, ko, url) {
         resourceToken: resourceToken,
         isLoading: isLoading,
         error: error,
+        query: query,
         load: function() {
             // Abort any in-flight requests to avoid race conditions
             if (query()) {

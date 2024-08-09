@@ -94,7 +94,11 @@ class Credentials extends Field
         try {
             return $this->getLayout()
                 ->createBlock(Button::class)
-                ->setData(['id' => 'truelayer-button_credentials', 'label' => __('Check Credentials')])
+                ->setData([
+                    'id' => 'truelayer-button_credentials',
+                    'class' => 'tl-btn',
+                    'label' => __('Check Credentials')
+                ])
                 ->toHtml();
         } catch (Exception $e) {
             $this->logger->error('Credentials check', $e->getMessage());

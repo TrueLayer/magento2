@@ -62,7 +62,8 @@ class ErrorCheck extends Field
                 ->createBlock(Button::class)
                 ->setData([
                     'id' => 'truelayer-button_error',
-                    'label' => __('Check last 100 error log records')
+                    'class' => 'tl-btn',
+                    'label' => __('View error log')
                 ])->toHtml();
         } catch (Exception $e) {
             return '';

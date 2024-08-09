@@ -6,4 +6,7 @@
     <event name="sales_order_creditmemo_save_after">
         <observer name="truelayer_connect_creditmemo_save_after" instance="TrueLayer\Connect\Observer\CreditMemoObserver" />
     </event>
+    <event name="payment_method_is_active">
+        <observer name="truelayer_connect_payment_method_active" instance="TrueLayer\Connect\Observer\PaymentMethodIsActiveObserver" />
+    </event>
 </config>
