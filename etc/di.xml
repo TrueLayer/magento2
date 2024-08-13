@@ -84,8 +84,4 @@
             <argument name="methodCode" xsi:type="const">TrueLayer\Connect\Model\Ui\ConfigProvider::CODE</argument>
         </arguments>
     </virtualType>
-
-    <type name="Magento\Payment\Model\MethodList">
-        <plugin name="restrict_payment_on_grandtotal" type="TrueLayer\Connect\Plugin\Payment\MethodList" sortOrder="1" disabled="false"/>
-    </type>
 </config>

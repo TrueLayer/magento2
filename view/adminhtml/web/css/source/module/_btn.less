@@ -1,7 +1,3 @@
-//
-//  [ Buttons ]: Mixin
-//  ---------------------------------------------
-
 .button_base(
   @bg: @btn-bg,
   @bg-hover: @btn-hover-bg,
@@ -22,15 +18,18 @@
   gap: 10px;
   font-weight: 600;
   border: 1px solid @border;
-  border-radius: 20px;
-  line-height: 2.5rem;
-  height: 2.5rem;
-  padding: 0.5rem 2.2rem;
+  border-radius: 2rem;
+  line-height: 2rem;
+  height: 2rem;
+  padding: 1rem 2.2rem;
   color: @color !important;
   text-decoration: none !important;
   transition: .3s;
+  box-sizing: content-box;
 
-  &:hover {
+  &:hover, &:focus {
+    transform: scale(1.1);
+
     & when not (@bg-hover = none) {
       background-color: @bg-hover;
     }
@@ -42,6 +41,10 @@
         fill: @icon-color-hover;
       }
     }
+  }
+
+  &:focus {
+    border-color: darken(@border, 20%);
   }
 
   i[class*="icon"] {
@@ -56,4 +59,24 @@
 
     transition: .3s;
   }
+}
+
+.tl-btn {
+  .button_base();
+}
+
+.tl-btn-secondary {
+  .button_base(@bg: @btn-secondary-bg,
+    @bg-hover: @btn-secondary-hover-bg,
+    @border: @btn-secondary-border,
+    @color: @btn-secondary-color,
+    @color-hover: @btn-secondary-hover-color);
+}
+
+.tl-btn-lg {
+  line-height: 4.6rem;
+  height: 4.6rem;
+  border-radius: 2.8rem;
+  font-size: 2rem;
+  padding: 0.5rem 4rem;
 }

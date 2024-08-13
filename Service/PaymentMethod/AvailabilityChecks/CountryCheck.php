@@ -9,7 +9,6 @@ namespace TrueLayer\Connect\Service\PaymentMethod\AvailabilityChecks;
 
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Quote\Api\Data\CartInterface;
-use Magento\Store\Api\Data\StoreInterface;
 use TrueLayer\Connect\Api\Config\System\SettingsRepositoryInterface;
 
 class CountryCheck extends AbstractCheck
@@ -25,14 +24,14 @@ class CountryCheck extends AbstractCheck
         $this->settingsRepository = $settingsRepository;
     }
 
-    public function isAllowed(StoreInterface $store): bool
+    public function isAllowed(CartInterface $quote): bool
     {
         if (!$this->settingsRepository->isCheckoutWidgetEnabled()) {
             return true;
         }
 
         return in_array(
-            $this->directoryHelper->getDefaultCountry($store->getId()),
+            $this->directoryHelper->getDefaultCountry($quote->getStoreId()),
             self::ALLOWED_COUNTRIES
         );
     }

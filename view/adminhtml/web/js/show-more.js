@@ -4,15 +4,15 @@ require([
     '!domReady'
 ], function ($, $t) {
 
-    const COMMENT = Array.from($('form[action*="truelayer"] .mm-ui-heading-comment'));
+    const COMMENT = Array.from($('form[action*="truelayer"] .tl-heading-comment'));
 
     if(COMMENT.length) {
         COMMENT.forEach((item) => {
             let showMoreLessBtnHtml = document.createElement("div"),
                 SPAN = document.createElement('span');
 
-            showMoreLessBtnHtml.classList.add('mm-ui-show-more-actions');
-            SPAN.classList.add('mm-ui-show-btn-more');
+            showMoreLessBtnHtml.classList.add('tl-show-more-actions');
+            SPAN.classList.add('tl-show-btn-more');
             SPAN.textContent = $t('Show more.');
 
             showMoreLessBtnHtml.appendChild(SPAN);
@@ -20,9 +20,9 @@ require([
             checkShowMoreVisibility(item);
         });
 
-        $(document).on('click', '.mm-ui-show-more-actions span', (e) => {
+        $(document).on('click', '.tl-show-more-actions span', (e) => {
             let button = e.target,
-                parent = e.target.closest('.value').querySelector('.mm-ui-heading-comment');
+                parent = e.target.closest('.value').querySelector('.tl-heading-comment');
 
             if (parent.classList.contains('show')) {
                 parent.classList.remove('show');
@@ -42,7 +42,7 @@ require([
     function checkShowMoreVisibility(text) {
         let sHeight = text.scrollHeight,
             cHeight = text.clientHeight,
-            button  = text.parentElement.querySelector('.mm-ui-show-more-actions');
+            button  = text.parentElement.querySelector('.tl-show-more-actions');
 
         cHeight >= sHeight ? button.classList.add('hidden') : button.classList.remove('hidden');
     }

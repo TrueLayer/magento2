@@ -14,7 +14,6 @@ use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepositoryInterfac
  */
 class Repository extends System\ConnectionRepository implements ConfigRepositoryInterface
 {
-
     /**
      * {@inheritDoc}
      */
@@ -36,6 +35,19 @@ class Repository extends System\ConnectionRepository implements ConfigRepository
             return $this->storeManager->getStore($storeId)->getBaseUrl();
         } catch (\Exception $exception) {
             return '';
+        }
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return string[]
+     */
+    public function getCurrencies(int $storeId = null): array
+    {
+        try {
+            return explode(',', $this->getStoreValue(self::XML_PATH_CURRENCIES));
+        } catch (\Exception $exception) {
+            return [];
         }
     }
 }

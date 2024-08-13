@@ -1,4 +1,4 @@
-@import './variables/_colors.less';
+@import './_colors.less';
 
 @import 'module/_btn.less';
 @import 'module/_modal.less';
@@ -22,24 +22,4 @@
 .admin__menu .item-menu.parent.level-0 > a:before {
   font-size: 2rem;
   padding-top: .2rem;
-}
-
-.tl-btn {
-  .button_base();
-}
-
-.tl-btn-secondary {
-  .button_base(@bg: @btn-secondary-bg,
-    @bg-hover: @btn-secondary-hover-bg,
-    @border: @btn-secondary-border,
-    @color: @btn-secondary-color,
-    @color-hover: @btn-secondary-hover-color);
-}
-
-.tl-btn-lg {
-  line-height: 4.6rem;
-  height: 4.6rem;
-  border-radius: 2.8rem;
-  font-size: 2rem;
-  padding: 0.5rem 4rem;
 }

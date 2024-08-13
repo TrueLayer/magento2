@@ -8,36 +8,31 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Service\PaymentMethod;
 
 use Magento\Quote\Api\Data\CartInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use TrueLayer\Connect\Service\PaymentMethod\AvailabilityChecks\AbstractCheck;
 use TrueLayer\Connect\Service\PaymentMethod\AvailabilityChecks\CountryCheck;
 use TrueLayer\Connect\Service\PaymentMethod\AvailabilityChecks\CurrencyCheck;
+use TrueLayer\Connect\Service\PaymentMethod\AvailabilityChecks\OrderTotalCheck;
 
-class AvailabilityService
+class PaymentMethodService
 {
-    private StoreManagerInterface $storeManager;
-
     /**
      * @var AbstractCheck[]
      */
     private array $checks;
 
     public function __construct(
-        StoreManagerInterface $storeManager,
         CountryCheck $countryCheck,
-        CurrencyCheck $currencyCheck
+        CurrencyCheck $currencyCheck,
+        OrderTotalCheck $orderTotalCheck
     )
     {
-        $this->storeManager = $storeManager;
-        $this->checks = [ $countryCheck, $currencyCheck ];
+        $this->checks = [ $countryCheck, $currencyCheck, $orderTotalCheck ];
     }
 
     public function isAvailable(CartInterface $quote): bool
     {
-        $store = $this->storeManager->getStore();
-
         foreach ($this->checks as $check) {
-            if (!$check->isAllowed($store, $quote)) {
+            if (!$check->isAllowed($quote)) {
                 return false;
             }
         }

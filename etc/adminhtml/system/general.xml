@@ -18,17 +18,17 @@
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/active</config_path>
         </field>
-        <field id="heading_credentials" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Credentials</label>
-            <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
-            <comment><![CDATA[Please enter your TrueLayer Console credentials into the relevant fields below in order for the plugin to work.]]></comment>
+        <field id="merchant_account_name" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Merchant Account Name</label>
+            <config_path>payment/truelayer/merchant_account_name</config_path>
             <depends>
                 <field id="active">1</field>
             </depends>
         </field>
-        <field id="merchant_account_name" translate="label" type="text" sortOrder="24" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Merchant Account Name</label>
-            <config_path>payment/truelayer/merchant_account_name</config_path>
+        <field id="heading_credentials" translate="label comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Credentials</label>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
+            <comment><![CDATA[Please enter your TrueLayer Console credentials into the relevant fields below.]]></comment>
             <depends>
                 <field id="active">1</field>
             </depends>

@@ -28,9 +28,9 @@ class Heading extends Field
         $html = '<tr id="row_' . $element->getHtmlId() . '">';
         $html .= '  <td class="label"></td>';
         $html .= '  <td class="value">';
-        $html .= '     <div class="mm-ui-heading-block">' .
+        $html .= '     <div class="tl-heading-block">' .
             $this->_escaper->escapeHtml($element->getData('label')) . '</div>';
-        $html .= '     <div class="mm-ui-heading-comment">' .
+        $html .= '     <div class="tl-heading-comment">' .
             $this->_escaper->escapeHtml($element->getData('comment')) . '</div>';
         $html .= '  </td>';
         $html .= '  <td></td>';

@@ -11,7 +11,7 @@ use Magento\Quote\Api\Data\CartInterface;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepositoryInterface;
 
 
-class CurrencyCheck extends AbstractCheck
+class OrderTotalCheck extends AbstractCheck
 {
     private ConfigRepositoryInterface $configRepository;
 
@@ -22,10 +22,17 @@ class CurrencyCheck extends AbstractCheck
 
     public function isAllowed(CartInterface $quote): bool
     {
-        $allowedCurrencies = $this->configRepository->isCheckoutWidgetEnabled()
-            ? ['GBP']
-            : $this->configRepository->getCurrencies($quote->getStoreId());
+        $min = $this->configRepository->getMinimumOrderTotal();
+        $max = $this->configRepository->getMaximumOrderTotal();
 
-        return in_array($quote->getBaseCurrencyCode(), $allowedCurrencies);
+        if ($min && ($min >= $quote->getGrandTotal())) {
+            return false;
+        }
+
+        if ($max && ($max <= $quote->getGrandTotal())) {
+            return false;
+        }
+
+        return true;
     }
 }

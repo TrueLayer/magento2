@@ -10,13 +10,11 @@ namespace TrueLayer\Connect\Service\Order;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\Plugin\AuthenticationException;
 use Magento\Quote\Api\Data\CartInterface;
-use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Math\Random;
+use stdClass;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
-use TrueLayer\Connect\Api\Transaction\BaseTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionDataInterface;
 use TrueLayer\Connect\Api\Transaction\Payment\PaymentTransactionRepositoryInterface as TransactionRepository;
 use TrueLayer\Connect\Api\User\RepositoryInterface as UserRepository;
@@ -132,8 +130,9 @@ class PaymentCreationService
         } catch (ApiResponseUnsuccessfulException $e) {
             $this->logger->error('API validation errors', $e->getErrors());
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Failed creating payment', $e);
+            throw $e;
         }
 
         $this->logger->debug('Created payment', $payment->getId());
@@ -176,7 +175,7 @@ class PaymentCreationService
             "amount_in_minor" => $amountInMinor,
             "currency" => $order->getBaseCurrencyCode(),
             "payment_method" => [
-                //"retry" => new \stdClass(),
+                "retry" => new stdClass(),
                 "provider_selection" => [
                     "filter" => [
                         "release_channel" => "general_availability",
@@ -214,6 +213,7 @@ class PaymentCreationService
      * @throws ApiResponseUnsuccessfulException
      * @throws InvalidArgumentException
      * @throws SignerException
+     * @throws Exception
      */
     private function getMerchantAccountId(ClientInterface $client, string $currencyCode): string
     {
@@ -235,7 +235,7 @@ class PaymentCreationService
     {
         try {
             return $this->transactionRepository->getByOrderId((int) $order->getEntityId());
-        } catch (NoSuchEntityException $exception) {
+        } catch (NoSuchEntityException) {
             $transaction = $this->transactionRepository->create()
                 ->setOrderId((int) $order->getEntityId())
                 ->setQuoteId((int) $order->getQuoteId())

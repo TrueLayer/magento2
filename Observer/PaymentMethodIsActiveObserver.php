@@ -11,15 +11,15 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\PaymentMethodInterface;
-use TrueLayer\Connect\Service\PaymentMethod\AvailabilityService;
+use TrueLayer\Connect\Service\PaymentMethod\PaymentMethodService;
 
 class PaymentMethodIsActiveObserver implements ObserverInterface
 {
-    private AvailabilityService $availabilityService;
+    private PaymentMethodService $paymentMethodService;
 
-    public function __construct(AvailabilityService $availabilityService)
+    public function __construct(PaymentMethodService $paymentMethodService)
     {
-        $this->availabilityService = $availabilityService;
+        $this->paymentMethodService = $paymentMethodService;
     }
 
     public function execute(Observer $observer)
@@ -33,9 +33,6 @@ class PaymentMethodIsActiveObserver implements ObserverInterface
 
         /** @var CartInterface $quote */
         $quote = $observer->getEvent()->getQuote();
-
-        if (!$this->availabilityService->isAvailable($quote)) {
-            $observer->getEvent()->getResult()->setData('is_available', false);
-        }
+        $observer->getEvent()->getResult()->setData('is_available', $this->paymentMethodService->isAvailable($quote));
     }
 }
