@@ -13,6 +13,8 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Checkout\Model\Session;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\QuoteRepository;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Helper\ValidationHelper;
@@ -30,6 +32,7 @@ class UserReturnService
     private Context $context;
     private Session $session;
     private OrderRepositoryInterface $orderRepository;
+    private CartRepositoryInterface $quoteRepository;
     private PaymentFailedService $paymentFailedService;
     private PaymentSettledService $paymentSettledService;
     private ClientFactory $clientFactory;
@@ -41,6 +44,7 @@ class UserReturnService
         Context $context,
         Session $session,
         OrderRepositoryInterface $orderRepository,
+        CartRepositoryInterface $quoteRepository,
         ClientFactory $clientFactory,
         PaymentSettledService $paymentSettledService,
         PaymentFailedService $paymentFailedService,
@@ -51,6 +55,7 @@ class UserReturnService
         $this->context = $context;
         $this->session = $session;
         $this->orderRepository = $orderRepository;
+        $this->quoteRepository = $quoteRepository;
         $this->clientFactory = $clientFactory;
         $this->transactionRepository = $transactionRepository;
         $this->paymentSettledService = $paymentSettledService;
@@ -106,6 +111,9 @@ class UserReturnService
         }
 
         if ($transaction->isPaymentSettled()) {
+            $quote = $this->quoteRepository->get($this->session->getQuoteId());
+            $quote->setIsActive(0);
+            $this->quoteRepository->save($quote);
             $this->session->setQuoteId(null);
             return 'checkout/onepage/success';
         }
