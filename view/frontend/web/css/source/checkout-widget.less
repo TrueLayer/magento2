@@ -30,9 +30,10 @@
   }
 }
 
-.widget-target {
+.tl-widget-target {
   height: 216px;
   display: block;
+  position: relative;
 
   iframe {
     z-index: 99999;
@@ -41,6 +42,18 @@
     &#tl-checkout-widget {
       z-index: 1;
       max-width: 424px;
+    }
+  }
+
+  &.tl-disabled {
+    opacity: 0.5;
+    
+    &:before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
     }
   }
 }

@@ -22,7 +22,7 @@
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
 
-        <span class="widget-target" data-bind="visible: !shouldRedirect()" afterRender="setup($element)"></span>
+        <span class="tl-widget-target" data-bind="visible: !shouldRedirect(), css: {'tl-disabled': !isPlaceOrderActionAllowed()}" afterRender="setup($element)"></span>
 
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
