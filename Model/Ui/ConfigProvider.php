@@ -10,6 +10,7 @@ namespace TrueLayer\Connect\Model\Ui;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use TrueLayer\Connect\Api\Config\System\SettingsRepositoryInterface;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepositoryInterface;
+use TrueLayer\Connect\Model\Config\System\SettingsRepository;
 
 class ConfigProvider implements ConfigProviderInterface
 {
@@ -32,6 +33,10 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig(): array
     {
+        $description = $this->settingsRepository->getShowDescription()
+            ? $this->settingsRepository->getDescription()
+            : null;
+
         return [
             'payment' => [
                 self::CODE => [
@@ -39,6 +44,7 @@ class ConfigProvider implements ConfigProviderInterface
                     'isPreselected' => $this->settingsRepository->isPreselected(),
                     'isCheckoutWidgetEnabled' => $this->settingsRepository->isCheckoutWidgetEnabled(),
                     'isCheckoutWidgetRecommended' => $this->settingsRepository->isCheckoutWidgetRecommended(),
+                    'description' => $description,
                 ]
             ]
         ];

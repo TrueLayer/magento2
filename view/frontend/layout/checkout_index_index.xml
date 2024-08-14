@@ -7,6 +7,9 @@
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">s
     <body>
+        <referenceContainer name="content">
+            <block class="TrueLayer\Connect\Block\Checkout\PaymentErrorMessage" name="truelayer_checkout_paymenterrormessage" template="TrueLayer_Connect::checkout/payment_error_message.phtml" />
+        </referenceContainer>
         <referenceBlock name="checkout.root">
             <arguments>
                 <argument name="jsLayout" xsi:type="array">

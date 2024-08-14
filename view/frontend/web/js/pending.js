@@ -9,7 +9,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
     return Component.extend({
         defaults: {
             requestCount: ko.observable(0),
-            maxRequestCount: 15,
+            maxRequestCount: 30,
             statusUrl: url.build('/truelayer/checkout/status'),
             unknownStatusUrl: url.build('/truelayer/checkout/pending'),
             isRedirecting: false,
@@ -41,7 +41,7 @@ define(['jquery', 'mage/url', 'ko', 'uiComponent'], function ($, url, ko, Compon
                 },
                 complete: function () {
                     if (!this.isRedirecting) {
-                        setTimeout(this.checkStatus.bind(this), this.requestCount() * 1500);
+                        setTimeout(this.checkStatus.bind(this), 2000);
                     }
                 }.bind(this)
             })

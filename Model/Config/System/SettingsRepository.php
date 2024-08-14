@@ -17,6 +17,22 @@ class SettingsRepository extends BaseRepository implements SettingsRepositoryInt
     /**
      * @inheritDoc
      */
+    public function getDescription(): ?string
+    {
+        return $this->getStoreValue(self::XML_PATH_DESCRIPTION);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getShowDescription(): bool
+    {
+        return $this->isSetFlag(self::XML_PATH_SHOW_DESCRIPTION);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getMinimumOrderTotal(): float
     {
         return (float)$this->getStoreValue(self::XML_PATH_MINIMUM_ORDER_TOTAL);

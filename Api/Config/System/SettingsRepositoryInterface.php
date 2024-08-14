@@ -23,10 +23,26 @@ interface SettingsRepositoryInterface
     public const XML_PATH_PAYMENT_PAGE_PRIMARY_COLOR = 'payment/truelayer/payment_page_primary_color';
     public const XML_PATH_PAYMENT_PAGE_SECONDARY_COLOR = 'payment/truelayer/payment_page_secondary_color';
     public const XML_PATH_PAYMENT_PAGE_TERTIARY_COLOR = 'payment/truelayer/payment_page_tertiary_color';
+    public const XML_PATH_DESCRIPTION = 'payment/truelayer/description';
+    public const XML_PATH_SHOW_DESCRIPTION = 'payment/truelayer/show_description';
 
     public const XML_PATH_PRESELECTED = 'payment/truelayer/preselected';
     public const XML_PATH_CHECKOUT_WIDGET_ENABLED = 'payment/truelayer/checkout_widget_enabled';
     public const XML_PATH_CHECKOUT_WIDGET_RECOMMENDED = 'payment/truelayer/checkout_widget_recommended';
+
+    /**
+     * Get payment method description
+     *
+     * @return string|null
+     */
+    public function getDescription(): ?string;
+
+    /**
+     * Get show description of payment method during checkout flag
+     *
+     * @return bool
+     */
+    public function getShowDescription(): bool;
 
     /**
      * Get minimum allowed order total

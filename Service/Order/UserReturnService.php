@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Service\Order;
 
 use Exception;
-use Magento\Framework\App\Action\Context;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -29,7 +28,6 @@ use TrueLayer\Interfaces\Payment\PaymentSettledInterface;
 
 class UserReturnService
 {
-    private Context $context;
     private Session $session;
     private OrderRepositoryInterface $orderRepository;
     private CartRepositoryInterface $quoteRepository;
@@ -41,7 +39,6 @@ class UserReturnService
     private LogServiceInterface $logger;
 
     public function __construct(
-        Context $context,
         Session $session,
         OrderRepositoryInterface $orderRepository,
         CartRepositoryInterface $quoteRepository,
@@ -52,7 +49,6 @@ class UserReturnService
         PaymentErrorMessageManager $paymentErrorMessageManager,
         LogServiceInterface $logger
     ) {
-        $this->context = $context;
         $this->session = $session;
         $this->orderRepository = $orderRepository;
         $this->quoteRepository = $quoteRepository;
@@ -122,7 +118,7 @@ class UserReturnService
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
             $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 
-            return 'checkout/cart';
+            return 'checkout/#payment';
         }
 
         return null;
@@ -173,7 +169,7 @@ class UserReturnService
     private function noPaymentFoundResponse(): string
     {
         $this->logger->error('Could not load TL payment');
-        $this->context->getMessageManager()->addErrorMessage(__('No payment found'));
-        return 'checkout/cart';
+        $this->paymentErrorMessageManager->addMessage((string) __('No payment found'));
+        return 'checkout/#payment';
     }
 }
