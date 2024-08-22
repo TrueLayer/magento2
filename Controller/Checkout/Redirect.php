@@ -95,7 +95,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
         $order = $this->checkoutSession->getLastRealOrder();
         $this->logger->addPrefix("order {$order->getEntityId()}");
 
-        $created = $this->paymentCreationService->createPayment($order);
+        $created = $this->paymentCreationService->createPaymentForOrder($order);
         $url = $this->hppService->getRedirectUrl($created);
 
         return $this->redirect($url);
