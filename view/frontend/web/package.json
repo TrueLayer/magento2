@@ -8,6 +8,6 @@
   },
   "license": "ISC",
   "dependencies": {
-    "truelayer-web-sdk": "^0.6.3"
+    "truelayer-web-sdk": "^0.6.7"
   }
 }
