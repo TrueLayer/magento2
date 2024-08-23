@@ -33,6 +33,15 @@
                 <field id="active">1</field>
             </depends>
         </field>
+        <field id="cache_encryption_key" translate="label" type="obscure" sortOrder="27" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Cache Encryption Key</label>
+            <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+            <config_path>payment/truelayer/cache_encryption_key</config_path>
+            <depends>
+                <field id="active">1</field>
+            </depends>
+            <tooltip><![CDATA[To generate a new key use: openssl rand -hex 32<br>Clear the field to disable cache]]></tooltip>
+        </field>
         <field id="mode" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Mode</label>
             <source_model>TrueLayer\Connect\Model\Config\Source\Mode</source_model>
