@@ -62,7 +62,7 @@ class ClientFactory
      */
     private function createClient(array $credentials): ?ClientInterface
     {
-        $cacheEncryptionKey = $this->configProvider->getCacheEncryptionKey();
+        $cacheEncryptionKey = $credentials['cache_encryption_key'];
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
         $configurator = Client::configure();
         $configurator->clientId($credentials['client_id'])

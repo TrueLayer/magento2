@@ -22,6 +22,16 @@ class Recurring implements InstallSchemaInterface
 
         $credentials = $this->configRepository->getCredentials();
         $cacheEncryptionKey = $credentials['cache_encryption_key'] ?? null;
+        if ($cacheEncryptionKey) {
+            try {
+                $binEncryptionKey = \hex2bin($cacheEncryptionKey);
+                if (strlen($binEncryptionKey) !== 32) {
+                    $cacheEncryptionKey = null;
+                }
+            } catch (\Exception $e) {
+                $cacheEncryptionKey = null;
+            }
+        }
         if (is_null($cacheEncryptionKey)) {
             $path = ConnectionInterface::XML_PATH_CACHE_ENCRYPTION_KEY;
             $value = bin2hex(openssl_random_pseudo_bytes(32));

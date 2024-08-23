@@ -133,7 +133,8 @@ class Check extends Action implements HttpPostActionInterface
                 'client_id' => $clientId,
                 'client_secret' => $clientSecret,
                 'private_key' => $this->getPrivateKeyPath($configCredentials),
-                'key_id' => $keyId
+                'key_id' => $keyId,
+                'cache_encryption_key' => $configCredentials['cache_encryption_key']
             ]
         ];
     }
