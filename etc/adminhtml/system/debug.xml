@@ -7,23 +7,23 @@
 -->
 <include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
-    <group id="debug" translate="label" sortOrder="300" showInDefault="1" showInWebsite="0" showInStore="0">
+    <group id="debug" translate="label" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Debug &amp; Logging</label>
         <field id="logging_heading" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Logging</label>
             <comment><![CDATA[Enable this function to write debug records and log events, API calls, and other debugging-related information into a debug.log file.<br>Errors are always logged and written into the error.log file.]]></comment>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
         </field>
-        <field id="logging" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
+        <field id="logging" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Debug Mode</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/logging</config_path>
         </field>
-        <field id="debug_button" translate="label" type="button" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+        <field id="debug_button" translate="label" type="button" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
             <label/>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Button\DebugCheck</frontend_model>
         </field>
-        <field id="error_button" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+        <field id="error_button" translate="label" type="button" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
             <label/>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Button\ErrorCheck</frontend_model>
         </field>
