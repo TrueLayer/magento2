@@ -17,6 +17,7 @@ use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\Plugin\AuthenticationException;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Service\Order\HPPService;
@@ -34,6 +35,7 @@ class Redirect extends BaseController implements HttpGetActionInterface
     private PaymentCreationService $paymentCreationService;
     private PaymentErrorMessageManager $paymentErrorMessageManager;
     private HPPService $hppService;
+    private OrderInterface $order;
 
     /**
      * @param Context $context
@@ -69,12 +71,19 @@ class Redirect extends BaseController implements HttpGetActionInterface
      */
     public function executeAction(): ResponseInterface
     {
+        $this->order = $this->orderRepository->get(
+            (int) $this->checkoutSession->getOrderIdForTlPayment()
+        );
+
+        if (!$this->order || !$this->order->getEntityId()) {
+            return $this->redirectToFailPage();
+        }
+
         try {
             return $this->createPaymentAndRedirect();
         } catch (Exception $e) {
             $this->logger->error('Failed to create payment and redirect to HPP', $e);
             $this->failOrder();
-            $this->checkoutSession->restoreQuote();
             return $this->redirectToFailPage();
         }
     }
@@ -92,10 +101,9 @@ class Redirect extends BaseController implements HttpGetActionInterface
      */
     private function createPaymentAndRedirect(): ResponseInterface
     {
-        $order = $this->checkoutSession->getLastRealOrder();
-        $this->logger->addPrefix("order {$order->getEntityId()}");
+        $this->logger->addPrefix("order {$this->order->getEntityId()}");
 
-        $created = $this->paymentCreationService->createPaymentForOrder($order);
+        $created = $this->paymentCreationService->createPaymentForOrder($this->order);
         $url = $this->hppService->getRedirectUrl($created);
 
         return $this->redirect($url);
@@ -103,13 +111,12 @@ class Redirect extends BaseController implements HttpGetActionInterface
 
     private function failOrder(): void
     {
-        $order = $this->checkoutSession->getLastRealOrder();
-        if (!$order->isCanceled()) {
-            $order->cancel();
+        if (!$this->order->isCanceled()) {
+            $this->order->cancel();
             $this->logger->debug('Order cancelled, failed to create payment');
         }
-        $order->addStatusToHistory($order->getStatus(), 'Failed to create payment and redirect to HPP', true);
-        $this->orderRepository->save($order);
+        $this->order->addStatusToHistory($this->order->getStatus(), 'Failed to create payment and redirect to HPP', true);
+        $this->orderRepository->save($this->order);
     }
 
     /**

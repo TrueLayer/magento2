@@ -64,7 +64,9 @@ class OrderPlacedObserver implements ObserverInterface
 
         // Restore the quote so users can check out again if they come back
         // The order success page will clear the quote by default
+        $lastRealOrderId = $this->session->getLastRealOrderId();
         $this->session->restoreQuote();
+        $this->session->setOrderIdForTlPayment($lastRealOrderId);
 
         $this->handleCheckoutWidgetPayment($order);
 

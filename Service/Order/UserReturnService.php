@@ -111,6 +111,7 @@ class UserReturnService
             $quote->setIsActive(0);
             $this->quoteRepository->save($quote);
             $this->session->setQuoteId(null);
+            $this->session->unsOrderIdForTlPayment();
             return 'checkout/onepage/success';
         }
 

@@ -9,8 +9,9 @@ define(
         'Magento_Checkout/js/view/payment/default',
         'mage/url',
         'Magento_Checkout/js/action/redirect-on-success',
+        'TrueLayer_Connect/js/action/invalidate-cart',
     ],
-    function (Component, url, redirectOnSuccess) {
+    function (Component, url, redirectOnSuccess, invalidateCart) {
         'use strict';
 
         return Component.extend({
@@ -25,6 +26,7 @@ define(
             },
 
             afterPlaceOrder: function() {
+                invalidateCart.requireInvalidation(true);
                 redirectOnSuccess.redirectUrl = url.build('truelayer/checkout/redirect');
             },
 
