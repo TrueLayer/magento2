@@ -52,13 +52,13 @@ class Process extends BaseController implements HttpGetActionInterface, HttpPost
      */
     public function executeAction(): ResultInterface|ResponseInterface
     {
-        $redirectPath = $this->userReturnService->checkPaymentAndProcessOrder(
+        $redirect = $this->userReturnService->checkPaymentAndProcessOrder(
             $this->context->getRequest()->getParam('payment_id'),
             (bool) $this->context->getRequest()->getParam('force_api_fallback')
         );
 
-        if ($redirectPath) {
-            return $this->redirect($redirectPath);
+        if ($redirect) {
+            return $this->redirect(...$redirect);
         }
 
         return $this->pageFactory->create();

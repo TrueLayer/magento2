@@ -63,12 +63,12 @@ class UserReturnService
     /**
      * @param string $paymentId
      * @param $shouldFallbackOnTlApi
-     * @return string|null
+     * @return array|null [string, array{_fragment?: string}]|null
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function checkPaymentAndProcessOrder(string $paymentId, $shouldFallbackOnTlApi): ?string
+    public function checkPaymentAndProcessOrder(string $paymentId, $shouldFallbackOnTlApi): ?array
     {
         // Validate payment id
         if (!ValidationHelper::isUUID($paymentId)) {
@@ -94,11 +94,24 @@ class UserReturnService
     }
 
     /**
-     * @param string $paymentId
-     * @return string|null
-     * @throws InputException
+     * @throws NoSuchEntityException
      */
-    private function getFinalPaymentStatusRedirect(string $paymentId): ?string
+    public function clearQuote(): void
+    {
+        $quote = $this->quoteRepository->get($this->session->getQuoteId());
+        $quote->setIsActive(0);
+        $this->quoteRepository->save($quote);
+        $this->session->setQuoteId(null);
+        $this->session->unsOrderIdForTlPayment();
+    }
+
+    /**
+     * @param string $paymentId
+     * @return array|null [string, array{_fragment?: string}]|null
+     * @throws InputException
+     * @throws NoSuchEntityException
+     */
+    private function getFinalPaymentStatusRedirect(string $paymentId): ?array
     {
         try {
             $transaction = $this->transactionRepository->getByPaymentUuid($paymentId);
@@ -107,19 +120,15 @@ class UserReturnService
         }
 
         if ($transaction->isPaymentSettled()) {
-            $quote = $this->quoteRepository->get($this->session->getQuoteId());
-            $quote->setIsActive(0);
-            $this->quoteRepository->save($quote);
-            $this->session->setQuoteId(null);
-            $this->session->unsOrderIdForTlPayment();
-            return 'checkout/onepage/success';
+            $this->clearQuote();
+            return ['checkout/onepage/success', []];
         }
 
         if ($transaction->isPaymentFailed()) {
             $errorText = PaymentFailureReasonHelper::getHumanReadableLabel($transaction->getFailureReason());
             $this->paymentErrorMessageManager->addMessage($errorText . ' ' . __('Please try again.'));
 
-            return 'checkout/#payment';
+            return ['checkout', ['_fragment' => 'payment']];
         }
 
         return null;
@@ -165,12 +174,13 @@ class UserReturnService
     }
 
     /**
-     * @return string
+     * @return array [string, array{_fragment?: string}]
      */
-    private function noPaymentFoundResponse(): string
+    private function noPaymentFoundResponse(): array
     {
         $this->logger->error('Could not load TL payment');
         $this->paymentErrorMessageManager->addMessage((string) __('No payment found'));
-        return 'checkout/#payment';
+
+        return ['checkout', ['_fragment' => 'payment']];
     }
 }

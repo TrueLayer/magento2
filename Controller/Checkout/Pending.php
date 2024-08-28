@@ -15,38 +15,43 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\Controller\Result\JsonFactory;
 use TrueLayer\Connect\Api\Log\LogServiceInterface as LogRepository;
-use Magento\Checkout\Model\Session;
+use TrueLayer\Connect\Service\Order\UserReturnService;
 
+/**
+ * Render a payment pending page when the payment takes too long to transition
+ * to a final status.
+ */
 class Pending extends BaseController implements HttpGetActionInterface, HttpPostActionInterface
 {
-    private Session $session;
     private PageFactory $pageFactory;
+    private UserReturnService $userReturnService;
 
     /**
      * @param Context $context
-     * @param Session $session
      * @param JsonFactory $jsonFactory
      * @param PageFactory $pageFactory
+     * @param UserReturnService $userReturnService
      * @param LogRepository $logger
      */
     public function __construct(
         Context $context,
-        Session $session,
         JsonFactory $jsonFactory,
         PageFactory $pageFactory,
+        UserReturnService $userReturnService,
         LogRepository $logger
     ) {
-        $this->session = $session;
         $this->pageFactory = $pageFactory;
+        $this->userReturnService = $userReturnService;
         parent::__construct($context, $jsonFactory, $logger);
     }
 
     /**
      * @return ResultInterface|ResponseInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function executeAction(): ResultInterface|ResponseInterface
     {
-        $this->session->setQuoteId(null);
+        $this->userReturnService->clearQuote();
         return $this->pageFactory->create();
     }
 }
