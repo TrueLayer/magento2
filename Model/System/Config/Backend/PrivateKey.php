@@ -25,6 +25,7 @@ use TrueLayer\Connect\Api\Config\System\ConnectionInterface;
  */
 class PrivateKey extends Value
 {
+    public const FILENAME = 'private-key.pem';
     /**
      * @var File
      */
@@ -76,35 +77,36 @@ class PrivateKey extends Value
     {
         $value = (array)$this->getValue();
         $sandbox = $this->getPath() === ConnectionInterface::XML_PATH_SANDBOX_PRIVATE_KEY;
+        $directory = $this->getDirectory($sandbox);
 
-        if (!empty($value['delete']) && !empty($value['value'])) {
-            $this->deleteCertificateAndReset($value['value']);
+        if (!empty($value['delete'])) {
+            $this->deleteCertificateAndReset($this->isObjectNew() ? '' : $this->getOldValue());
             return $this;
         }
 
-        if (!empty($value['value'])) {
-            $this->setValue($value['value']);
-        }
-
-        if (empty($value['tmp_name'])) {
+        $tmpName = $this->getTmpName($sandbox);
+        $isUploading = (is_string($tmpName) && !empty($tmpName) && $this->tmpDirectory->isExist($tmpName));
+        
+        if (!$isUploading) {
+            $this->setValue($this->isObjectNew() ? '' : $this->getOldValue());
             return $this;
         }
-
-        $tmpPath = $this->tmpDirectory->getAbsolutePath($value['tmp_name']);
-        if ($tmpPath && $this->tmpDirectory->isExist($tmpPath)) {
+        
+        if ($isUploading) {
+            $tmpPath = $this->tmpDirectory->getAbsolutePath($tmpName);
             if (!$this->tmpDirectory->stat($tmpPath)['size']) {
                 throw new LocalizedException(__('The TrueLayer certificate file is empty.'));
             }
 
-            $filePath = $this->getFilePath($sandbox);
-            $destinationPath = $this->varDirectory->getAbsolutePath('truelayer/' . $filePath);
+            $destinationPath = $this->varDirectory->getAbsolutePath('truelayer/' . $directory);
 
+            $filePath = $directory . self::FILENAME;
             $this->file->checkAndCreateFolder($destinationPath);
             $this->file->mv(
                 $tmpPath,
-                $this->varDirectory->getAbsolutePath('truelayer/' . $filePath . $value['name'])
+                $this->varDirectory->getAbsolutePath('truelayer/' . $filePath)
             );
-            $this->setValue($filePath . $value['name']);
+            $this->setValue($filePath);
         }
 
         return $this;
@@ -118,25 +120,47 @@ class PrivateKey extends Value
      */
     private function deleteCertificateAndReset(string $filePath): void
     {
-        $absolutePath = $this->varDirectory->getAbsolutePath('truelayer/' . $filePath);
-        if ($this->file->fileExists($absolutePath)) {
-            $this->file->rm($absolutePath);
+        if (!empty($filePath)) {
+            $absolutePath = $this->varDirectory->getAbsolutePath('truelayer/' . $filePath);
+            if ($this->file->fileExists($absolutePath)) {
+                $this->file->rm($absolutePath);
+            }
         }
 
         $this->setValue('');
     }
 
     /**
-     * Returns the filepath based on set scope.
+     * Returns the directory based on set scope.
      *
      * @param bool $sandbox
      * @return string
      */
-    private function getFilePath(bool $sandbox): string
+    private function getDirectory(bool $sandbox): string
     {
         $mode = $sandbox ? 'sandbox' : 'production';
         return $this->getScope() !== 'default'
             ? sprintf('%s/%s/%s/', $mode, $this->getScope(), $this->getScopeId())
             : sprintf('%s/default/', $mode);
+    }
+
+    /**
+     * Returns the path to the uploaded tmp_file based on set scope.
+     *
+     * @param bool $sandbox
+     * @return string
+     */
+    private function getTmpName(bool $sandbox): ?string
+    {
+        $files = $_FILES;
+        if (empty($files)) {
+            return null;
+        }
+        try {
+            $tmpName = $files['groups']['tmp_name']['general']['fields'][$sandbox ? 'sandbox_private_key' : 'production_private_key']['value'];
+            return empty($tmpName) ? null : $tmpName;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
