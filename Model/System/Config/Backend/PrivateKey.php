@@ -113,6 +113,24 @@ class PrivateKey extends Value
     }
 
     /**
+     * Delete the cert file from disk when deleting the setting.
+     *
+     * @return $this
+     */
+    public function beforeDelete()
+    {
+        $returnValue = parent::beforeDelete();
+        $filePath = $this->isObjectNew() ? '' : $this->getOldValue();
+        if ($filePath) {
+            $absolutePath = $this->varDirectory->getAbsolutePath('truelayer/' . $filePath);
+            if ($this->file->fileExists($absolutePath)) {
+                $this->file->rm($absolutePath);
+            }
+        }
+        return $returnValue;
+    }
+
+    /**
      * Delete the cert file and unset the config value.
      *
      * @param string $filePath
