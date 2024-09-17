@@ -19,7 +19,7 @@ interface LogServiceInterface
      * @param string $type
      * @param mixed $data
      */
-    public function error(string $type, $data): LogServiceInterface;
+    public function error(string $type, $data = ''): LogServiceInterface;
 
     /**
      * Add record to debug log
@@ -27,7 +27,7 @@ interface LogServiceInterface
      * @param string $type
      * @param mixed $data
      */
-    public function debug(string $type, $data): LogServiceInterface;
+    public function debug(string $type, $data = ''): LogServiceInterface;
 
     /**
      * @param string|int $prefix
