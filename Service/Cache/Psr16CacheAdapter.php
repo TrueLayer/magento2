@@ -6,7 +6,7 @@ use Psr\SimpleCache\CacheInterface;
 use Truelayer\Connect\Model\Cache\CacheType;
 use Truelayer\Connect\Service\Cache\InvalidArgumentException;
 
-class Adapter implements CacheInterface
+class Psr16CacheAdapter implements CacheInterface
 {
     private CacheType $cacheFrontend;
 
@@ -90,10 +90,6 @@ class Adapter implements CacheInterface
 
             if (!is_string($key)) {
                 throw new InvalidArgumentException(sprintf('Cache key must be string, "%s" given', gettype($key)));
-            }
-
-            if (preg_match('|[\{\}\(\)/\\\@\:]|', $key)) {
-                throw new InvalidArgumentException(sprintf('Invalid key: "%s". The key contains one or more characters reserved for future extension: {}()/\@:', $key));
             }
 
             $stringKeyedValues[$key] = $value;

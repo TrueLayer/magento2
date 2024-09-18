@@ -12,7 +12,7 @@ use Exception;
 use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
-use TrueLayer\Connect\Service\Cache\Adapter;
+use TrueLayer\Connect\Service\Cache\Psr16CacheAdapter;
 use TrueLayer\Exceptions\SignerException;
 use TrueLayer\Interfaces\Client\ClientInterface;
 use TrueLayer\Settings;
@@ -21,7 +21,7 @@ class ClientFactory
 {
     private ConfigRepository $configProvider;
     private LogServiceInterface $logger;
-    private Adapter $cacheAdapter;
+    private Psr16CacheAdapter $cacheAdapter;
 
     /**
      * @param ConfigRepository $configProvider
@@ -30,7 +30,7 @@ class ClientFactory
     public function __construct(
         ConfigRepository $configProvider,
         LogServiceInterface $logger,
-        Adapter $cacheAdapter,
+        Psr16CacheAdapter $cacheAdapter,
     ) {
         $this->configProvider = $configProvider;
         $this->logger = $logger;
@@ -64,15 +64,15 @@ class ClientFactory
     {
         $cacheEncryptionKey = $credentials['cache_encryption_key'];
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
-        $configurator = Client::configure();
-        $configurator->clientId($credentials['client_id'])
+        $clientFactory = Client::configure();
+        $clientFactory->clientId($credentials['client_id'])
             ->clientSecret($credentials['client_secret'])
             ->keyId($credentials['key_id'])
             ->pemFile($credentials['private_key'])
             ->useProduction(!$this->configProvider->isSandbox());
         if ($cacheEncryptionKey) {
-            $configurator->cache($this->cacheAdapter, $cacheEncryptionKey);
+            $clientFactory->cache($this->cacheAdapter, $cacheEncryptionKey);
         }
-        return $configurator->create();
+        return $clientFactory->create();
     }
 }
