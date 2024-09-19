@@ -13,6 +13,7 @@ use TrueLayer\Client;
 use TrueLayer\Connect\Api\Config\RepositoryInterface as ConfigRepository;
 use TrueLayer\Connect\Api\Log\LogServiceInterface;
 use TrueLayer\Connect\Service\Cache\Psr16CacheAdapter;
+use TrueLayer\Exceptions\InvalidArgumentException;
 use TrueLayer\Exceptions\SignerException;
 use TrueLayer\Interfaces\Client\ClientInterface;
 use TrueLayer\Settings;
@@ -45,10 +46,11 @@ class ClientFactory
      */
     public function create(int $storeId = 0, ?array $data = []): ?ClientInterface
     {
-        $credentials = $data['credentials'] ?? $this->configProvider->getCredentials($storeId);
+        $forceSandbox = $data['force_sandbox'] ?? null;
+        $credentials = $data['credentials'] ?? $this->configProvider->getCredentials($storeId, $forceSandbox);
 
         try {
-            return $this->createClient($credentials);
+            return $this->createClient($credentials, $forceSandbox);
         } catch (Exception $e) {
             $this->logger->debug('Client Creation Failed', $e->getMessage());
             throw $e;
@@ -57,22 +59,27 @@ class ClientFactory
 
     /**
      * @param array $credentials
+     * @param bool|null $forceSandbox
      * @return ClientInterface|null
+     * @throws InvalidArgumentException
      * @throws SignerException
      */
-    private function createClient(array $credentials): ?ClientInterface
+    private function createClient(array $credentials, ?bool $forceSandbox = null): ?ClientInterface
     {
         $cacheEncryptionKey = $credentials['cache_encryption_key'];
         Settings::tlAgent('truelayer-magento/' . $this->configProvider->getExtensionVersion());
+
         $clientFactory = Client::configure();
         $clientFactory->clientId($credentials['client_id'])
             ->clientSecret($credentials['client_secret'])
             ->keyId($credentials['key_id'])
             ->pemFile($credentials['private_key'])
-            ->useProduction(!$this->configProvider->isSandbox());
+            ->useProduction(is_null($forceSandbox) ? !$this->configProvider->isSandbox() : !$forceSandbox);
+
         if ($cacheEncryptionKey) {
             $clientFactory->cache($this->cacheAdapter, $cacheEncryptionKey);
         }
+
         return $clientFactory->create();
     }
 }

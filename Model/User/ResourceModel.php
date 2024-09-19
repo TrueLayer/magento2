@@ -55,7 +55,7 @@ class ResourceModel extends AbstractDb
     }
 
     /**
-     * @param string $uuid
+     * @param string $userId
      * @return mixed
      */
     public function getByTruelayerId(string $userId)

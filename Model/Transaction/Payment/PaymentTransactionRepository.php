@@ -54,6 +54,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function get(int $entityId): PaymentTransactionDataInterface
     {
@@ -64,12 +65,16 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
             $exceptionMsg = self::NO_SUCH_ENTITY_EXCEPTION;
             throw new NoSuchEntityException(__($exceptionMsg, $entityId));
         }
-        return $this->dataFactory->create()
-            ->load($entityId);
+
+        /** @var PaymentTransactionDataModel $transaction */
+        $transaction = $this->dataFactory->create();
+        $this->resource->load($transaction, $entityId);
+        return $transaction;
     }
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function getByOrderId(int $orderId): PaymentTransactionDataInterface
     {
@@ -79,12 +84,16 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
         } elseif (!$this->resource->isOrderIdExists($orderId)) {
             throw new NoSuchEntityException(__('No record found for OrderID: %1.', $orderId));
         }
-        return $this->dataFactory->create()
-            ->load($orderId, 'order_id');
+
+        /** @var PaymentTransactionDataModel $transaction */
+        $transaction = $this->dataFactory->create();
+        $this->resource->load($transaction, $orderId, 'order_id');
+        return $transaction;
     }
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function getByPaymentUuid(string $uuid): PaymentTransactionDataInterface
     {
@@ -95,12 +104,17 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
             throw new NoSuchEntityException(__('No record found for uuid: %1.', $uuid));
         }
 
-        return $this->dataFactory->create()
-            ->load($uuid, 'uuid');
+        $transaction = $this->dataFactory->create();
+        /** @var PaymentTransactionDataModel $transaction */
+        $this->resource->load($transaction, $uuid, 'uuid');
+        return $transaction;
+
     }
 
     /**
      * @inheritDoc
+     * @param PaymentTransactionDataModel $entity
+     * @return PaymentTransactionDataModel
      */
     public function save(PaymentTransactionDataInterface $entity): PaymentTransactionDataInterface
     {

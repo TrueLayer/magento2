@@ -32,7 +32,7 @@ class MethodList
     /**
      * @param Subject $subject
      * @param $availableMethods
-     * @param CartInterface|null $quote
+     * @param \Magento\Quote\Model\Quote|null $quote
      * @return mixed
      */
     public function afterGetAvailableMethods(

@@ -21,11 +21,13 @@ interface ConnectionInterface extends DebugInterface
     public const XML_PATH_SANDBOX_CLIENT_SECRET = 'payment/truelayer/sandbox_client_secret';
     public const XML_PATH_SANDBOX_PRIVATE_KEY = 'payment/truelayer/sandbox_private_key';
     public const XML_PATH_SANDBOX_KEY_ID = 'payment/truelayer/sandbox_key_id';
+    public const XML_PATH_SANDBOX_RELEASE_CHANNEL = 'payment/truelayer/sandbox_release_channel';
     public const XML_PATH_PRODUCTION_CLIENT_ID = 'payment/truelayer/production_client_id';
     public const XML_PATH_PRODUCTION_CLIENT_SECRET = 'payment/truelayer/production_client_secret';
     public const XML_PATH_PRODUCTION_PRIVATE_KEY = 'payment/truelayer/production_private_key';
     public const XML_PATH_PRODUCTION_KEY_ID = 'payment/truelayer/production_key_id';
     public const XML_PATH_CACHE_ENCRYPTION_KEY = 'payment/truelayer/cache_encryption_key';
+    public const XML_PATH_PRODUCTION_RELEASE_CHANNEL = 'payment/truelayer/production_release_channel';
 
     /**
      * Get Merchant Account Name
@@ -54,4 +56,13 @@ interface ConnectionInterface extends DebugInterface
      * @return array
      */
     public function getCredentials(?int $storeId = null, ?bool $forceSandbox = null): array;
+
+    /**
+     * Get associated array of credentials
+     *
+     * @param int|null  $storeId
+     *
+     * @return array
+     */
+    public function getReleaseChannel(?int $storeId = null): string;
 }
