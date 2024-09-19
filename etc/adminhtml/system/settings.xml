@@ -47,17 +47,17 @@
             <frontend_class>validate-number</frontend_class>
             <config_path>payment/truelayer/sort_order</config_path>
         </field>
-        <field id="heading_emails" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="heading_emails" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Transactional Emails</label>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
             <comment><![CDATA[This function allows you to specify whether you want to send the order and/or invoice email to the client through Magento.]]></comment>
         </field>
-        <field id="send_order_email" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="send_order_email" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Send Order Email</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/send_order_email</config_path>
         </field>
-        <field id="send_invoice_email" translate="label" type="select" sortOrder="62" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="send_invoice_email" translate="label" type="select" sortOrder="62" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Send Invoice Email</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/send_invoice_email</config_path>
