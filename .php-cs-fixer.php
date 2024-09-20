@@ -43,7 +43,8 @@ $rules = [
             'method',
             'const'
         ]
-    ]
+    ],
+    'align_multiline_comment' => true
 ];
 
 $config = new Config();
