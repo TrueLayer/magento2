@@ -9,7 +9,6 @@ namespace TrueLayer\Connect\Model\Config\System;
 
 use TrueLayer\Connect\Api\Config\System\ConnectionInterface;
 use TrueLayer\Connect\Model\Config\Source\Mode;
-use TrueLayer\Connect\Model\Config\Source\ReleaseChannel;
 
 /**
  * Credentials provider class
@@ -46,16 +45,6 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
             "key_id" => $this->getKeyId($storeId, $isSandBox),
             "cache_encryption_key" => $this->getCacheEncryptionKey($storeId)
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getReleaseChannel(?int $storeId = null): string
-    {
-        $isSandBox = $this->isSandbox($storeId);
-        $path = $isSandBox ? self::XML_PATH_SANDBOX_RELEASE_CHANNEL : self::XML_PATH_PRODUCTION_RELEASE_CHANNEL;
-        return $this->getStoreValue($path, $storeId) ?: ReleaseChannel::GENERAL_AVAILABILITY;
     }
 
     /**
