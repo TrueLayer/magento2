@@ -71,6 +71,7 @@ class PaymentFailedService
         }
 
         // Update order payment
+        /** @var \Magento\Sales\Model\Order\Payment $payment */
         $payment = $order->getPayment();
         $payment->setLastTransId($transaction->getPaymentUuid());
         $payment->cancel();

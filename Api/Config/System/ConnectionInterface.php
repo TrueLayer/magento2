@@ -62,7 +62,7 @@ interface ConnectionInterface extends DebugInterface
      *
      * @param int|null  $storeId
      *
-     * @return array
+     * @return string
      */
     public function getReleaseChannel(?int $storeId = null): string;
 }

@@ -3,8 +3,8 @@
 namespace TrueLayer\Connect\Service\Cache;
 
 use Psr\SimpleCache\CacheInterface;
-use Truelayer\Connect\Model\Cache\CacheType;
-use Truelayer\Connect\Service\Cache\InvalidArgumentException;
+use TrueLayer\Connect\Model\Cache\CacheType;
+use TrueLayer\Connect\Service\Cache\InvalidArgumentException;
 
 class Psr16CacheAdapter implements CacheInterface
 {

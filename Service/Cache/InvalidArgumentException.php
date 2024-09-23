@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Truelayer\Connect\Service\Cache;
+namespace TrueLayer\Connect\Service\Cache;
 
 class InvalidArgumentException extends \InvalidArgumentException implements \Psr\Cache\InvalidArgumentException
 {
