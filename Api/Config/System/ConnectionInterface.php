@@ -25,7 +25,6 @@ interface ConnectionInterface extends DebugInterface
     public const XML_PATH_PRODUCTION_CLIENT_SECRET = 'payment/truelayer/production_client_secret';
     public const XML_PATH_PRODUCTION_PRIVATE_KEY = 'payment/truelayer/production_private_key';
     public const XML_PATH_PRODUCTION_KEY_ID = 'payment/truelayer/production_key_id';
-    public const XML_PATH_CACHE_ENCRYPTION_KEY = 'payment/truelayer/cache_encryption_key';
 
     /**
      * Get Merchant Account Name
