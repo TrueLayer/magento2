@@ -62,6 +62,7 @@ class PaymentFailedService
      */
     private function cancelOrder(PaymentTransactionDataInterface $transaction, string $failureReason): void
     {
+        /** @var \Magento\Sales\Model\Order $order */
         $order = $this->orderRepository->get($transaction->getOrderId());
 
         if (!$order->isCanceled()) {
@@ -70,6 +71,7 @@ class PaymentFailedService
         }
 
         // Update order payment
+        /** @var \Magento\Sales\Model\Order\Payment $payment */
         $payment = $order->getPayment();
         $payment->setLastTransId($transaction->getPaymentUuid());
         $payment->cancel();

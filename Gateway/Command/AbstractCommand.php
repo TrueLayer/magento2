@@ -65,7 +65,6 @@ abstract class AbstractCommand implements CommandInterface
 
     /**
      * @param array $subject
-     * @return mixed
      */
     abstract protected function executeCommand(array $subject): void;
 }

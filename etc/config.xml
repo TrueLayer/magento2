@@ -34,6 +34,7 @@
                 <payment_page_primary_color>#000000</payment_page_primary_color>
                 <payment_page_secondary_color>#e53935</payment_page_secondary_color>
                 <payment_page_tertiary_color>#32329f</payment_page_tertiary_color>
+                <release_channel>general_availability</release_channel>
             </truelayer>
         </payment>
     </default>
