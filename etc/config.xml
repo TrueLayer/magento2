@@ -10,7 +10,7 @@
     <default>
         <payment>
             <truelayer>
-                <version>2.1.0</version>
+                <version>2.3.0</version>
                 <model>TrueLayerFacade</model>
                 <title>TrueLayer</title>
                 <description>Make a direct payment securely from your bank app - no card needed</description>
