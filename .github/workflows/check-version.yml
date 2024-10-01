@@ -12,4 +12,4 @@ jobs:
 
       - name: Compare version
         run: |
-              [[ "v$(cat ./etc/config.xml | grep \<version\> | sed -e 's/<version>\(.*\)<\/version>/\1/' | tr -d '[:blank:]')" == $(git describe --tags --abbrev=0 | tr -d '\n') ]]
+              [[ "v$(cat ./etc/config.xml | grep \<version\> | sed -e 's/<version>\(.*\)<\/version>/\1/' | tr -d '[:blank:]')" == curl -s https://raw.githubusercontent.com/TrueLayer/magento2/refs/heads/main/etc/config.xml | grep \<version\> | sed -e 's/<version>\(.*\)<\/version>/\1/' | tr -d '[:blank:]' ]]
