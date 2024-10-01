@@ -11,4 +11,5 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Compare version
-        run: [[ "v$(xmlstarlet sel -t -v '//config/default/payment/truelayer/version' ./etc/config.xml)" == $(git describe --tags --abbrev=0 | tr -d '\n') ]]
+        run: |
+              [[ "v$(xmlstarlet sel -t -v '//config/default/payment/truelayer/version' ./etc/config.xml)" == $(git describe --tags --abbrev=0 | tr -d '\n') ]]
