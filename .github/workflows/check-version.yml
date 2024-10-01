@@ -1,0 +1,12 @@
+name: Check config.xml version
+on:
+  push:
+    branches:
+      - 'feature/PLUG-155'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare version tag with config.xml plugin version
+        run: [[ "v$(xmlstarlet sel -t -v '//config/default/payment/truelayer/version' ./etc/config.xml)" == $(git describe --tags --abbrev=0 | tr -d '\n') ]]
