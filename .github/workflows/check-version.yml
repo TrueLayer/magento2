@@ -28,3 +28,7 @@ jobs:
       - name: Test that versions are different
         run: |
               [[ $OLD_VERSION != $NEW_VERSION ]]
+
+      - name: Print versions
+        run: |
+              echo "Old version: ${OLD_VERSION:-unknown}; New version: ${NEW_VERSION:-unknown}"
