@@ -9,14 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
 
       - name: Set OLD_VERSION from etc/config.xml if merge would modify it
         run: |
-              echo "OLD_VERSION=$(git log main..HEAD --cherry -p -- etc/config.xml | grep '\-.\s*.\<version\>' | tr -d '\-[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
+              echo "OLD_VERSION=$(git log main.. --cherry -p -- etc/config.xml | grep '\-.\s*.\<version\>' | tr -d '\-[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
 
       - name: Set NEW_VERSION from etc/config.xml if merge would modify it
         run: |
-              echo "NEW_VERSION=$(git log main..HEAD --cherry -p -- etc/config.xml | grep '\+.\s*.\<version\>' | tr -d '+[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
+              echo "NEW_VERSION=$(git log main.. --cherry -p -- etc/config.xml | grep '\+.\s*.\<version\>' | tr -d '+[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
 
       - name: Test that versions are not empty
         run: |
