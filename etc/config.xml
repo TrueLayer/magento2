@@ -10,7 +10,7 @@
     <default>
         <payment>
             <truelayer>
-                <version>2.1.0</version>
+                <version>2.3.0</version>
                 <model>TrueLayerFacade</model>
                 <title>TrueLayer</title>
                 <description>Make a direct payment securely from your bank app - no card needed</description>
@@ -31,6 +31,7 @@
                 <send_email>1</send_email>
                 <specificcountry>FR,DE,IE,LT,NL,ES,GB</specificcountry>
                 <banking_providers>retail</banking_providers>
+                <release_channel>general_availability</release_channel>
                 <payment_page_primary_color>#000000</payment_page_primary_color>
                 <payment_page_secondary_color>#e53935</payment_page_secondary_color>
                 <payment_page_tertiary_color>#32329f</payment_page_tertiary_color>

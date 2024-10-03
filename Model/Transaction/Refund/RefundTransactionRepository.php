@@ -98,6 +98,7 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
 
     /**
      * @inheritDoc
+     * @param \TrueLayer\Connect\Model\Transaction\Refund\RefundTransactionDataModel $entity
      */
     public function save(RefundTransactionDataInterface $entity): RefundTransactionDataInterface
     {
@@ -114,13 +115,14 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     /**
      * @param string $col
      * @param $value
-     * @return RefundTransactionDataInterface
+     * @return RefundTransactionDataModel
      * @throws NoSuchEntityException
      */
     private function getByColumn(string $col, $value): RefundTransactionDataInterface
     {
-        /** @var RefundTransactionDataInterface $transaction */
-        $transaction = $this->dataFactory->create()->load($value, $col);
+        /** @var RefundTransactionDataModel $transaction */
+        $transaction = $this->dataFactory->create();
+        $this->resource->load($transaction, $value, $col);
 
         if (!$transaction->getEntityId()) {
             $this->logger->error('Refund transaction not found', $value);
@@ -133,10 +135,11 @@ class RefundTransactionRepository implements RefundTransactionRepositoryInterfac
     /**
      * @param array $cols
      * @param array $sort
-     * @return null|RefundTransactionDataInterface
+     * @return RefundTransactionDataModel
      */
     public function getOneByColumns(array $cols, array $sort = []): ?RefundTransactionDataInterface
     {
+
         $collection = $this->collectionFactory->create();
 
         foreach ($cols as $col => $value) {

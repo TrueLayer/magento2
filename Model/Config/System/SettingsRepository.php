@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace TrueLayer\Connect\Model\Config\System;
 
 use TrueLayer\Connect\Api\Config\System\SettingsRepositoryInterface;
+use TrueLayer\Connect\Model\Config\Source\ReleaseChannel;
 
 /**
  * Debug provider class
@@ -57,6 +58,14 @@ class SettingsRepository extends BaseRepository implements SettingsRepositoryInt
         } else {
             return ['retail'];
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getReleaseChannel(?int $storeId = null): string
+    {
+        return $this->getStoreValue(self::XML_PATH_RELEASE_CHANNEL, $storeId) ?: ReleaseChannel::GENERAL_AVAILABILITY;
     }
 
     /**

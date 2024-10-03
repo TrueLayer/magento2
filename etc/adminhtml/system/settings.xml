@@ -7,7 +7,7 @@
 -->
 <include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
-    <group id="settings" translate="label" sortOrder="200" showInDefault="1" showInWebsite="0" showInStore="1">
+    <group id="settings" translate="label" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Settings</label>
 
         <field id="heading_limits" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -34,19 +34,19 @@
             <config_path>payment/truelayer/sort_order</config_path>
         </field>
 
-        <field id="heading_emails" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="heading_emails" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Transactional Emails</label>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
             <comment><![CDATA[This function allows you to specify whether you want to send the order and/or invoice email to the client through Magento.]]></comment>
         </field>
 
-        <field id="send_order_email" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="1" showInStore="0">
+        <field id="send_order_email" translate="label" type="select" sortOrder="61" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Send Order Email</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/send_order_email</config_path>
         </field>
 
-        <field id="send_invoice_email" translate="label" type="select" sortOrder="62" showInDefault="1" showInWebsite="1" showInStore="0">
+        <field id="send_invoice_email" translate="label" type="select" sortOrder="62" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Send Invoice Email</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/send_invoice_email</config_path>
@@ -63,6 +63,13 @@
             <source_model>TrueLayer\Connect\Model\Config\Source\BankingProviders</source_model>
             <can_be_empty>1</can_be_empty>
             <config_path>payment/truelayer/banking_providers</config_path>
+        </field>
+
+        <field id="release_channel" translate="label" type="select" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+            <label>Release Channel</label>
+            <source_model>TrueLayer\Connect\Model\Config\Source\ReleaseChannel</source_model>
+            <config_path>payment/truelayer/release_channel</config_path>
+            <tooltip><![CDATA[The lowest stability release stage of a provider that should be returned.<br>Note that many EUR providers are in Public Beta or Private Beta.]]></tooltip>
         </field>
 
         <field id="checkout_widget_enabled" translate="label" type="select" sortOrder="72" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -107,25 +114,26 @@
             <config_path>payment/truelayer/show_description</config_path>
         </field>
 
+
         <field id="heading_hosted_page" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Hosted payment page settings</label>
             <comment><![CDATA[You can customise TrueLayer's Hosted Payments Page to align with your brand by using the settings below]]></comment>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\Design\Heading</frontend_model>
         </field>
 
-        <field id="payment_page_primary_color" translate="label" type="text" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="0">
+        <field id="payment_page_primary_color" translate="label" type="text" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Primary Color</label>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Field\ColorPicker</frontend_model>
             <config_path>payment/truelayer/payment_page_primary_color</config_path>
         </field>
 
-        <field id="payment_page_secondary_color" translate="label" type="text" sortOrder="82" showInDefault="1" showInWebsite="1" showInStore="0">
+        <field id="payment_page_secondary_color" translate="label" type="text" sortOrder="82" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Secondary Color</label>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Field\ColorPicker</frontend_model>
             <config_path>payment/truelayer/payment_page_secondary_color</config_path>
         </field>
 
-        <field id="payment_page_tertiary_color" translate="label" type="text" sortOrder="83" showInDefault="1" showInWebsite="1" showInStore="0">
+        <field id="payment_page_tertiary_color" translate="label" type="text" sortOrder="83" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Tertiary Color</label>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Field\ColorPicker</frontend_model>
             <config_path>payment/truelayer/payment_page_tertiary_color</config_path>

@@ -58,6 +58,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function get(int $entityId): PaymentTransactionDataInterface
     {
@@ -66,6 +67,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function getByOrderId(int $orderId): PaymentTransactionDataInterface
     {
@@ -82,6 +84,7 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
 
     /**
      * @inheritDoc
+     * @return PaymentTransactionDataModel
      */
     public function getByPaymentUuid(string $uuid): PaymentTransactionDataInterface
     {
@@ -90,6 +93,8 @@ class PaymentTransactionRepository implements PaymentTransactionRepositoryInterf
 
     /**
      * @inheritDoc
+     * @param PaymentTransactionDataModel $entity
+     * @return PaymentTransactionDataModel
      */
     public function save(PaymentTransactionDataInterface $entity): PaymentTransactionDataInterface
     {

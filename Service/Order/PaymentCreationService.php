@@ -178,7 +178,7 @@ class PaymentCreationService
                 "retry" => new stdClass(),
                 "provider_selection" => [
                     "filter" => [
-                        "release_channel" => "general_availability",
+                        "release_channel" => $this->configRepository->getReleaseChannel((int) $order->getStoreId()),
                         "customer_segments" => $this->configRepository->getBankingProviders(),
                     ],
                     "type" => "user_selected",
