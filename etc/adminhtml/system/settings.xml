@@ -72,7 +72,7 @@
             <tooltip><![CDATA[The lowest stability release stage of a provider that should be returned.<br>Note that many EUR providers are in Public Beta or Private Beta.]]></tooltip>
         </field>
 
-        <field id="checkout_widget_enabled" translate="label" type="select" sortOrder="72" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="checkout_widget_enabled" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Enable Dynamic Payment Button</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/truelayer/checkout_widget_enabled</config_path>
