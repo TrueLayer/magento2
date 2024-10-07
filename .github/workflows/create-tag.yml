@@ -1,0 +1,47 @@
+name: Create Tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+          fetch-depth: '0'
+
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+        NEW_TAG=v$(cat etc/config.xml | grep '<version>' | tr -d '\-[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_OUTPUT
+
+    - name: Push Git Tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "github-actions@users.noreply.github.com"
+        git tag $NEW_TAG
+        git push origin $NEW_TAG
+
+    - name: Create changelog diff
+      run: |
+        sed -n "/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\]/,/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/{/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/\!p;}" CHANGELOG.md > release_notes.md
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.generate_tag.outputs.version }}
+        release_name: ${{ steps.generate_tag.outputs.version }}
+        body_path: ./release_notes.md
+        draft: false
+        prerelease: false
+
+    - name: Delete release_notes file
+      run: rm release_notes.md
