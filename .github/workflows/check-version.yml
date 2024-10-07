@@ -33,6 +33,10 @@ jobs:
         run: |
               [[ $OLD_VERSION != $NEW_VERSION ]]
 
+      - name: Sort versions
+        run: |
+              echo "GREATER_VERSION=$(echo $OLD_VERSION\\\n$NEW_VERSION | sort --version-sort | tail -n1)" >> $GITHUB_ENV
+
       - name: Make sure new version is greater
         run: |
-              [[ $(echo "$OLD_VERSION\n$NEW_VERSION" | sort --version-sort | tail -n1) == $NEW_VERSION ]]
+              [[ $GREATER_VERSION == $NEW_VERSION ]]
