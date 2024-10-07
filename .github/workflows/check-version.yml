@@ -21,6 +21,10 @@ jobs:
         run: |
               echo "NEW_VERSION=$(git log origin/main..HEAD --cherry -p -- etc/config.xml | grep '\+.\s*.<version>' | head -1 | tr -d '+[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
 
+      - name: Print versions
+        run: |
+              echo "Old version: ${OLD_VERSION:-unknown}; New version: ${NEW_VERSION:-unknown}"
+
       - name: Test that versions are not empty
         run: |
               [[ ! -z $OLD_VERSION ]] && [[ ! -z $NEW_VERSION ]]
@@ -32,7 +36,3 @@ jobs:
       - name: Make sure new version is greater
         run: |
               [[ $(echo "$OLD_VERSION\n$NEW_VERSION" | sort --version-sort | tail -n1) == $NEW_VERSION ]]
-
-      - name: Print versions
-        run: |
-              echo "Old version: ${OLD_VERSION:-unknown}; New version: ${NEW_VERSION:-unknown}"
