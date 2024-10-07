@@ -35,7 +35,7 @@ jobs:
 
       - name: Sort versions
         run: |
-              echo "GREATER_VERSION=$(echo $OLD_VERSION\\\n$NEW_VERSION | sort --version-sort | tail -n1)" >> $GITHUB_ENV
+              echo "GREATER_VERSION=$(echo -e ${OLD_VERSION}\\n${NEW_VERSION} | sort --version-sort | tail -n1)" >> $GITHUB_ENV
 
       - name: Make sure new version is greater
         run: |
