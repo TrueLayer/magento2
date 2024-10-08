@@ -28,6 +28,9 @@ jobs:
       - name: Set minimum-stability for composer (temp)
         run: docker exec magento-project-community-edition composer config minimum-stability dev
 
+      - name: Configure composer to mirror repository
+        run: docker exec magento-project-community-edition composer config repositories.truelayer \{\"type\":\"path\",\"url\":\"/data/extensions/$(basename $(pwd))\",\"options\":\{\"symlink\":false\}\}
+
       - name: Install the extensions in Magento
         run: docker exec magento-project-community-edition composer require truelayer/magento2:@dev --no-plugins --with-all-dependencies
 
