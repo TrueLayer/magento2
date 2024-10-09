@@ -11,7 +11,7 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
           fetch-depth: '0'
 
@@ -31,7 +31,7 @@ jobs:
 
     - name: Create changelog diff
       run: |
-        sed -n "/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\]/,/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/{/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/\!p;}" CHANGELOG.md > release_notes.md
+        sed -n "/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\]/,/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/p" CHANGELOG.md | sed -e "s/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\].*\$//" -e "s/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\].*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' > release_notes.md
 
     - name: Create release
       id: create_release
@@ -39,8 +39,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.generate_tag.outputs.version }}
-        release_name: ${{ steps.generate_tag.outputs.version }}
+        tag_name: ${{ steps.generate_tag.outputs.NEW_TAG }}
+        release_name: ${{ steps.generate_tag.outputs.NEW_TAG }}
         body_path: ./release_notes.md
         draft: false
         prerelease: false
