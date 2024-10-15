@@ -4,3 +4,8 @@
 .DS_Store
 docker
 .vscode
+/node_modules
+/test-results
+/playwright-report
+/results.xml
+private-key.pem
