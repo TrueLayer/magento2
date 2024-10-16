@@ -12,8 +12,8 @@
         "magento/module-payment": ">=100.1.0",
         "magento/module-checkout": ">=100.1.0",
         "magento/module-sales": ">=100.1.0",
-        "truelayer/client": ">=1.2.0",
-        "php": ">=7.4.0"
+        "truelayer/client": ">=2.6.0",
+        "php": ">=8.1.0"
     },
     "require-dev": {
         "phpstan/phpstan": "*",
