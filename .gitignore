@@ -4,3 +4,4 @@
 .DS_Store
 docker
 .vscode
+.php-cs-fixer.cache
