@@ -2,7 +2,7 @@
     "name": "truelayer/magento2",
     "description": "TrueLayer extension for Magento 2",
     "type": "magento2-module",
-    "version": "2.1.0",
+    "version": "2.3.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -17,7 +17,8 @@
     },
     "require-dev": {
         "phpstan/phpstan": "*",
-        "friendsofphp/php-cs-fixer": "^3.64"
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "bitexpert/phpstan-magento": "*"
     },
     "autoload": {
         "files": [
@@ -25,6 +26,28 @@
         ],
         "psr-4": {
             "TrueLayer\\Connect\\": ""
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/magento-composer-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "magento/inventory-composer-installer": true,
+            "php-http/discovery": true,
+            "magento/composer-root-update-plugin": true
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=-1",
+        "checks": [
+            "@analyse"
+        ]
+    },
+    "repositories": {
+        "magento": {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
         }
     }
 }

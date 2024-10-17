@@ -9,6 +9,9 @@ namespace TrueLayer\Connect\Model\Transaction\Refund;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
+/**
+ * @method RefundTransactionDataModel getFirstItem()
+ */
 class RefundCollection extends AbstractCollection
 {
     /**

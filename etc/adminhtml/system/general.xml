@@ -112,7 +112,7 @@
                 <field id="mode">sandbox</field>
             </depends>
         </field>
-        <field id="check_credentials" translate="label" type="button" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="1">
+        <field id="check_credentials" translate="label" type="button" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <label/>
             <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Button\Credentials</frontend_model>
             <depends>
