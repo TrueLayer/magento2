@@ -31,6 +31,9 @@ bin/magento cache:flush
 bin/magento setup:static-content:deploy
 ```
 7.  After the installation, go to your Magento® admin portal and open ‘Stores’ > ‘Configuration’ > ‘Sales’ > ‘TrueLayer’.
+8. It's recommended that you also enable the cache for TrueLayer. There's two ways you can do this.
+    1. In your Magento® admin portal open ‘System‘ > ‘Cache Management‘, click the checkbox for TrueLayer, select ‘Enable‘ from ‘Actions‘, and click ‘Submit‘.
+    2. On your server running Magento® 2 run the following command from the command line: `bin/magento cache:enable truelayer`
 
 # Local development
 A basic docker-compose configuration is provided to make local development easier. To start it, run the following:
