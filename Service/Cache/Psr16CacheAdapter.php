@@ -22,13 +22,11 @@ class Psr16CacheAdapter implements CacheInterface
     {
         $item = $this->cacheFrontend->load($key);
 
-        if ($item !== false) {
-            $item = unserialize($item);
-        } else {
-            $item = $default;
+        if ($item === false) {
+            return $default;
         }
 
-        return $item;
+        return unserialize($item);
     }
 
     /**
