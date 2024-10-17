@@ -114,11 +114,8 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
     {
         $path = self::XML_PATH_CACHE_ENCRYPTION_KEY;
         $value = $this->getStoreValue($path, $storeId);
-        if (is_string($value)) {
-            if ($value) {
-                return $this->encryptor->decrypt($value);
-            }
-            return '';
+        if (!empty($value)) {
+            return $this->encryptor->decrypt($value);
         }
         return null;
     }
