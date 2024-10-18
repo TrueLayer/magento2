@@ -37,7 +37,7 @@ jobs:
           docker exec magento sh wait-for-db.sh
 
       - name: Enable plugin
-        run: docker exec magento ./retry "./retry "php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
+        run: docker exec magento ./retry "php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
 
       - name: Copy private key
         run: |
