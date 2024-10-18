@@ -8,14 +8,14 @@ export class PaymentConfirmationPage {
     }
 
     // Locators
-    orderBeingProcessedText = () => this.page.getByText('Confirming your payment')
-    paymentConfirmedText = () => this.page.getByRole('heading', { name: 'All done' });
+    paymentProcessingText = () => this.page.getByText('In progress');
+    paymentConfirmedText = () => this.page.getByText('All done');
     continueButton = () => this.page.getByRole('button', {name: 'continue'})
 
     // Methods
     async waitForProcessingAndContinue() {
-        // await expect(this.orderBeingProcessedText()).toBeVisible({timeout: 10000});
-        await expect(this.continueButton()).toBeVisible({timeout: 10000});
+        await expect(this.paymentProcessingText().or(this.paymentConfirmedText())).toBeVisible({timeout: 10000})
+        await expect(this.continueButton()).toBeVisible();
         await this.continueButton().click();
     }
 }
