@@ -41,7 +41,7 @@ jobs:
 
       - name: Copy private key
         run: |
-          echo ${{ secrets.TEST_PEM }} >> $(pwd)/private-key.pem
+          echo "${{ secrets.TEST_PEM }}" >> $(pwd)/private-key.pem
           docker exec magento mkdir -p /data/var/truelayer/sandbox/default
           docker cp $(pwd)/private-key.pem magento:/data/var/truelayer/sandbox/default/private-key.pem
           rm $(pwd)/private-key.pem
