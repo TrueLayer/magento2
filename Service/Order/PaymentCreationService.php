@@ -151,6 +151,7 @@ class PaymentCreationService
             ],
             "metadata" => [
                 "Magento Order ID" => $order->getEntityId(),
+                "Magento Order Increment ID" => $order->getIncrementId(),
                 "Magento Store ID" => $order->getStoreId(),
             ]
         ];
