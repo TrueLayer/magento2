@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export class MockUkBankAccountsPage {
     page: Page;
@@ -8,11 +8,13 @@ export class MockUkBankAccountsPage {
     }
 
     // Locators
+    currentAccount = () => this.page.getByText('Select account');
     continueButton = () => this.page.getByRole('button', { name: 'Continue' });
 
     // Methods
     async selectAccountAndContinue() {
-        await this.continueButton().isVisible({timeout:10000});
+        await expect(this.currentAccount()).toBeVisible({ timeout: 10000 })
+        await this.continueButton().isVisible();
         await this.continueButton().click({force: true});
     }
 }
