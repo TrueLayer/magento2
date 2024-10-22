@@ -84,4 +84,4 @@ jobs:
           docker exec -w /data/extensions/magento2 magento npx playwright install
 
       - name: Run tests
-        run: docker exec -w /data/extensions/magento2 magento npx playwright test --project=chromium
+        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test --project=chromium --reporter=line
