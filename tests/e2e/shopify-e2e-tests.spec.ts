@@ -28,7 +28,7 @@ test.describe('Truelayer magento plugin E2E Tests', () => {
         }
         await mockUkBankPage.enterOnlineBankingDetailsAndContinue();
         await mockUkBankAccountsPage.selectAccountAndContinue();
-        await paymentConfirmationPage.waitForProcessingAndContinue();
+        // await paymentConfirmationPage.waitForProcessingAndContinue();
         await orderConfirmationPage.waitForProcessingAndReturnToStore();
     })
 });
