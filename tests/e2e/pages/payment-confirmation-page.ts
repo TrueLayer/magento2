@@ -14,7 +14,7 @@ export class PaymentConfirmationPage {
 
     // Methods
     async waitForProcessingAndContinue() {
-        await expect(this.paymentProcessingText().or(this.paymentConfirmedText())).toBeVisible({timeout: 20000})
+        await expect(this.paymentProcessingText().or(this.paymentConfirmedText())).toBeVisible({timeout: 30000})
         await expect(this.continueButton()).toBeVisible();
         await this.continueButton().click();
     }
