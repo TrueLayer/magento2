@@ -1,8 +1,8 @@
 name: Run e2e tests
 on:
-  push:
-    branches:
-      - 'feature/PLUG-126'
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
 
 jobs:
   build:
