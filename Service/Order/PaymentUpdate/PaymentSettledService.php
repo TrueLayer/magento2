@@ -78,9 +78,14 @@ class PaymentSettledService
         $this->logger->removePrefix($prefix);
     }
 
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @return void
+     */
     private function updateOrder(OrderInterface $order, string $paymentId): void
     {
         // Update order payment
+        /** @var \Magento\Sales\Model\Order\Payment $payment */
         $payment = $order->getPayment();
         $payment->setTransactionId($paymentId);
         $payment->setIsTransactionClosed(true);
@@ -93,7 +98,7 @@ class PaymentSettledService
     }
 
     /**
-     * @param OrderInterface $order
+     * @param \Magento\Sales\Model\Order $order
      * @return void
      */
     private function sendOrderEmail(OrderInterface $order): void
@@ -117,7 +122,7 @@ class PaymentSettledService
     }
 
     /**
-     * @param OrderInterface $order
+     * @param \Magento\Sales\Model\Order $order
      * @throws Exception
      */
     private function sendInvoiceEmail(OrderInterface $order): void

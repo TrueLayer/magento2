@@ -30,7 +30,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get config
      *
-     * @return \array[][]
+     * @return array{payment:array{truelayer:array{description:string|null}}}
      */
     public function getConfig(): array
     {

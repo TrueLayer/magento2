@@ -125,7 +125,7 @@ class PaymentCreationService
                         "countries" =>  [
                             $order->getBillingAddress()->getCountryId()
                         ],
-                        "release_channel" => "general_availability",
+                        "release_channel" => $this->configRepository->getReleaseChannel((int) $order->getStoreId()),
                         "customer_segments" => $this->configRepository->getBankingProviders(),
                         "excludes" => [
                             "provider_ids" => [
