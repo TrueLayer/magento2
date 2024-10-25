@@ -77,17 +77,17 @@ class VersionCheck extends Field
         $this->curl->get('https://api.github.com/repos/TrueLayer/magento2/releases');
         $responseStatus = $this->curl->getStatus();
         if ($responseStatus !== 200) {
-            $this->logger->error('Cron failed', [
+            $this->logger->error('Plugin version check failed, could not retrieve releases from github api', [
                 'response_status' => $responseStatus,
                 'response_body' => $this->curl->getBody()
             ]);
             return false;
-        } 
+        }
         $response = $this->curl->getBody();
         try {
             $releases = json_decode($response, true, JSON_THROW_ON_ERROR);
         } catch (\Exception $e) {
-            $this->logger->error('Cannot decode response', [
+            $this->logger->error('Plugin version check failed, json_decode error', [
                 'response_body' => $response,
                 'json_exception' => $e->getMessage()
             ]);
@@ -100,7 +100,7 @@ class VersionCheck extends Field
             }
         }
         if (!isset($latestRelease)) {
-            $this->logger->error('Could not find latest release');
+            $this->logger->error('Plugin version check failed, no valid release in github api response');
             return false;
         }
         $latestVersion = ltrim($latestRelease['name'], 'v');
