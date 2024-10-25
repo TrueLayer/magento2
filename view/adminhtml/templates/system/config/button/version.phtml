@@ -12,12 +12,7 @@ use TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck;
  */
 $currentVersion = $block->getVersion();
 $latestVersion = $block->getLatestVersion();
-if (!$latestVersion || version_compare($currentVersion, $latestVersion, '<') === false) {
-    //running latest version
-    $upToDate = true;
-} else {
-    $upToDate = false;
-}
+$upToDate = !$latestVersion || version_compare($currentVersion, $latestVersion, '>=');
 ?>
 
 <div class="mm-ui-result_version-wrapper" data-bind="scope:'truelayer-plugin-version'">
