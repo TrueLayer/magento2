@@ -22,6 +22,26 @@ jobs:
         echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
         echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_OUTPUT
 
+    - name: Test that version string mathches pattern
+      run: |
+            [[ $NEW_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]$ ]]
+
+    - name: Test for tag collision
+      run: |
+            TAG_EXISTS=0
+            for EXISTING_TAG in `git tag -l`; do
+              if [[ $EXISTING_TAG == $NEW_TAG || v$EXISTING_TAG == $NEW_TAG ]]; then
+                TAG_EXISTS=1
+                break
+              fi
+            done
+            [[ $TAG_EXISTS == 0 ]]
+
+    - name: Ensure changelog is not empty for the new tag
+      run: |
+        CHANGELOG=$(sed -n "/^## \[$NEW_TAG\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')
+        [[ -n $CHANGELOG ]]
+        [[ $CHANGELOG == *"### Added"* || $CHANGELOG == *"### Changed"* || $CHANGELOG == *"### Fixed"* ]]
     - name: Push Git Tag
       run: |
         git config user.name "GitHub Actions"
@@ -31,7 +51,7 @@ jobs:
 
     - name: Create changelog diff
       run: |
-        sed -n "/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\]/,/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\]/p" CHANGELOG.md | sed -e "s/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=0 --max-count=1))\].*\$//" -e "s/^## \[$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))\].*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' > release_notes.md
+        sed -n "/^## \[$NEW_TAG\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' > release_notes.md
 
     - name: Create release
       id: create_release

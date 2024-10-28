@@ -29,10 +29,24 @@ jobs:
         run: |
               [[ $OLD_VERSION != $NEW_VERSION ]]
 
+      - name: Test that version string mathches pattern
+        run: |
+              [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]$ ]]
+
       - name: Sort versions
         run: |
-              echo "GREATER_VERSION=$(echo -e ${OLD_VERSION}\\n${NEW_VERSION} | sort --version-sort | tail -n1)" >> $GITHUB_ENV
+              if [[ $OLD_VERSION =~ ^[0-9]+(\.[0-9]+)+\.[0-9]$ ]]; then
+                echo "GREATER_VERSION=$(echo -e ${OLD_VERSION}\\n${NEW_VERSION} | sort --version-sort | tail -n1)" >> $GITHUB_ENV
+              else
+                echo "GREATER_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+              fi
 
       - name: Make sure new version is greater
         run: |
               [[ $GREATER_VERSION == $NEW_VERSION ]]
+
+      - name: Ensure changelog is not empty for the new version
+        run: |
+              CHANGELOG=$(sed -n "/^## \[v$NEW_VERSION\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')
+              [[ -n $CHANGELOG ]]
+              [[ $CHANGELOG == *"### Added"* || $CHANGELOG == *"### Changed"* || $CHANGELOG == *"### Fixed"* ]]
