@@ -17,6 +17,7 @@
     },
     "require-dev": {
         "phpstan/phpstan": "*",
+        "friendsofphp/php-cs-fixer": "^3.64",
         "bitexpert/phpstan-magento": "*"
     },
     "autoload": {
