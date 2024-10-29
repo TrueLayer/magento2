@@ -42,7 +42,8 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
             "client_id" => $this->getClientId($storeId, $isSandBox),
             "client_secret" => $this->getClientSecret($storeId, $isSandBox),
             "private_key" => $this->getPathToPrivateKey($storeId, $isSandBox),
-            "key_id" => $this->getKeyId($storeId, $isSandBox)
+            "key_id" => $this->getKeyId($storeId, $isSandBox),
+            "cache_encryption_key" => $this->getCacheEncryptionKey($storeId)
         ];
     }
 
@@ -102,5 +103,20 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
         }
 
         return '';
+    }
+
+    /**
+     * @param int|null $storeId
+     *
+     * @return string
+     */
+    private function getCacheEncryptionKey(?int $storeId = null): ?string
+    {
+        $path = self::XML_PATH_CACHE_ENCRYPTION_KEY;
+        $value = $this->getStoreValue($path, $storeId);
+        if (!empty($value)) {
+            return $this->encryptor->decrypt($value);
+        }
+        return null;
     }
 }
