@@ -1,0 +1,52 @@
+name: Check config.xml version
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set OLD_VERSION from etc/config.xml if merge would modify it
+        run: |
+              echo "OLD_VERSION=$(git log origin/main..HEAD --cherry -p -- etc/config.xml | grep '\-.\s*.<version>' | tail -1 | tr -d '\-[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
+
+      - name: Set NEW_VERSION from etc/config.xml if merge would modify it
+        run: |
+              echo "NEW_VERSION=$(git log origin/main..HEAD --cherry -p -- etc/config.xml | grep '\+.\s*.<version>' | head -1 | tr -d '+[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')" >> $GITHUB_ENV
+
+      - name: Test that versions are not empty
+        run: |
+              [[ ! -z $OLD_VERSION ]] && [[ ! -z $NEW_VERSION ]]
+
+      - name: Test that versions are different
+        run: |
+              [[ $OLD_VERSION != $NEW_VERSION ]]
+
+      - name: Test that version string mathches pattern
+        run: |
+              [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]$ ]]
+
+      - name: Sort versions
+        run: |
+              if [[ $OLD_VERSION =~ ^[0-9]+(\.[0-9]+)+\.[0-9]$ ]]; then
+                echo "GREATER_VERSION=$(echo -e ${OLD_VERSION}\\n${NEW_VERSION} | sort --version-sort | tail -n1)" >> $GITHUB_ENV
+              else
+                echo "GREATER_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+              fi
+
+      - name: Make sure new version is greater
+        run: |
+              [[ $GREATER_VERSION == $NEW_VERSION ]]
+
+      - name: Ensure changelog is not empty for the new version
+        run: |
+              CHANGELOG=$(sed -n "/^## \[v$NEW_VERSION\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')
+              [[ -n $CHANGELOG ]]
+              [[ $CHANGELOG == *"### Added"* || $CHANGELOG == *"### Changed"* || $CHANGELOG == *"### Fixed"* ]]
