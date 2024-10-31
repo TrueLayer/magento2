@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.4.0] - 2024-10-31
+
+### Added
+
+- A notice will appear on the settings page of the plugin if a newer version of the plugin is available.
+- Added "Magento Order Increment ID" to payment metadata when creating the payment in Truelayer.
+- PSR-16 cache adapter
+- Automatically generate cache encryption key
+
+### Changed
+
+- Using constant filename new uploaded private keys
+- Increased PHP dependency version
+- Increased TrueLayer PHP Client dependency version
+
+### Fixed
+
+- Potential security issue when deleting a private key
+
 ## [v2.3.0] - 2024-09-27
 
 ### Added
