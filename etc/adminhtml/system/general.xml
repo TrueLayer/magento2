@@ -76,18 +76,22 @@
                 <field id="mode">production</field>
             </depends>
         </field>
-        <field id="production_private_key" translate="label" type="file" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="production_private_key" translate="label" type="obscure" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Private Key (production)</label>
+            <tooltip><![CDATA[Use the Upload file button or paste your file contents into the field as a single line base64 encoded string.]]></tooltip>
             <config_path>payment/truelayer/production_private_key</config_path>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Field\Base64FileUpload</frontend_model>
             <backend_model>TrueLayer\Connect\Model\System\Config\Backend\PrivateKey</backend_model>
             <depends>
                 <field id="active">1</field>
                 <field id="mode">production</field>
             </depends>
         </field>
-        <field id="sandbox_private_key" translate="label" type="file" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="sandbox_private_key" translate="label" type="obscure" sortOrder="33" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Private Key (sandbox)</label>
+            <tooltip><![CDATA[Use the Upload file button or paste your file contents into the field as a single line base64 encoded string.]]></tooltip>
             <config_path>payment/truelayer/sandbox_private_key</config_path>
+            <frontend_model>TrueLayer\Connect\Block\Adminhtml\System\Config\Field\Base64FileUpload</frontend_model>
             <backend_model>TrueLayer\Connect\Model\System\Config\Backend\PrivateKey</backend_model>
             <depends>
                 <field id="active">1</field>
