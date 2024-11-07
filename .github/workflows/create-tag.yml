@@ -1,0 +1,69 @@
+name: Create Tag
+
+on:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - '**'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          fetch-depth: '0'
+
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+        NEW_TAG=v$(cat etc/config.xml | grep '<version>' | tr -d '\-[:blank:]\n' | sed -e 's/<version>\(.*\)<\/version>/\1/')
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_OUTPUT
+
+    - name: Test that version string mathches pattern
+      run: |
+            [[ $NEW_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]$ ]]
+
+    - name: Test for tag collision
+      run: |
+            TAG_EXISTS=0
+            for EXISTING_TAG in `git tag -l`; do
+              if [[ $EXISTING_TAG == $NEW_TAG || v$EXISTING_TAG == $NEW_TAG ]]; then
+                TAG_EXISTS=1
+                break
+              fi
+            done
+            [[ $TAG_EXISTS == 0 ]]
+
+    - name: Ensure changelog is not empty for the new tag
+      run: |
+        CHANGELOG=$(sed -n "/^## \[$NEW_TAG\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba')
+        [[ -n $CHANGELOG ]]
+        [[ $CHANGELOG == *"### Added"* || $CHANGELOG == *"### Changed"* || $CHANGELOG == *"### Fixed"* ]]
+    - name: Push Git Tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "github-actions@users.noreply.github.com"
+        git tag $NEW_TAG
+        git push origin $NEW_TAG
+
+    - name: Create changelog diff
+      run: |
+        sed -n "/^## \[$NEW_TAG\]/,/^## \[v/p" CHANGELOG.md | sed -e "s/^## \[v.*\$//" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' > release_notes.md
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.generate_tag.outputs.NEW_TAG }}
+        release_name: ${{ steps.generate_tag.outputs.NEW_TAG }}
+        body_path: ./release_notes.md
+        draft: false
+        prerelease: false
+
+    - name: Delete release_notes file
+      run: rm release_notes.md

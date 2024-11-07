@@ -1,0 +1,87 @@
+name: Run e2e tests
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - PHP_VERSION: php82-fpm
+            MAGENTO_VERSION: 2.4.6
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: docker run --rm --detach --name=magento -p 80:80 -p 3306:3306 -e URL=http://localhost/ -e FLAT_TABLES=false michielgerritsen/magento-project-community-edition:${{ matrix.PHP_VERSION }}-magento${{ matrix.MAGENTO_VERSION }}
+
+      - name: Upload our code into the docker container
+        run: docker cp $(pwd) magento:/data/extensions/
+
+      - name: Set minimum-stability for composer (temp)
+        run: docker exec magento composer config minimum-stability dev
+
+      - name: Configure composer to mirror repository
+        run: docker exec magento composer config repositories.truelayer \{\"type\":\"path\",\"url\":\"/data/extensions/$(basename $(pwd))\",\"options\":\{\"symlink\":false\}\}
+
+      - name: Install dependencies
+        run: docker exec magento composer require truelayer/magento2:@dev --no-plugins --with-all-dependencies
+
+      - name: Wait for MySQL and Elastic to start
+        run: |
+          docker cp $(pwd)/.github/workflows/templates/wait-for-db.sh magento:/data/wait-for-db.sh
+          docker exec magento sh wait-for-db.sh
+
+      - name: Enable plugin
+        run: docker exec magento ./retry "php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
+
+      - name: Copy private key
+        run: |
+          echo "${{ secrets.TEST_PEM }}" >> $(pwd)/private-key.pem
+          docker exec magento mkdir -p /data/var/truelayer/sandbox/default
+          docker cp $(pwd)/private-key.pem magento:/data/var/truelayer/sandbox/default/private-key.pem
+          rm $(pwd)/private-key.pem
+
+      - name: Write initial values to database
+        run: |
+          docker exec -i magento mysql magento << "EOF"
+              REPLACE INTO `admin_user` VALUES (1,'Example','Example','user@example.com','exampleuser','12b66e0132008acb13a9eb880f9ff4e7393b64b74722dcda435a03ec7e0dd780:TWLwiabBH2lIPcDkKLrhu37GsEBRpnSb:3_32_2_67108864','2024-09-23 01:02:08','2024-10-10 16:39:29','2024-10-10 16:39:29',1,0,1,NULL,NULL,NULL,'en_US',0,NULL,NULL);
+              REPLACE INTO `admin_analytics_usage_version_log` VALUES (1,'2.4.6');
+              REPLACE INTO `core_config_data` VALUES (4,'default',0,'currency/options/base','GBP','2024-10-11 11:26:34'),(5,'default',0,'currency/options/default','GBP','2024-10-11 11:26:34'),(6,'default',0,'currency/options/allow','GBP','2024-10-11 11:26:34');
+              REPLACE INTO `core_config_data` VALUES (18,'default',0,'admin/usage/enabled','0','2024-10-10 16:43:40'),(19,'default',0,'carriers/flatrate/active','0','2024-10-10 16:43:40'),(20,'default',0,'carriers/flatrate/handling_fee',NULL,'2024-10-10 16:43:40'),(21,'default',0,'carriers/flatrate/specificcountry',NULL,'2024-10-10 16:43:40'),(22,'default',0,'carriers/flatrate/showmethod','0','2024-10-10 16:43:40'),(23,'default',0,'carriers/flatrate/sort_order',NULL,'2024-10-10 16:43:40'),(24,'default',0,'carriers/freeshipping/active','1','2024-10-10 16:43:40'),(25,'default',0,'carriers/freeshipping/free_shipping_subtotal',NULL,'2024-10-10 16:43:40'),(26,'default',0,'carriers/freeshipping/specificcountry',NULL,'2024-10-10 16:43:40'),(27,'default',0,'carriers/freeshipping/showmethod','0','2024-10-10 16:43:40'),(28,'default',0,'carriers/freeshipping/sort_order',NULL,'2024-10-10 16:43:40'),(29,'default',0,'carriers/tablerate/handling_fee',NULL,'2024-10-10 16:43:40'),(30,'default',0,'carriers/tablerate/specificcountry',NULL,'2024-10-10 16:43:40'),(31,'default',0,'carriers/tablerate/showmethod','0','2024-10-10 16:43:40'),(32,'default',0,'carriers/tablerate/sort_order',NULL,'2024-10-10 16:43:40'),(33,'default',0,'carriers/ups/shipper_number',NULL,'2024-10-10 16:43:40'),(34,'default',0,'carriers/ups/handling_fee',NULL,'2024-10-10 16:43:40'),(35,'default',0,'carriers/ups/free_shipping_enable','0','2024-10-10 16:43:40'),(36,'default',0,'carriers/ups/specificcountry',NULL,'2024-10-10 16:43:40'),(37,'default',0,'carriers/ups/showmethod','0','2024-10-10 16:43:40'),(38,'default',0,'carriers/ups/debug','0','2024-10-10 16:43:40'),(39,'default',0,'carriers/ups/sort_order',NULL,'2024-10-10 16:43:40'),(40,'default',0,'carriers/usps/userid',NULL,'2024-10-10 16:43:40'),(41,'default',0,'carriers/usps/password',NULL,'2024-10-10 16:43:40'),(42,'default',0,'carriers/usps/handling_fee',NULL,'2024-10-10 16:43:40'),(43,'default',0,'carriers/usps/free_shipping_enable','0','2024-10-10 16:43:40'),(44,'default',0,'carriers/usps/specificcountry',NULL,'2024-10-10 16:43:40'),(45,'default',0,'carriers/usps/debug','0','2024-10-10 16:43:40'),(46,'default',0,'carriers/usps/showmethod','0','2024-10-10 16:43:40'),(47,'default',0,'carriers/usps/sort_order',NULL,'2024-10-10 16:43:40'),(48,'default',0,'carriers/fedex/account',NULL,'2024-10-10 16:43:40'),(49,'default',0,'carriers/fedex/meter_number',NULL,'2024-10-10 16:43:40'),(50,'default',0,'carriers/fedex/key',NULL,'2024-10-10 16:43:40'),(51,'default',0,'carriers/fedex/password',NULL,'2024-10-10 16:43:40'),(52,'default',0,'carriers/fedex/handling_fee',NULL,'2024-10-10 16:43:40'),(53,'default',0,'carriers/fedex/residence_delivery','0','2024-10-10 16:43:40'),(54,'default',0,'carriers/fedex/smartpost_hubid',NULL,'2024-10-10 16:43:40'),(55,'default',0,'carriers/fedex/free_shipping_enable','0','2024-10-10 16:43:40'),(56,'default',0,'carriers/fedex/specificcountry',NULL,'2024-10-10 16:43:40'),(57,'default',0,'carriers/fedex/debug','0','2024-10-10 16:43:40'),(58,'default',0,'carriers/fedex/showmethod','0','2024-10-10 16:43:40'),(59,'default',0,'carriers/fedex/sort_order',NULL,'2024-10-10 16:43:40'),(60,'default',0,'carriers/dhl/id',NULL,'2024-10-10 16:43:40'),(61,'default',0,'carriers/dhl/password',NULL,'2024-10-10 16:43:40'),(62,'default',0,'carriers/dhl/handling_fee',NULL,'2024-10-10 16:43:40'),(63,'default',0,'carriers/dhl/free_method_nondoc',NULL,'2024-10-10 16:43:40'),(64,'default',0,'carriers/dhl/free_shipping_enable','0','2024-10-10 16:43:40'),(65,'default',0,'carriers/dhl/specificcountry',NULL,'2024-10-10 16:43:40'),(66,'default',0,'carriers/dhl/showmethod','0','2024-10-10 16:43:40'),(67,'default',0,'carriers/dhl/debug','0','2024-10-10 16:43:40'),(68,'default',0,'carriers/dhl/sandbox_mode','0','2024-10-10 16:43:40'),(69,'default',0,'carriers/dhl/sort_order',NULL,'2024-10-10 16:43:40'),(70,'default',0,'payment/truelayer/active','1','2024-10-10 16:44:45'),(71,'default',0,'payment/truelayer/merchant_account_name',NULL,'2024-10-10 16:44:45'),(72,'default',0,'payment/truelayer/mode','sandbox','2024-10-10 16:44:45'),(73,'default',0,'payment/truelayer/sandbox_client_id','${{ secrets.TEST_CLIENT_ID }}','2024-10-10 16:44:45'),(74,'default',0,'payment/truelayer/sandbox_client_secret','','2024-10-10 16:44:45'),(75,'default',0,'payment/truelayer/sandbox_key_id','${{ secrets.TEST_KID }}','2024-10-10 16:44:45'),(76,'default',0,'payment/truelayer/sandbox_private_key','sandbox/default/private-key.pem','2024-10-10 16:44:45'),(77,'default',0,'payment/truelayer/specificcountry','GB,IE,ES,FR,DE,NL,LT','2024-10-10 16:44:45'),(78,'default',0,'payment/truelayer/send_order_email','0','2024-10-10 16:44:45'),(79,'default',0,'payment/truelayer/send_invoice_email','0','2024-10-10 16:44:45'),(80,'default',0,'payment/truelayer/banking_providers','retail','2024-10-10 16:44:45'),(81,'default',0,'payment/truelayer/payment_page_primary_color','#000000','2024-10-10 16:44:45'),(82,'default',0,'payment/truelayer/payment_page_secondary_color','#e53935','2024-10-10 16:44:45'),(83,'default',0,'payment/truelayer/payment_page_tertiary_color','#32329f','2024-10-10 16:44:45'),(84,'default',0,'payment/truelayer/logging','0','2024-10-10 16:44:45');
+              REPLACE INTO `catalog_product_entity` VALUES (1,4,'simple','test-product',0,0,'2024-10-10 16:41:56','2024-10-10 16:41:56');
+              REPLACE INTO `catalog_product_entity_decimal` VALUES (1,77,0,1,0.010000),(2,82,0,1,1.000000);
+              REPLACE INTO `catalog_product_entity_int` VALUES (1,97,0,1,1),(2,136,0,1,2),(3,99,0,1,4);
+              REPLACE INTO `catalog_product_entity_text` VALUES (1,85,0,1,'test-product');
+              REPLACE INTO `catalog_product_entity_varchar` VALUES (1,134,0,1,'2'),(2,86,0,1,'test-product '),(3,84,0,1,'test-product'),(4,124,0,1,'0'),(5,73,0,1,'test-product'),(6,106,0,1,'container2'),(7,104,0,1,'product-full-width'),(8,121,0,1,'test-product');
+              REPLACE INTO `catalog_product_website` VALUES (1,1);
+              REPLACE INTO `cataloginventory_stock_item` VALUES (1,1,1,0.0000,0.0000,1,0,0,1,1.0000,1,10000.0000,1,0,'2024-10-11 10:09:52',1.0000,1,0,0,0,1,1.0000,1,0,0,0);
+              REPLACE INTO `cataloginventory_stock_status` VALUES (1,0,1,0.0000,1);
+              REPLACE INTO `directory_currency_rate` VALUES ('EUR','EUR',1.000000000000),('EUR','USD',1.415000000000),('GBP','GBP',1.000000000000),('USD','EUR',0.706700000000),('USD','USD',1.000000000000);
+              REPLACE INTO `inventory_low_stock_notification_configuration` VALUES ('default','test-product',NULL);
+              REPLACE INTO `inventory_source_item` VALUES (1,'default','test-product',0.0000,0);
+              REPLACE INTO `ui_bookmark` VALUES (1,1,'product_listing','default',1,'Default View','{\"views\":{\"default\":{\"label\":\"Default View\",\"index\":\"default\",\"editable\":false,\"data\":{\"filters\":{\"applied\":{\"placeholder\":true}},\"paging\":{\"pageSize\":20,\"current\":1,\"options\":{\"20\":{\"value\":20,\"label\":20},\"30\":{\"value\":30,\"label\":30},\"50\":{\"value\":50,\"label\":50},\"100\":{\"value\":100,\"label\":100},\"200\":{\"value\":200,\"label\":200}},\"value\":20},\"search\":{\"value\":\"\"},\"columns\":{\"entity_id\":{\"visible\":true,\"sorting\":\"asc\"},\"name\":{\"visible\":true,\"sorting\":false},\"sku\":{\"visible\":true,\"sorting\":false},\"price\":{\"visible\":true,\"sorting\":false},\"websites\":{\"visible\":true,\"sorting\":false},\"qty\":{\"visible\":true,\"sorting\":false},\"short_description\":{\"visible\":false,\"sorting\":false},\"special_price\":{\"visible\":false,\"sorting\":false},\"cost\":{\"visible\":false,\"sorting\":false},\"weight\":{\"visible\":false,\"sorting\":false},\"meta_title\":{\"visible\":false,\"sorting\":false},\"meta_keyword\":{\"visible\":false,\"sorting\":false},\"meta_description\":{\"visible\":false,\"sorting\":false},\"url_key\":{\"visible\":false,\"sorting\":false},\"msrp\":{\"visible\":false,\"sorting\":false},\"actions\":{\"visible\":true,\"sorting\":false},\"ids\":{\"visible\":true,\"sorting\":false},\"type_id\":{\"visible\":true,\"sorting\":false},\"attribute_set_id\":{\"visible\":true,\"sorting\":false},\"visibility\":{\"visible\":true,\"sorting\":false},\"status\":{\"visible\":true,\"sorting\":false},\"manufacturer\":{\"visible\":false,\"sorting\":false},\"color\":{\"visible\":false,\"sorting\":false},\"custom_design\":{\"visible\":false,\"sorting\":false},\"page_layout\":{\"visible\":false,\"sorting\":false},\"country_of_manufacture\":{\"visible\":false,\"sorting\":false},\"custom_layout\":{\"visible\":false,\"sorting\":false},\"gift_message_available\":{\"visible\":false,\"sorting\":false},\"tax_class_id\":{\"visible\":false,\"sorting\":false},\"salable_quantity\":{\"visible\":true,\"sorting\":false},\"thumbnail\":{\"visible\":true,\"sorting\":false},\"updated_at\":{\"visible\":true,\"sorting\":false},\"special_from_date\":{\"visible\":false,\"sorting\":false},\"special_to_date\":{\"visible\":false,\"sorting\":false},\"news_from_date\":{\"visible\":false,\"sorting\":false},\"news_to_date\":{\"visible\":false,\"sorting\":false},\"custom_design_from\":{\"visible\":false,\"sorting\":false},\"custom_design_to\":{\"visible\":false,\"sorting\":false}},\"displayMode\":\"grid\",\"positions\":{\"ids\":0,\"entity_id\":1,\"thumbnail\":2,\"name\":3,\"type_id\":4,\"attribute_set_id\":5,\"sku\":6,\"price\":7,\"qty\":8,\"salable_quantity\":9,\"visibility\":10,\"status\":11,\"websites\":12,\"short_description\":13,\"special_price\":14,\"special_from_date\":15,\"special_to_date\":16,\"cost\":17,\"weight\":18,\"manufacturer\":19,\"meta_title\":20,\"meta_keyword\":21,\"meta_description\":22,\"color\":23,\"news_from_date\":24,\"news_to_date\":25,\"custom_design\":26,\"custom_design_from\":27,\"custom_design_to\":28,\"page_layout\":29,\"country_of_manufacture\":30,\"custom_layout\":31,\"url_key\":32,\"msrp\":33,\"gift_message_available\":34,\"tax_class_id\":35,\"updated_at\":36,\"actions\":37}},\"value\":\"Default View\"}}}','2024-10-10 16:40:36','2024-10-10 16:40:36'),(2,1,'product_listing','current',0,NULL,'{\"current\":{\"filters\":{\"applied\":{\"placeholder\":true}},\"paging\":{\"pageSize\":20,\"current\":1,\"options\":{\"20\":{\"value\":20,\"label\":20},\"30\":{\"value\":30,\"label\":30},\"50\":{\"value\":50,\"label\":50},\"100\":{\"value\":100,\"label\":100},\"200\":{\"value\":200,\"label\":200}},\"value\":20},\"search\":{\"value\":\"\"},\"columns\":{\"entity_id\":{\"visible\":true,\"sorting\":\"asc\"},\"name\":{\"visible\":true,\"sorting\":false},\"sku\":{\"visible\":true,\"sorting\":false},\"price\":{\"visible\":true,\"sorting\":false},\"websites\":{\"visible\":true,\"sorting\":false},\"qty\":{\"visible\":true,\"sorting\":false},\"short_description\":{\"visible\":false,\"sorting\":false},\"special_price\":{\"visible\":false,\"sorting\":false},\"cost\":{\"visible\":false,\"sorting\":false},\"weight\":{\"visible\":false,\"sorting\":false},\"meta_title\":{\"visible\":false,\"sorting\":false},\"meta_keyword\":{\"visible\":false,\"sorting\":false},\"meta_description\":{\"visible\":false,\"sorting\":false},\"url_key\":{\"visible\":false,\"sorting\":false},\"msrp\":{\"visible\":false,\"sorting\":false},\"actions\":{\"visible\":true,\"sorting\":false},\"ids\":{\"visible\":true,\"sorting\":false},\"type_id\":{\"visible\":true,\"sorting\":false},\"attribute_set_id\":{\"visible\":true,\"sorting\":false},\"visibility\":{\"visible\":true,\"sorting\":false},\"status\":{\"visible\":true,\"sorting\":false},\"manufacturer\":{\"visible\":false,\"sorting\":false},\"color\":{\"visible\":false,\"sorting\":false},\"custom_design\":{\"visible\":false,\"sorting\":false},\"page_layout\":{\"visible\":false,\"sorting\":false},\"country_of_manufacture\":{\"visible\":false,\"sorting\":false},\"custom_layout\":{\"visible\":false,\"sorting\":false},\"gift_message_available\":{\"visible\":false,\"sorting\":false},\"tax_class_id\":{\"visible\":false,\"sorting\":false},\"salable_quantity\":{\"visible\":true,\"sorting\":false},\"thumbnail\":{\"visible\":true,\"sorting\":false},\"updated_at\":{\"visible\":true,\"sorting\":false},\"special_from_date\":{\"visible\":false,\"sorting\":false},\"special_to_date\":{\"visible\":false,\"sorting\":false},\"news_from_date\":{\"visible\":false,\"sorting\":false},\"news_to_date\":{\"visible\":false,\"sorting\":false},\"custom_design_from\":{\"visible\":false,\"sorting\":false},\"custom_design_to\":{\"visible\":false,\"sorting\":false}},\"displayMode\":\"grid\",\"positions\":{\"ids\":0,\"entity_id\":1,\"thumbnail\":2,\"name\":3,\"type_id\":4,\"attribute_set_id\":5,\"sku\":6,\"price\":7,\"qty\":8,\"salable_quantity\":9,\"visibility\":10,\"status\":11,\"websites\":12,\"short_description\":13,\"special_price\":14,\"special_from_date\":15,\"special_to_date\":16,\"cost\":17,\"weight\":18,\"manufacturer\":19,\"meta_title\":20,\"meta_keyword\":21,\"meta_description\":22,\"color\":23,\"news_from_date\":24,\"news_to_date\":25,\"custom_design\":26,\"custom_design_from\":27,\"custom_design_to\":28,\"page_layout\":29,\"country_of_manufacture\":30,\"custom_layout\":31,\"url_key\":32,\"msrp\":33,\"gift_message_available\":34,\"tax_class_id\":35,\"updated_at\":36,\"actions\":37}}}','2024-10-10 16:40:37','2024-10-10 16:40:37');
+              REPLACE INTO `url_rewrite` VALUES (5,'product',1,'test-product.html','catalog/product/view/id/1',0,1,NULL,1,NULL);
+          EOF
+
+      - name: Set encrypted client secret
+        run: docker exec magento sh -c 'php bin/magento config:set payment/truelayer/sandbox_client_secret $(php -r "require \"vendor/autoload.php\"; require \"app/bootstrap.php\"; \$bootstrap = \Magento\Framework\App\Bootstrap::create(BP, \$_SERVER); \$bootstrap->createApplication(\Magento\Framework\App\Http::class); \$encryptor = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Encryption\EncryptorInterface::class); echo \$encryptor->encrypt(\"${{ secrets.TEST_CLIENT_SECRET }}\");")'
+
+      - name: Reindex products
+        run: docker exec magento php bin/magento indexer:reindex
+
+      - name: Clear cache
+        run: docker exec magento php bin/magento cache:flush
+
+      - name: Install test runner
+        run: |
+          docker exec -w /data/extensions/magento2 magento npm install
+          docker exec -w /data/extensions/magento2 magento npx playwright install-deps
+          docker exec -w /data/extensions/magento2 magento npx playwright install
+
+      - name: Run tests
+        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test --project=chromium --reporter=line
