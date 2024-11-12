@@ -14,29 +14,30 @@ $htmlClass = 'truelayer_upload-file-as-string_'.$mode;
 $scope = 'truelayer_private-key-upload_'.$mode;
 $fieldType = $block->getData('fieldType');
 $displayValue = $block->getData('displayValue');
-$tooltip = $block->getData('tooltip');
+$disabled = $block->getData('disabled');
+$disabledHtml = $disabled ? 'disabled="disabled"' : "";
 
 $htmlTextInputId = $block->getData('htmlTextInputId');
 $htmlFileInputId = $htmlTextInputId.'_file';
 ?>
 
-<div class="<?= $htmlClass ?>" data-bind="scope: '<?= $scope ?>'">
+<span class="<?= $htmlClass ?>" data-bind="scope: '<?= $scope ?>'" style="display:inline-block;width:100%;">
     <input
         id="<?= $htmlTextInputId ?>"
         name="groups[general][fields][<?= $mode ?>_private_key][value]"
         type="<?= $fieldType === 'obscure' ? 'password' : 'text' ?>"
-        value="<?= $displayValue ?>"/>
+        value="<?= $displayValue ?>"
+        <?= $disabledHtml ?>
+    />
 
-        <?php if ($tooltip) { ?>
-            <div class="tooltip"><span class="help"><span></span></span>
-            <div class="tooltip-content"><?= $tooltip ?></div></div>
-        <?php } ?>
     <button
+        id="button-<?= $htmlTextInputId ?>"
         type="button"
         data-bind="click: clickUpload"
+        <?= $disabledHtml ?>
     >Upload file</button>
     <input type="file" id="<?= $htmlFileInputId ?>" data-bind="event:{change:handleFile}" hidden />
-</div>
+</span>
 
 <script type="text/x-magento-init">
     {

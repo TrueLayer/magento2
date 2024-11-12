@@ -28,9 +28,8 @@ class Base64FileUpload extends Field
         $htmlTextInputId = $element->getHtmlId();
         $mode = $element->getData('field_config')['depends']['fields']['mode']['value'] ?? Mode::SANDBOX;
         $fieldType = $element->getData('field_config')['type'] ?? 'text';
-        $tooltip = $element->getTooltip();
-        $element->setTooltip();
         $displayValue = $element->getValue();
+        $disabled = $element->getDisabled();
         if ($displayValue && $fieldType == 'obscure') {
             $displayValue = '******';
         }
@@ -40,7 +39,7 @@ class Base64FileUpload extends Field
             'mode' => $mode,
             'fieldType' => $fieldType,
             'displayValue' => $displayValue,
-            'tooltip' => $tooltip,
+            'disabled' => $disabled,
         ]);
         return $this->_toHtml();
     }
