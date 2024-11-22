@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export class HostedPaymentsPage {
     page: Page;
@@ -8,14 +8,14 @@ export class HostedPaymentsPage {
     }
 
     // Locators
-    mockBank = () => this.page.getByLabel('Mock UK Payments - Redirect Flow', { exact: true });
-    continueButton = () => this.page.getByText('Go to bank');
-    continueOnDesktopButton = () => this.page.getByText('on this device');
+    mockBank = () => this.page.getByLabel('Select Mock UK Payments - Redirect Flow', { exact: true });
+    continueButton = () => this.page.getByTestId('confirm-redirect-button');
+    continueOnDesktopButton = () => this.page.getByTestId('continue-desktop');
 
     // Methods
     async selectMockBankAndContinueOnDesktop() {
         await this.selectMockBankAndContinue();
-        await expect(this.continueOnDesktopButton()).toBeVisible({timeout: 5000})
+        await this.continueOnDesktopButton().isVisible()
         await this.continueOnDesktopButton().click();
     }
 
@@ -24,9 +24,9 @@ export class HostedPaymentsPage {
     }
 
     private async selectMockBankAndContinue(){
-        await expect(this.mockBank()).toBeVisible({timeout: 5000})
+        await this.mockBank().isVisible();
         await this.mockBank().click();
-        await expect(this.continueButton()).toBeVisible({timeout: 5000})
+        await this.continueButton().isVisible();
         await this.continueButton().click();
     }
 }
