@@ -9,7 +9,7 @@ export class HostedPaymentsPage {
 
     // Locators
     mockBank = () => this.page.getByLabel('Mock UK Payments - Redirect Flow', { exact: true });
-    continueButton = () => this.page.getByText('Go to bank');
+    continueButton = () => this.page.getByTestId('go-to-bank-button');
     continueOnDesktopButton = () => this.page.getByText('on this device');
 
     // Methods
