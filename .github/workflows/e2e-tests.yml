@@ -1,0 +1,115 @@
+name: Run e2e tests
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - PHP_VERSION: php82-fpm
+            MAGENTO_VERSION: 2.4.6
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: docker run --rm --detach --name=magento -p 80:80 -p 3306:3306 -e URL=http://localhost/ -e FLAT_TABLES=false michielgerritsen/magento-project-community-edition:${{ matrix.PHP_VERSION }}-magento${{ matrix.MAGENTO_VERSION }}
+
+      - name: Upload our code into the docker container
+        run: docker cp $(pwd) magento:/data/extensions/
+
+      - name: Set minimum-stability for composer (temp)
+        run: docker exec magento composer config minimum-stability dev
+
+      - name: Configure composer to mirror repository
+        run: docker exec magento composer config repositories.truelayer \{\"type\":\"path\",\"url\":\"/data/extensions/$(basename $(pwd))\",\"options\":\{\"symlink\":false\}\}
+
+      - name: Install dependencies
+        run: docker exec magento composer require truelayer/magento2:@dev --no-plugins --with-all-dependencies
+
+      - name: Wait for MySQL and Elastic to start
+        run: |
+          docker cp $(pwd)/.github/workflows/templates/wait-for-db.sh magento:/data/wait-for-db.sh
+          docker exec magento sh wait-for-db.sh
+
+      - name: Enable plugin
+        run: docker exec magento ./retry "php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
+
+      - name: Copy private key
+        run: |
+          echo "${{ secrets.TEST_PEM }}" >> $(pwd)/private-key.pem
+          docker exec magento mkdir -p /data/var/truelayer/sandbox/default
+          docker cp $(pwd)/private-key.pem magento:/data/var/truelayer/sandbox/default/private-key.pem
+          rm $(pwd)/private-key.pem
+
+      - name: Write initial values to database
+        run: |
+          docker exec -i magento mysql magento << "EOF"
+              REPLACE INTO `admin_user` VALUES (1,'Example','Example','user@example.com','exampleuser','12b66e0132008acb13a9eb880f9ff4e7393b64b74722dcda435a03ec7e0dd780:TWLwiabBH2lIPcDkKLrhu37GsEBRpnSb:3_32_2_67108864','2024-09-23 01:02:08','2024-10-10 16:39:29','2024-10-10 16:39:29',1,0,1,NULL,NULL,NULL,'en_US',0,NULL,NULL);
+              REPLACE INTO `admin_analytics_usage_version_log` VALUES (1,'2.4.6');
+              REPLACE INTO `catalog_product_entity` VALUES (1,4,'simple','test-product',0,0,'2024-10-10 16:41:56','2024-10-10 16:41:56');
+              REPLACE INTO `catalog_product_entity_decimal` VALUES (1,77,0,1,0.010000),(2,82,0,1,1.000000);
+              REPLACE INTO `catalog_product_entity_int` VALUES (1,97,0,1,1),(2,136,0,1,2),(3,99,0,1,4);
+              REPLACE INTO `catalog_product_entity_text` VALUES (1,85,0,1,'test-product');
+              REPLACE INTO `catalog_product_entity_varchar` VALUES (1,134,0,1,'2'),(2,86,0,1,'test-product '),(3,84,0,1,'test-product'),(4,124,0,1,'0'),(5,73,0,1,'test-product'),(6,106,0,1,'container2'),(7,104,0,1,'product-full-width'),(8,121,0,1,'test-product');
+              REPLACE INTO `catalog_product_website` VALUES (1,1);
+              REPLACE INTO `cataloginventory_stock_item` VALUES (1,1,1,0.0000,0.0000,1,0,0,1,1.0000,1,10000.0000,1,0,'2024-10-11 10:09:52',1.0000,1,0,0,0,1,1.0000,1,0,0,0);
+              REPLACE INTO `cataloginventory_stock_status` VALUES (1,0,1,0.0000,1);
+              REPLACE INTO `directory_currency_rate` VALUES ('EUR','EUR',1.000000000000),('EUR','USD',1.415000000000),('GBP','GBP',1.000000000000),('USD','EUR',0.706700000000),('USD','USD',1.000000000000);
+              REPLACE INTO `inventory_low_stock_notification_configuration` VALUES ('default','test-product',NULL);
+              REPLACE INTO `inventory_source_item` VALUES (1,'default','test-product',0.0000,0);
+              REPLACE INTO `url_rewrite` VALUES (5,'product',1,'test-product.html','catalog/product/view/id/1',0,1,NULL,1,NULL);
+          EOF
+
+      - name: Add magento config
+        run: |
+          docker exec magento bin/magento config:set admin/usage/enabled 0;
+          docker exec magento bin/magento config:set admin/security/use_form_key 0;
+          docker exec magento bin/magento config:set general/country/default GB;
+          docker exec magento bin/magento config:set currency/options/allow GBP,EUR;
+          docker exec magento bin/magento config:set currency/options/base GBP;
+          docker exec magento bin/magento config:set currency/options/default GBP;
+          docker exec magento bin/magento config:set currency/options/allow GBP;
+          docker exec magento bin/magento config:set carriers/flatrate/active 0;
+          docker exec magento bin/magento config:set carriers/freeshipping/active 1;
+          docker exec magento bin/magento config:set carriers/freeshipping/specificcountry "";
+
+      - name: Add truelayer config
+        run: |
+          docker exec magento bin/magento config:set payment/truelayer/active 1;
+          docker exec magento bin/magento config:set payment/truelayer/mode sandbox;
+          docker exec magento bin/magento config:set payment/truelayer/send_order_email 0;
+          docker exec magento bin/magento config:set payment/truelayer/send_invoice_email 0;
+          docker exec magento bin/magento config:set payment/truelayer/banking_providers retail;
+          docker exec magento bin/magento config:set payment/truelayer/logging 0;
+          docker exec magento bin/magento config:set payment/truelayer/send_order_email 0;
+          docker exec magento bin/magento config:set payment/truelayer/send_invoice_email 0;
+          docker exec magento bin/magento config:set payment/truelayer/payment_page_primary_color \#000000;
+          docker exec magento bin/magento config:set payment/truelayer/payment_page_secondary_color \#e53935;
+          docker exec magento bin/magento config:set payment/truelayer/payment_page_tertiary_color \#32329f;
+          docker exec magento bin/magento config:set payment/truelayer/specificcountry GB,IE,ES,FR,DE,NL,LT;
+          docker exec magento bin/magento config:set payment/truelayer/sandbox_client_id ${{ secrets.TEST_CLIENT_ID }};
+          docker exec magento bin/magento config:set payment/truelayer/sandbox_key_id ${{ secrets.TEST_KID }};
+          docker exec magento bin/magento config:set payment/truelayer/sandbox_private_key sandbox/default/private-key.pem;
+
+      - name: Set encrypted client secret
+        run: docker exec magento sh -c 'php bin/magento config:set payment/truelayer/sandbox_client_secret $(php -r "require \"vendor/autoload.php\"; require \"app/bootstrap.php\"; \$bootstrap = \Magento\Framework\App\Bootstrap::create(BP, \$_SERVER); \$bootstrap->createApplication(\Magento\Framework\App\Http::class); \$encryptor = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Encryption\EncryptorInterface::class); echo \$encryptor->encrypt(\"${{ secrets.TEST_CLIENT_SECRET }}\");")'
+
+      - name: Reindex products
+        run: docker exec magento php bin/magento indexer:reindex
+
+      - name: Clear cache
+        run: docker exec magento php bin/magento cache:flush
+
+      - name: Install test runner
+        run: |
+          docker exec -w /data/extensions/magento2 magento npm install
+          docker exec -w /data/extensions/magento2 magento npx playwright install-deps
+          docker exec -w /data/extensions/magento2 magento npx playwright install
+
+      - name: Run tests
+        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test --project=chromium --reporter=line

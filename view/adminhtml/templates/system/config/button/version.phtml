@@ -10,7 +10,29 @@ use TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck;
  * @see \TrueLayer\Connect\Block\Adminhtml\System\Config\Button\VersionCheck
  * @var VersionCheck $block
  */
+$currentVersion = $block->getVersion();
+$latestVersion = $block->getLatestVersion();
+$upToDate = !$latestVersion || version_compare($currentVersion, $latestVersion, '>=');
 ?>
-<div class="tl-result_version-wrapper">
-    <span><?= $block->escapeHtml($block->getVersion()); ?></span>
+
+<div class="tl-result_version-wrapper" data-bind="scope:'truelayer-plugin-version'">
+    <span id="truelayer-installed-version" data-bind="text: `v${getCurrentVersion()}`"></span>
+    <span id="truelayer-latest-version" data-bind="visible: !isUpToDate(), text: ` - A new version is available: v${getLatestVersion()}`"></span>
 </div>
+
+<script type="text/x-magento-init">
+    {
+        ".tl-result_version-wrapper": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "truelayer-plugin-version": {
+                        "component": "TrueLayer_Connect/js/version",
+                        "currentVersion": "<?= $currentVersion ?>",
+                        "latestVersion": "<?= $latestVersion ?>",
+                        "upToDate": "<?= $upToDate ?>"
+                    }
+                }
+            }
+        }
+    }
+</script>

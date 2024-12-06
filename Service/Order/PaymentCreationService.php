@@ -74,6 +74,7 @@ class PaymentCreationService
     {
         return $this->createPayment($order, $this->getTransactionByOrder($order), [
             "Magento Order ID" => (string) $order->getEntityId(),
+            "Magento Order Increment ID" => (string) $order->getIncrementId(),
             "Magento Store ID" => (string) $order->getStoreId(),
         ]);
     }

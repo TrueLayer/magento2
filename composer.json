@@ -13,10 +13,11 @@
         "magento/module-checkout": ">=100.1.0",
         "magento/module-sales": ">=100.1.0",
         "truelayer/client": ">=2.6.0",
-        "php": ">=8.0"
+        "php": ">=8.1.0"
     },
     "require-dev": {
         "phpstan/phpstan": "*",
+        "friendsofphp/php-cs-fixer": "^3.64",
         "bitexpert/phpstan-magento": "*"
     },
     "autoload": {

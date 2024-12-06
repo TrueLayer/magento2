@@ -4,3 +4,9 @@
 .DS_Store
 docker
 .vscode
+.php-cs-fixer.cache
+/node_modules
+/test-results
+/playwright-report
+/results.xml
+private-key.pem
