@@ -91,7 +91,9 @@ jobs:
           docker exec magento bin/magento config:set payment/truelayer/payment_page_primary_color \#000000;
           docker exec magento bin/magento config:set payment/truelayer/payment_page_secondary_color \#e53935;
           docker exec magento bin/magento config:set payment/truelayer/payment_page_tertiary_color \#32329f;
-          docker exec magento bin/magento config:set payment/truelayer/specificcountry GB,IE,ES,FR,DE,NL,LT;
+          docker exec magento bin/magento config:set payment/truelayer/preselected 0;
+          docker exec magento bin/magento config:set payment/truelayer/checkout_widget_recommended 1;
+          docker exec magento bin/magento config:set payment/truelayer/checkout_widget_enabled 1;
           docker exec magento bin/magento config:set payment/truelayer/sandbox_client_id ${{ secrets.TEST_CLIENT_ID }};
           docker exec magento bin/magento config:set payment/truelayer/sandbox_key_id ${{ secrets.TEST_KID }};
           docker exec magento bin/magento config:set payment/truelayer/sandbox_private_key sandbox/default/private-key.pem;
@@ -111,5 +113,11 @@ jobs:
           docker exec -w /data/extensions/magento2 magento npx playwright install-deps
           docker exec -w /data/extensions/magento2 magento npx playwright install
 
-      - name: Run tests
-        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test --project=chromium --reporter=line
+      - name: Run test with checkout widget
+        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test tests/e2e/magento-e2e-tests-with-widget.spec.ts --project="chromium" --reporter=line
+
+      - name: Disable checkout widget
+        run: docker exec magento bin/magento config:set payment/truelayer/checkout_widget_enabled 0;
+
+      - name: Run test without checkout widget
+        run: docker exec --env PW_TEST_HTML_REPORT_OPEN=never -w /data/extensions/magento2 magento npx playwright test tests/e2e/magento-e2e-tests-no-widget.spec.ts --project="chromium" --reporter=line

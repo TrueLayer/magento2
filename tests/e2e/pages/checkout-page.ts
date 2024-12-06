@@ -22,6 +22,15 @@ export class CheckoutPage {
     paymentMethodButton = () => this.page.locator(this.paymentMethodSelector);
     placeOrderButton = () => this.page.getByRole('button', { name: 'Place Order' });
 
+    private widgetInitPaymentframe = () => this.page.locator('#tl-checkout-widget').contentFrame();
+    private widgetBankingModal = () => this.page.locator('#tl-hpp-next').contentFrame();
+    widgetPayButton = () => this.widgetInitPaymentframe().getByTestId('checkout-button-loaded');
+    widgetSelectBankModal = () => this.widgetInitPaymentframe().getByText('Select your bank');
+    widgetMockBank = () => this.widgetBankingModal().getByTestId('provider-list-item-mock-payments-gb-redirect');
+    widgetContinueButton = () => this.widgetBankingModal().getByTestId('go-to-bank-button');
+    widgetContinueOnDesktopButton = () => this.widgetBankingModal().getByText('on this device');
+    widgetPaymentBeingProcessedText = () => this.widgetBankingModal().getByText('confirming your payment', {exact: false})
+
     // Methods
 
     async fillShippingDetailsAndSubmit(email: string, isMobile: boolean = false) {
@@ -72,5 +81,30 @@ export class CheckoutPage {
         await this.placeOrderButton().isVisible();
         await this.placeOrderButton().isEnabled();
         await this.placeOrderButton().click();
+    }
+
+    async clickWidgetPayButton() {
+        await expect(this.widgetPayButton()).toBeVisible({timeout: 5000});
+        await this.widgetPayButton().click();
+    }
+
+    async selectWidgetMockBankAndContinueOnDesktop() {
+        await this.selectWidgetMockBankAndContinue();
+        await this.widgetContinueOnDesktopButton().click();
+    }
+
+    async selectMockBankAndContinueOnMobile() {
+        await this.selectWidgetMockBankAndContinue();
+    }
+
+    private async selectWidgetMockBankAndContinue(){
+        await expect(this.widgetMockBank()).toBeVisible({timeout: 15000})
+        await this.widgetMockBank().click();
+        await expect(this.widgetContinueButton()).toBeVisible({timeout: 10000})
+        await this.widgetContinueButton().click();
+    }
+
+    async expectPaymentProcessingText() {
+        await expect(this.widgetPaymentBeingProcessedText()).toBeVisible({timeout: 5000});
     }
 }
