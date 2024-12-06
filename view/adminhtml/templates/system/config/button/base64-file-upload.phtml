@@ -1,0 +1,56 @@
+<?php
+/**
+ * Copyright © TrueLayer Ltd. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/**
+ * @var \TrueLayer\Connect\Block\Adminhtml\System\Config\Field\Base64FileUpload $block
+ */
+
+/** @var "sandbox"|"production" $mode */
+$mode = $block->getData('mode');
+$htmlClass = 'truelayer_upload-file-as-string_'.$mode;
+$scope = 'truelayer_private-key-upload_'.$mode;
+$fieldType = $block->getData('fieldType');
+$displayValue = $block->getData('displayValue');
+$disabled = $block->getData('disabled');
+$disabledHtml = $disabled ? 'disabled="disabled"' : "";
+
+$htmlTextInputId = $block->getData('htmlTextInputId');
+$htmlFileInputId = $htmlTextInputId.'_file';
+?>
+
+<span class="<?= $htmlClass ?>" data-bind="scope: '<?= $scope ?>'" style="display:inline-block;width:100%;">
+    <input
+        id="<?= $htmlTextInputId ?>"
+        name="groups[general][fields][<?= $mode ?>_private_key][value]"
+        type="<?= $fieldType === 'obscure' ? 'password' : 'text' ?>"
+        value="<?= $displayValue ?>"
+        <?= $disabledHtml ?>
+    />
+
+    <button
+        id="button-<?= $htmlTextInputId ?>"
+        type="button"
+        data-bind="click: clickUpload"
+        <?= $disabledHtml ?>
+    >Upload file</button>
+    <input type="file" id="<?= $htmlFileInputId ?>" data-bind="event:{change:handleFile}" hidden />
+</span>
+
+<script type="text/x-magento-init">
+    {
+        ".<?= $htmlClass ?>": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "<?= $scope ?>": {
+                        "component": "TrueLayer_Connect/js/handle-upload",
+                        "htmlFileInputId": "<?= $htmlFileInputId ?>",
+                        "htmlTextInputId": "<?= $htmlTextInputId ?>"
+                    }
+                }
+            }
+        }
+    }
+</script>

@@ -74,7 +74,7 @@ class ClientFactory
         $clientFactory->clientId($credentials['client_id'])
             ->clientSecret($credentials['client_secret'])
             ->keyId($credentials['key_id'])
-            ->pemFile($credentials['private_key'])
+            ->pem($credentials['private_key'])
             ->useProduction(is_null($forceSandbox) ? !$this->configProvider->isSandbox() : !$forceSandbox);
 
         if ($cacheEncryptionKey) {

@@ -41,7 +41,7 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
         return [
             "client_id" => $this->getClientId($storeId, $isSandBox),
             "client_secret" => $this->getClientSecret($storeId, $isSandBox),
-            "private_key" => $this->getPathToPrivateKey($storeId, $isSandBox),
+            "private_key" => $this->getPrivateKey($storeId, $isSandBox),
             "key_id" => $this->getKeyId($storeId, $isSandBox),
             "cache_encryption_key" => $this->getCacheEncryptionKey($storeId)
         ];
@@ -52,18 +52,14 @@ class ConnectionRepository extends DebugRepository implements ConnectionInterfac
      * @param bool $isSandBox
      * @return string
      */
-    private function getPathToPrivateKey(?int $storeId = null, bool $isSandBox = false): string
+    private function getPrivateKey(?int $storeId = null, bool $isSandBox = false): string
     {
         $path = $isSandBox ? self::XML_PATH_SANDBOX_PRIVATE_KEY : self::XML_PATH_PRODUCTION_PRIVATE_KEY;
-        if (!$savedPrivateKey = $this->getStoreValue($path, $storeId)) {
-            return '';
+        if ($value = $this->getStoreValue($path, $storeId)) {
+            return $this->encryptor->decrypt($value);
         }
 
-        try {
-            return $this->directoryList->getPath('var') . '/truelayer/' . $savedPrivateKey;
-        } catch (\Exception $exception) {
-            return '';
-        }
+        return '';
     }
 
     /**

@@ -154,15 +154,27 @@ class Check extends Action implements HttpPostActionInterface
             $clientId = $this->getRequest()->getParam('sandbox_client_id');
             $clientSecret = $this->getRequest()->getParam('sandbox_client_secret');
             $keyId = $this->getRequest()->getParam('sandbox_key_id');
+            $privateKey = $this->getRequest()->getParam('sandbox_private_key');
         } else {
             $clientId = $this->getRequest()->getParam('production_client_id');
             $clientSecret = $this->getRequest()->getParam('production_client_secret');
             $keyId = $this->getRequest()->getParam('production_key_id');
+            $privateKey = $this->getRequest()->getParam('production_private_key');
         }
 
         $configCredentials = $this->configProvider->getCredentials($storeId, $mode === Mode::SANDBOX);
         if ($clientSecret == '******') {
             $clientSecret = $configCredentials['client_secret'];
+        }
+        if ($privateKey == '******') {
+            $privateKey = $configCredentials['private_key'];
+        } else {
+            if ($privateKey) {
+                $decoded = base64_decode($privateKey, true);
+                if (@base64_encode($decoded) === $privateKey) {
+                    $privateKey = $decoded;
+                }
+            }
         }
 
         return [
@@ -170,34 +182,11 @@ class Check extends Action implements HttpPostActionInterface
             'credentials' => [
                 'client_id' => $clientId,
                 'client_secret' => $clientSecret,
-                'private_key' => $this->getPrivateKeyPath($configCredentials),
+                'private_key' => $privateKey,
                 'key_id' => $keyId,
                 'cache_encryption_key' => $configCredentials['cache_encryption_key']
             ]
         ];
-    }
-
-    /**
-     * @param array $configCredentials
-     * @return string
-     * @throws FileSystemException
-     */
-    private function getPrivateKeyPath(array $configCredentials): string
-    {
-        if ($privateKey = $this->getRequest()->getParam('private_key')) {
-            $path = $this->directoryList->getPath('var') . self::PEM_UPLOAD_FILE;
-            $fileInfo = $this->file->getPathInfo($path);
-
-            if (!$this->file->fileExists($fileInfo['dirname'])) {
-                $this->file->mkdir($fileInfo['dirname']);
-            }
-
-            $this->file->write($path, $privateKey);
-
-            return $path;
-        }
-
-        return $configCredentials['private_key'];
     }
 
     /**
