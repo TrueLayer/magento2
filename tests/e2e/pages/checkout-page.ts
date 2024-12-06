@@ -24,7 +24,7 @@ export class CheckoutPage {
 
     // Methods
 
-    async fillShippingDetailsAndSubmit(email: string) {
+    async fillShippingDetailsAndSubmit(email: string, isMobile: boolean = false) {
         await this.emailField().isVisible();
         await this.emailField().fill(email);
         await this.firstNameField().isVisible();
@@ -41,6 +41,9 @@ export class CheckoutPage {
         await this.addressField().fill('10 Downing Street')
         await this.postcodeField().isVisible();
         await this.postcodeField().fill('SW1A 2AB');
+        if (isMobile) {
+            await this.page.locator('body').click({position: {x: 0, y: 0}});
+        }
 
         await this.submitShippingInfoAndWaitForPageLoad();
     }
@@ -52,11 +55,9 @@ export class CheckoutPage {
     }
 
     async submitShippingInfoAndWaitForPageLoad() {
-        await this.nextStepButton().isEnabled();
+        await expect(this.nextStepButton()).toBeEnabled({timeout: 5000});
         await this.nextStepButton().click();
-        await this.page.waitForSelector('.loading-mask', { state: 'visible' });
-        await this.page.waitForSelector('.loading-mask', { state: 'hidden' });
-        await this.page.waitForSelector(this.paymentMethodSelector, { state: 'visible' });
+        await this.page.waitForSelector(this.paymentMethodSelector, { state: 'visible', timeout: 15000 });
     }
 
     async clickPaymentMethod() {
@@ -72,4 +73,4 @@ export class CheckoutPage {
         await this.placeOrderButton().isEnabled();
         await this.placeOrderButton().click();
     }
-} 
+}

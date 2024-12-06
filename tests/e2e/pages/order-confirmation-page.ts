@@ -14,6 +14,10 @@ export class OrderConfirmationPage {
     // Methods
     async waitForProcessingAndReturnToStore() {
         await this.paymentBeingProcessedText().isVisible();
-        await expect(this.orderConfirmedText()).toBeVisible({timeout: 90000});
+        await this.expectOrderConfirmed(90000);
+    }
+
+    async expectOrderConfirmed(timeout: number) {
+        await expect(this.orderConfirmedText()).toBeVisible({timeout});
     }
 }

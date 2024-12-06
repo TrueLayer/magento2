@@ -9,14 +9,13 @@ test.describe('Truelayer magento plugin E2E Tests', () => {
         hostedPaymentsPage,
         mockUkBankPage,
         mockUkBankAccountsPage,
-        paymentConfirmationPage,
         orderConfirmationPage,
     }) => {
         // arrange
         await productPage.navigateTo();
         await productPage.addToCart();
         await checkoutPage.navigateToShippingStep();
-        await checkoutPage.fillShippingDetailsAndSubmit('truelayer@example.com');
+        await checkoutPage.fillShippingDetailsAndSubmit('truelayer@example.com', isMobile);
         await checkoutPage.clickPaymentMethod();
         await checkoutPage.clickPlaceOrderButton();
 
@@ -28,7 +27,6 @@ test.describe('Truelayer magento plugin E2E Tests', () => {
         }
         await mockUkBankPage.enterOnlineBankingDetailsAndContinue();
         await mockUkBankAccountsPage.selectAccountAndContinue();
-        // await paymentConfirmationPage.waitForProcessingAndContinue();
         await orderConfirmationPage.waitForProcessingAndReturnToStore();
     })
 });

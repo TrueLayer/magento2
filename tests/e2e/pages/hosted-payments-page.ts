@@ -8,9 +8,9 @@ export class HostedPaymentsPage {
     }
 
     // Locators
-    mockBank = () => this.page.getByLabel('Select Mock UK Payments - Redirect Flow', { exact: true });
-    continueButton = () => this.page.getByTestId('confirm-redirect-button');
-    continueOnDesktopButton = () => this.page.getByTestId('continue-desktop');
+    mockBank = () => this.page.getByText('Mock UK Payments - Redirect Flow', { exact: true });
+    continueButton = () => this.page.getByTestId('go-to-bank-button');
+    continueOnDesktopButton = () => this.page.getByText('on this device');
 
     // Methods
     async selectMockBankAndContinueOnDesktop() {
