@@ -94,7 +94,6 @@ jobs:
           docker exec magento bin/magento config:set payment/truelayer/specificcountry GB,IE,ES,FR,DE,NL,LT;
           docker exec magento bin/magento config:set payment/truelayer/sandbox_client_id ${{ secrets.TEST_CLIENT_ID }};
           docker exec magento bin/magento config:set payment/truelayer/sandbox_key_id ${{ secrets.TEST_KID }};
-          docker exec magento bin/magento config:set payment/truelayer/sandbox_private_key sandbox/default/private-key.pem;
 
       - name: Set encrypted client secret
         run: |
