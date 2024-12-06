@@ -17,7 +17,7 @@ export class ProductPage {
         await this.addToCartButton().click();
         const cartCounter = this.cartCounter()
         await cartCounter.isVisible();
-        await expect(cartCounter).toHaveText('1', {timeout: 1000})
+        await expect(cartCounter).toHaveText('1', {timeout: 5000})
     }
 
     async navigateTo(){

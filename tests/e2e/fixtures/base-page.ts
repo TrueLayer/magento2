@@ -4,7 +4,6 @@ import { ProductPage } from "../pages/product-page";
 import { CheckoutPage } from "../pages/checkout-page";
 import { HostedPaymentsPage } from "../pages/hosted-payments-page";
 import { MockUkBankPage } from "../pages/mock-uk-bank-page";
-import { PaymentConfirmationPage } from "../pages/payment-confirmation-page";
 import { MockUkBankAccountsPage } from "../pages/mock-uk-bank-accounts-page";
 import { OrderConfirmationPage } from "../pages/order-confirmation-page";
 
@@ -14,7 +13,6 @@ export const test = base.extend<{
     hostedPaymentsPage: HostedPaymentsPage;
     mockUkBankPage: MockUkBankPage;
     mockUkBankAccountsPage: MockUkBankAccountsPage;
-    paymentConfirmationPage: PaymentConfirmationPage;
     orderConfirmationPage: OrderConfirmationPage;
 
 }>({
@@ -32,9 +30,6 @@ export const test = base.extend<{
     },
     mockUkBankAccountsPage: async ({ page }, use) => {
         await use(new MockUkBankAccountsPage(page));
-    },
-    paymentConfirmationPage: async ({ page }, use) => {
-        await use(new PaymentConfirmationPage(page));
     },
     orderConfirmationPage: async ({ page }, use) => {
         await use(new OrderConfirmationPage(page));
