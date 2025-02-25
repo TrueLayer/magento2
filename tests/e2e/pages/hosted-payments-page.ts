@@ -24,6 +24,7 @@ export class HostedPaymentsPage {
     }
 
     private async selectMockBankAndContinue(){
+        console.log(this.page.url())
         await this.mockBank().isVisible();
         await this.mockBank().click();
         await this.continueButton().isVisible();
