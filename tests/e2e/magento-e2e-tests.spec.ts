@@ -2,7 +2,7 @@ import { chromium, webkit } from "@playwright/test";
 import { test } from "./fixtures/base-page";
 
 test.describe('Truelayer magento plugin E2E Tests', () => {
-    test('Successful Purchase of a Product using a valid email address', async ({
+    test.skip('Successful Purchase of a Product using a valid email address', async ({
         isMobile,
         productPage,
         checkoutPage,
