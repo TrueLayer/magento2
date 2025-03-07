@@ -9,7 +9,7 @@ jobs:
         include:
           - PHP_VERSION: php82-fpm
             MAGENTO_VERSION: 2.4.6
-          - PHP_VERSION: php82-fpm
+          - PHP_VERSION: php81-fpm
             MAGENTO_VERSION: 2.4.5
 
     runs-on: ubuntu-latest
