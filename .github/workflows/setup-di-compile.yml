@@ -9,7 +9,7 @@ jobs:
         include:
           - PHP_VERSION: php81-fpm
             MAGENTO_VERSION: 2.4.5-p11
-          - PHP_VERSION: php82-fpm
+          - PHP_VERSION: php81-fpm
             MAGENTO_VERSION: 2.4.6
     runs-on: ubuntu-latest
     steps:
@@ -32,3 +32,6 @@ jobs:
 
       - name: Activate the extension and run setup:upgrade and setup:di:compile
         run: docker exec magento-project-community-edition ./retry "php bin/magento module:enable TrueLayer_Connect && php bin/magento setup:upgrade && php bin/magento setup:di:compile"
+
+      - name: Run PHPStan
+        run: docker exec magento-project-community-edition /bin/bash -c "./vendor/bin/phpstan analyse --no-progress -c /data/extensions/*/phpstan.neon /data/extensions"
