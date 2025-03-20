@@ -18,7 +18,7 @@ class Psr16CacheAdapter implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $key, mixed $default = null): mixed
+    public function get($key, $default = null): mixed
     {
         $item = $this->cacheFrontend->load($key);
 
@@ -32,7 +32,7 @@ class Psr16CacheAdapter implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function set(string $key, $value, $ttl = null): bool
+    public function set($key, $value, $ttl = null): bool
     {
         $value = serialize($value);
         return $this->cacheFrontend->save(
@@ -62,7 +62,7 @@ class Psr16CacheAdapter implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function getMultiple(iterable $keys, mixed $default = null): iterable
+    public function getMultiple($keys, $default = null): iterable
     {
         if ($keys instanceof \Traversable) {
             $keys = iterator_to_array($keys, false);
@@ -76,9 +76,8 @@ class Psr16CacheAdapter implements CacheInterface
 
     /**
      * {@inheritdoc}
-     * @param iterable<int|string, mixed> $values
      */
-    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
+    public function setMultiple($values, $ttl = null): bool
     {
         $stringKeyedValues = [];
         foreach ($values as $key => $value) {
@@ -103,7 +102,7 @@ class Psr16CacheAdapter implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function deleteMultiple(iterable $keys): bool
+    public function deleteMultiple($keys): bool
     {
         if ($keys instanceof \Traversable) {
             $keys = iterator_to_array($keys, false);
@@ -118,7 +117,7 @@ class Psr16CacheAdapter implements CacheInterface
     /**
      * {@inheritdoc}
      */
-    public function has(string $key): bool
+    public function has($key): bool
     {
         return $this->cacheFrontend->test($key);
     }
