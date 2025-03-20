@@ -27,6 +27,7 @@ class ClientFactory
     /**
      * @param ConfigRepository $configProvider
      * @param LogServiceInterface $logger
+     * @param Psr16CacheAdapter $cacheAdapter
      */
     public function __construct(
         ConfigRepository $configProvider,
@@ -42,7 +43,7 @@ class ClientFactory
      * @param int $storeId
      * @param array|null $data
      * @return ClientInterface|null
-     * @throws SignerException
+     * @throws SignerException|InvalidArgumentException
      */
     public function create(int $storeId = 0, ?array $data = []): ?ClientInterface
     {
