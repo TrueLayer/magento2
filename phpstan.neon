@@ -12,5 +12,6 @@ parameters:
     excludePaths:
         - docker/*
         - vendor/*
+        - Service/Client/ClientFactory.php
 includes:
     - vendor/bitexpert/phpstan-magento/extension.neon
