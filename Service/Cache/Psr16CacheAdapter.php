@@ -26,7 +26,12 @@ class Psr16CacheAdapter implements CacheInterface
             return $default;
         }
 
-        return unserialize($item);
+        $decoded = json_decode($item, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        return $default;
     }
 
     /**
@@ -34,9 +39,8 @@ class Psr16CacheAdapter implements CacheInterface
      */
     public function set($key, $value, $ttl = null): bool
     {
-        $value = serialize($value);
         return $this->cacheFrontend->save(
-            $value,
+            json_encode($value),
             $key,
             [CacheType::CACHE_TAG],
             $ttl
