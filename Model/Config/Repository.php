@@ -30,7 +30,7 @@ class Repository extends System\ConnectionRepository implements ConfigRepository
     /**
      * @inheritDoc
      */
-    public function getBaseUrl(int $storeId = null): string
+    public function getBaseUrl(?int $storeId = null): string
     {
         try {
             return $this->storeManager->getStore($storeId)->getBaseUrl();

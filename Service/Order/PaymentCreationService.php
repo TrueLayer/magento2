@@ -114,7 +114,7 @@ class PaymentCreationService
         OrderInterface $order,
         string $merchantAccId,
         string $customerEmail,
-        string $existingUserId = null
+        ?string $existingUserId = null
     ): array {
         $config = [
             "amount_in_minor" => AmountHelper::toMinor($order->getBaseGrandTotal()),

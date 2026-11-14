@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   web:
-    image: michielgerritsen/magento-project-community-edition:php81-fpm-magento2.4.6
+    image: michielgerritsen/magento-project-community-edition:php85-fpm-magento2.4.9
     ports:
       - 1234:80
       - 3307:3306

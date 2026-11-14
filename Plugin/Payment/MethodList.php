@@ -38,7 +38,7 @@ class MethodList
     public function afterGetAvailableMethods(
         Subject $subject,
         $availableMethods,
-        CartInterface $quote = null
+        ?CartInterface $quote = null
     ) {
         $minTotal = $this->configRepository->getMinimumOrderTotal();
         if ($minTotal && ($minTotal >= $quote->getGrandTotal())) {
