@@ -11,7 +11,7 @@ use Magento\Framework\Phrase;
 
 class PaymentFailureReasonHelper
 {
-    public static function getHumanReadableLabel(string $reason = null): Phrase
+    public static function getHumanReadableLabel(?string $reason = null): Phrase
     {
         switch ($reason) {
             case 'canceled':

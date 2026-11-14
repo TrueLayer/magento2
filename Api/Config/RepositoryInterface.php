@@ -30,5 +30,5 @@ interface RepositoryInterface extends System\ConnectionInterface
      * @param int|null $storeId
      * @return string
      */
-    public function getBaseUrl(int $storeId = null): string;
+    public function getBaseUrl(?int $storeId = null): string;
 }

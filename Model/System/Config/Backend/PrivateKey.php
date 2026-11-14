@@ -57,8 +57,8 @@ class PrivateKey extends Value
         TypeListInterface $cacheTypeList,
         Filesystem $filesystem,
         File $file,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->file = $file;
